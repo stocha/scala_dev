@@ -40,6 +40,22 @@ object Testeur extends App {
     }
 
   }
+  
+   def testBm_basics2 {
+         println("Test, Bm!")
+    val b = BitMap.border
+    
+    println(""+b);
+         
+         var prop=b;
+         
+         while(!(prop^BitMap.full).isNull){
+           prop=prop|(prop<<-)
+           
+           println("prop<<- \n"+prop);
+         }
+     
+   }
 
   def testServ {
     println("Test, world!")
@@ -52,6 +68,6 @@ object Testeur extends App {
   }
 
   override def main(args: Array[String]) {
-    testBm_basics
+    testBm_basics2
   }
 }

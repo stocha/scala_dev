@@ -97,6 +97,7 @@ class ServWorld(seed: Int, sameSquare: Boolean, symetrical: Boolean, bots: List[
   val mapTraj = new Array[servMap](bots.size)
   val mapBonus = new Array[servMap](bots.size)
   val officialMap = new servMap()
+  val owner = Array.fill(bots.size)(BitMap.zero)
   var rawTurn = List[List[servCoord]]();
 
   var turn = 0
@@ -148,6 +149,7 @@ class ServWorld(seed: Int, sameSquare: Boolean, symetrical: Boolean, bots: List[
       val c = canceled.contains(at)
       if (!c) {
         officialMap.dat(tr.x)(tr.y) = id;
+        owner(id)=owner(id).set(tr.x)(tr.y)(1)
       }
 
       id = id + 1;
@@ -173,8 +175,18 @@ class ServWorld(seed: Int, sameSquare: Boolean, symetrical: Boolean, bots: List[
     System.err.println(" " + tM);
     for (b <- bots) {
       System.err.print(b.name + " ")
-    }
+    }    
     System.err.println;
+    
+    for (b <- owner) {
+      System.err.print(""+b+"\n")
+    }  
+    
+    for( i <- 0 until bots.size){
+      System.err.print(""+BitMap.enclosed(owner, i)+"\n")
+    }
+    
+    System.err.println;    
 
   }
 

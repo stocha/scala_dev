@@ -9,8 +9,10 @@ object Scenarios {
     val serv2R_same = new ServWorld(0x4545FF99, true, false, List(new randBot(), new randBot()))
 
     val serv4R_2 = new ServWorld(1154, false, false, List(new randBot(), new Bot002(), new randBot(), new randBot()))
+    
+     val serv4R_3 = new ServWorld(1154, false, false, List(new Bot002(), new Bot003(), new Bot002(), new Bot002()))
 
-    val serv = serv4R_2
+    val serv = serv4R_3
     serv
   }
 }

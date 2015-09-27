@@ -13,7 +13,6 @@ object ServWorld {
 }
 
 
-
 object BitMap {
 
   val zero = {
@@ -149,9 +148,10 @@ object BitMap {
       if (i == id) {
         val c = pos(i)
         f = f.set(c.x)(c.y)(1)
-      } else {
+      } else {        
         val c = pos(i)
-        e = e.set(c.x)(c.y)(1)
+        if(c.x!= -1 && c.y != -1)
+          e = e.set(c.x)(c.y)(1)
       }
     }
     void = ~void
@@ -514,7 +514,6 @@ class BitMap(
   }
 
 }
-  
 
 class servMap {
   val dat = Array.fill[Int](ServWorld.W, ServWorld.H) { -1 }
@@ -605,7 +604,10 @@ object Player extends App {
       // opponentx: X position of the opponent
       // opponenty: Y position of the opponent
       // opponentbackintimeleft: Remaining back in time of the opponent
-      val Array(opponentx, opponenty, opponentbackintimeleft) = for (i <- readLine split " ") yield i.toInt
+      val Array(opponentxb, opponentyb, opponentbackintimeleft) = for (i <- readLine split " ") yield i.toInt
+      val opponentx = if(opponentxb>0) opponentxb else 0;
+      val opponenty = if(opponentyb>0) opponentyb else 0;
+      
       new servCoord(opponentx, opponenty, opponentbackintimeleft)
 
     }
@@ -615,15 +617,22 @@ object Player extends App {
       line
     }
     
+          val t0 = System.nanoTime()
+
+    
     val map=convertMap(ls)
     myBot.input(someCoord.toArray, map)
     
     val order=myBot.turn
+    
+      val t1 = System.nanoTime()
+      
+      var t : Double =( t1 - t0) / 1000
+      Console.err.println(""+ myBot.name+" "+t+" nanoseconds "+(t/1000)+" millisecondes");    
 
     // Write an action using println
     // To debug: Console.err.println("Debug messages...")
 
-    System.err.println("Round " + gameround);
     println("" + order.x + " " + order.y) // action: "x y" to move or "BACK rounds" to go back in time
   }
 }
@@ -767,8 +776,96 @@ class Bot002 extends servBot {
 
 }
 
+class Bot003 extends servBot {
+  var nbPlay = -1;
+  var idP = -1;
+  var coord = new servCoord(0, 0, 0)
+  var rand: Random = null
+
+  var coords: Array[servCoord] = null
+  var dat: servMap = null
+
+  override def init(nbPlay: Int, idP: Int) {
+    this.nbPlay = nbPlay;
+    this.idP = idP;
+
+    val r = new Random(0xFF88773);
+    var ssN = 0x77889E76;
+    for (i <- 0 until 10 * (idP + 10)) {
+      ssN = (ssN << idP) ^ r.nextInt()
+    }
+    rand = new Random(ssN)
+  }
+  override def input(coords: Array[servCoord], dat: servMap) {
+    coord = coords(idP)
+
+    this.coords = coords
+    this.dat = dat
+  }
+
+  override def turn: servCoord = {
+
+    val W = ServWorld.W;
+    val H = ServWorld.H;
+
+    val bms = dat.extractBm(coords.size);
+    val firstZone = BitMap.firstArea(bms, coords, idP)
+    
+    val void = BitMap.voidArea(bms)
+    
+    val consolidatedZone = (firstZone | bms(idP))
+    val bordFirstExt= ( consolidatedZone).scramble ^ consolidatedZone 
+    val bordFirst = (bordFirstExt.scramble & consolidatedZone ) & (~bms(idP))
+
+    if (!(bordFirst.isNull)) {
+      val possibi = BitMap.firstDirTo(BitMap.zero.set(coord.x)(coord.y)(1), bordFirst)
+
+      //println("\n"+BitMap.zero.set(coord.x)(coord.y)(1));
+      println("\n"+firstZone);
+      println("\n"+(firstZone | bms(idP)));
+      
+      println("bordFirst\n"+bordFirst);
+      //println(""+possibi);
+
+      val rx = rand.nextInt(possibi.size)
+      val dir = possibi(rx)
+      dir match {
+        case 0 => new servCoord(coord.x, coord.y - 1, 0);
+        case 1 => new servCoord(coord.x + 1, coord.y, 0);
+        case 2 => new servCoord(coord.x, coord.y + 1, 0);
+        case 3 => new servCoord(coord.x - 1, coord.y, 0);
+
+      }
+
+    } else {
+      val v = BitMap.voidArea(bms)
+
+      if (v.isNull) {
+        new servCoord(coord.x, coord.y, 0);
+      } else {
+        val possibi = BitMap.firstDirTo(BitMap.zero.set(coord.x)(coord.y)(1), v)
+        val rx = rand.nextInt(possibi.size)
+        val dir = possibi(rx)
+        dir match {
+          case 0 => new servCoord(coord.x, coord.y - 1, 0);
+          case 1 => new servCoord(coord.x + 1, coord.y, 0);
+          case 2 => new servCoord(coord.x, coord.y + 1, 0);
+          case 3 => new servCoord(coord.x - 1, coord.y, 0);
+
+        }
+      }
+
+    }
+
+  }
+  override def name: String = {
+    "Bot003 (" + idP + ")";
+  }
+
+}
+
 
 object Const{
-  val BOT = new Bot002()
+  val BOT = new Bot003()
   
 }

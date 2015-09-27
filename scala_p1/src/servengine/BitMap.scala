@@ -139,9 +139,10 @@ object BitMap {
       if (i == id) {
         val c = pos(i)
         f = f.set(c.x)(c.y)(1)
-      } else {
+      } else {        
         val c = pos(i)
-        e = e.set(c.x)(c.y)(1)
+        if(c.x!= -1 && c.y != -1)
+          e = e.set(c.x)(c.y)(1)
       }
     }
     void = ~void

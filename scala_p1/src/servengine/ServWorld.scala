@@ -193,7 +193,13 @@ class ServWorld(seed: Int, sameSquare: Boolean, symetrical: Boolean, bots: List[
 
     var id = 0;
     val tM = for (b <- bots) yield {
+      
+      val t0 = System.nanoTime()
       b.input(rawTurn.head.toArray, officialMap)
+      val t1 = System.nanoTime()
+      
+      var t : Double =( t1 - t0) / 1000000
+      println(""+ b.name+" "+t+" ms");
 
       val tr = b.turn
       id = id + 1

@@ -5,7 +5,7 @@ import scala.util.Random
 /**
  * @author Jahan
  */
-class Bot002 extends servBot {
+class Bot003 extends servBot {
   var nbPlay = -1;
   var idP = -1;
   var coord = new servCoord(0, 0, 0)
@@ -39,12 +39,21 @@ class Bot002 extends servBot {
 
     val bms = dat.extractBm(coords.size);
     val firstZone = BitMap.firstArea(bms, coords, idP)
+    
+    val void = BitMap.voidArea(bms)
+    
+    val consolidatedZone = (firstZone | bms(idP))
+    val bordFirstExt= ( consolidatedZone).scramble ^ consolidatedZone 
+    val bordFirst = (bordFirstExt.scramble & consolidatedZone ) & (~bms(idP))
 
-    if (!(firstZone.isNull)) {
-      val possibi = BitMap.firstDirTo(BitMap.zero.set(coord.x)(coord.y)(1), firstZone)
+    if (!(bordFirst.isNull)) {
+      val possibi = BitMap.firstDirTo(BitMap.zero.set(coord.x)(coord.y)(1), bordFirst)
 
       //println("\n"+BitMap.zero.set(coord.x)(coord.y)(1));
       //println("\n"+firstZone);
+      //println("\n"+(firstZone | bms(idP)));
+      
+      //println("bordFirst\n"+bordFirst);
       //println(""+possibi);
 
       val rx = rand.nextInt(possibi.size)
@@ -79,7 +88,7 @@ class Bot002 extends servBot {
 
   }
   override def name: String = {
-    "Bot002 (" + idP + ")";
+    "Bot003 (" + idP + ")";
   }
 
 }

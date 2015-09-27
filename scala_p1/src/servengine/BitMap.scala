@@ -118,6 +118,75 @@ object BitMap {
 
   }
 
+  def voidArea(all: Array[BitMap]) = {
+    var void = zero;
+
+    for (i <- 0 until all.size) {
+      void = void | all(i)
+    }
+    ~void
+  }
+
+  def firstArea(all: Array[BitMap], pos: Array[servCoord], id: Int) = {
+    var e = zero;
+    var f = zero;
+    var void = zero;
+
+    var firste = zero;
+
+    for (i <- 0 until all.size) {
+      void = void | all(i)
+      if (i == id) {
+        val c = pos(i)
+        f = f.set(c.x)(c.y)(1)
+      } else {
+        val c = pos(i)
+        e = e.set(c.x)(c.y)(1)
+      }
+    }
+    void = ~void
+
+    while (!(~(f | e)).isNull) {
+      e = e.scramble
+      f = f.scramble
+
+      //println("e\n"+e);
+
+      //println("\nf\n"+f);
+
+      firste = firste | (~e & f)
+    }
+
+    (firste & void)
+  }
+
+  def firstDirTo(pos: BitMap, goal: BitMap) = {
+
+    var last = zero
+    var curr = pos
+
+    var res = List[Int]();
+
+    while (!(last ^ curr).isNull && res.size == 0) {
+      last = curr
+      val up = curr--
+      val down = curr++
+      val left = curr<<
+      val right = curr>>
+
+      if (!(up & goal).isNull) res = 0 :: res;
+      if (!(right & goal).isNull) res = 1 :: res;
+      if (!(down & goal).isNull) res = 2 :: res;
+      if (!(left & goal).isNull) res = 3 :: res;
+
+      curr = curr | up
+      curr = curr | down
+      curr = curr | left
+      curr = curr | right
+    }
+    res
+  }
+
 }
 
 class BitMap(
@@ -235,6 +304,34 @@ class BitMap(
     }
   }
 
+  def scramble = {
+    var check = this;
+    val oldcheck = check;
+
+    check = (check | (oldcheck>>))
+    check = (check | (oldcheck<<))
+    check = (check | (oldcheck--))
+    check = (check | (oldcheck++))
+
+    check
+  }
+
+  def angularScramble = {
+    var check = this;
+    val oldcheck = check;
+
+    check = (check | (oldcheck>>-))
+    check = (check | (oldcheck>>+))
+    check = (check | (oldcheck<<-))
+    check = (check | (oldcheck<<+))
+    check = (check | (oldcheck>>))
+    check = (check | (oldcheck<<))
+    check = (check | (oldcheck--))
+    check = (check | (oldcheck++))
+
+    check
+  }
+
   def l_toString(at: Int) = {
     val r = l_getAt(at)
     llong_toString(r)
@@ -283,18 +380,18 @@ class BitMap(
       BitMap.umask & ~u15, BitMap.umask & ~u16, BitMap.umask & ~u17, BitMap.umask & ~u18, BitMap.umask & ~u19)
 
   }
-  
-  def forAllSet(blockOfCode: ( Int,Int) => Unit ){
-    for(i <- 0 until 35; j <-  0 until 20 ){
-      if(get(i)(j)!=0){
-        blockOfCode(i,j)
+
+  def forAllSet(blockOfCode: (Int, Int) => Unit) {
+    for (i <- 0 until 35; j <- 0 until 20) {
+      if (get(i)(j) != 0) {
+        blockOfCode(i, j)
       }
     }
   }
-  
-  def countBitset={
-    var add=0;
-    forAllSet( (_,_) => add=add+1)    
+
+  def countBitset = {
+    var add = 0;
+    forAllSet((_, _) => add = add + 1)
     add
   }
 

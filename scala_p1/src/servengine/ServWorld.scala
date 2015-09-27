@@ -20,6 +20,31 @@ object ServWorld {
 class servMap {
   val dat = Array.fill[Int](ServWorld.W, ServWorld.H) { -1 }
 
+  
+  def extractBm(nbPlayer : Int)={
+    var bm0 = BitMap.zero;
+    var bm1 = BitMap.zero;
+    var bm2 = BitMap.zero;
+    var bm3 = BitMap.zero;    
+    
+    for( i<- 0 until ServWorld.W; j <- 0 until ServWorld.H){
+      dat(i)(j) match{
+        case 0 => bm0 = bm0.set(i)(j)(1);
+        case 1 => bm1 = bm1.set(i)(j)(1);
+        case 2 => bm2 = bm2.set(i)(j)(1);
+        case 3 => bm3 = bm3.set(i)(j)(1);
+        case _ => ()
+      }
+    }
+    
+    val res=nbPlayer match{
+        case 2 => Array(bm0,bm1)
+        case 3 => Array(bm0,bm1,bm2)
+        case 4 => Array(bm0,bm1,bm2,bm3)
+    }
+    
+    res
+  }
 }
 
 class servCoord(

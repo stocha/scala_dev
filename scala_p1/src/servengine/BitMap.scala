@@ -37,7 +37,7 @@ object BitMap{
   }
   
   val umask={
-    (-1L)>>(64-35);
+    (-1L)>>>(64-35);
   }
   
   val full = {
@@ -159,15 +159,19 @@ class BitMap(
   }  
   
   def l_toString(at : Int) = {
+      val r= l_getAt(at)
+      llong_toString(r)
+  }
+  
+  def llong_toString(r : Long) = {
     var res="";
     
     for(i <- 0 until 35){
-      val r= l_getAt(at)
-      val c = if(( (r>>>i)&1L) ==0) '-' else '#';
+      val c = if(( (r>>>i)&1L) ==0) "- " else "# ";
       res+=c;
     }
     res
-  }
+  }  
   
   def get(x :Int)(y : Int) ={
     val r=l_getAt(y)
@@ -177,7 +181,12 @@ class BitMap(
   def set(x :Int)(y : Int)(v : Long) = {
     val r : Long=l_getAt(y)
     val b : Long=(1L<<x)
-    l_setAt(y) ((~b & r) | (v&b))
+    val nb : Long = (~b & r) | ((v<<x)&b)
+    //println("old "+llong_toString(r));
+    //println("new "+llong_toString(nb));
+    val res=l_setAt(y) (nb)
+    //println("res is \n"+res);
+    res
   }  
   
   override def toString() ={
@@ -190,6 +199,41 @@ class BitMap(
     res
   }
   
+  def ++ ={
+    new BitMap(0L,u00,u01,u02,u03,u04, u05,u06,u07,u08,u09, u10,u11,u12,u13,u14, u15,u16,u17,u18)
+
+  }
+  
+  def -- ={
+    new BitMap(u01,u02,u03,u04, u05,u06,u07,u08,u09, u10,u11,u12,u13,u14, u15,u16,u17,u18,u19,0L)
+  }  
+  
+  def << ={
+    //System.err.println("apply << ");
+    new BitMap(u00>>>1,u01>>>1,u02>>>1,u03>>>1,u04>>>1, u05>>>1,u06>>>1,u07>>>1,u08>>>1,u09>>>1, u10>>>1,u11>>>1,u12>>>1,u13>>>1,u14>>>1, u15>>>1,u16>>>1,u17>>>1,u18>>>1,u19>>>1)
+  }    
+  
+  def >> ={
+    new BitMap(BitMap.umask & u00<<1,BitMap.umask & u01<<1,BitMap.umask & u02<<1,BitMap.umask & u03<<1,BitMap.umask & u04<<1, BitMap.umask & u05<<1,BitMap.umask & u06<<1,BitMap.umask & u07<<1,BitMap.umask & u08<<1,BitMap.umask & u09<<1, BitMap.umask & u10<<1,BitMap.umask & u11<<1,BitMap.umask & u12<<1,BitMap.umask & u13<<1,BitMap.umask & u14<<1, BitMap.umask & u15<<1,BitMap.umask & u16<<1,BitMap.umask & u17<<1,BitMap.umask & u18<<1,BitMap.umask & u19<<1)
+  }     
+  
+  def <<- ={
+        new BitMap(u01>>>1,u02>>>1,u03>>>1,u04>>>1, u05>>>1,u06>>>1,u07>>>1,u08>>>1,u09>>>1, u10>>>1,u11>>>1,u12>>>1,u13>>>1,u14>>>1, u15>>>1,u16>>>1,u17>>>1,u18>>>1,u19>>>1,0L)
+
+  }
+  
+  def <<+ ={
+    new BitMap(0L,u00>>>1,u01>>>1,u02>>>1,u03>>>1,u04>>>1, u05>>>1,u06>>>1,u07>>>1,u08>>>1,u09>>>1, u10>>>1,u11>>>1,u12>>>1,u13>>>1,u14>>>1, u15>>>1,u16>>>1,u17>>>1,u18>>>1)
+
+  }  
+  
+  def >>- ={
+    new BitMap(BitMap.umask & u01<<1,BitMap.umask & u02<<1,BitMap.umask & u03<<1,BitMap.umask & u04<<1, BitMap.umask & u05<<1,BitMap.umask & u06<<1,BitMap.umask & u07<<1,BitMap.umask & u08<<1,BitMap.umask & u09<<1, BitMap.umask & u10<<1,BitMap.umask & u11<<1,BitMap.umask & u12<<1,BitMap.umask & u13<<1,BitMap.umask & u14<<1, BitMap.umask & u15<<1,BitMap.umask & u16<<1,BitMap.umask & u17<<1,BitMap.umask & u18<<1,BitMap.umask & u19<<1,0L)
+  }
+  
+  def >>+ ={
+    new BitMap(0L,BitMap.umask & u00<<1,BitMap.umask & u01<<1,BitMap.umask & u02<<1,BitMap.umask & u03<<1,BitMap.umask & u04<<1, BitMap.umask & u05<<1,BitMap.umask & u06<<1,BitMap.umask & u07<<1,BitMap.umask & u08<<1,BitMap.umask & u09<<1, BitMap.umask & u10<<1,BitMap.umask & u11<<1,BitMap.umask & u12<<1,BitMap.umask & u13<<1,BitMap.umask & u14<<1, BitMap.umask & u15<<1,BitMap.umask & u16<<1,BitMap.umask & u17<<1,BitMap.umask & u18<<1)
+  }  
   
 }
 

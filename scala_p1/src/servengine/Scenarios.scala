@@ -5,8 +5,9 @@ package servengine
  */
 object Scenarios {
   def getModel = {
-          val serv= new ServWorld(1154,false, false,List(new randBot(), new randBot(), new randBot(), new randBot()))
-          
+          val serv4R= new ServWorld(1154,false, false,List(new randBot(), new randBot(), new randBot(), new randBot()))
+          val serv2R_same= new ServWorld(0x4545FF99,true, false,List(new randBot(), new randBot()))
+          val serv= serv2R_same
           
           serv
   }

@@ -18,7 +18,7 @@ object ServWorld{
 }
 
 class servMap{
-  val dat=Array.fill[Int](ServWorld.W,ServWorld.H) { 0}
+  val dat=Array.fill[Int](ServWorld.W,ServWorld.H) { -1}
   
 }
 
@@ -126,10 +126,18 @@ class ServWorld(seed : Int,sameSquare : Boolean, symetrical : Boolean, bots : Li
   def applyTurn(){
     turn=turn + 1;
     
-    
+    var id=0;
     val tM = for ( b <- bots) yield {
        b.input(rawTurn.head.toArray, officialMap)
-       b.turn
+
+       val tr=b.turn
+       
+       if(officialMap.dat(tr.x)(tr.y)== -1){
+                officialMap.dat(tr.x)(tr.y)=id;
+       }
+
+       id= id+1
+       tr
     };
     rawTurn=tM::rawTurn;
     

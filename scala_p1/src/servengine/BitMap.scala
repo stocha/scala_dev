@@ -283,6 +283,20 @@ class BitMap(
       BitMap.umask & ~u15, BitMap.umask & ~u16, BitMap.umask & ~u17, BitMap.umask & ~u18, BitMap.umask & ~u19)
 
   }
+  
+  def forAllSet(blockOfCode: ( Int,Int) => Unit ){
+    for(i <- 0 until 35; j <-  0 until 20 ){
+      if(get(i)(j)!=0){
+        blockOfCode(i,j)
+      }
+    }
+  }
+  
+  def countBitset={
+    var add=0;
+    forAllSet( (_,_) => add=add+1)    
+    add
+  }
 
   def &(that: BitMap) = {
     new BitMap(

@@ -150,6 +150,13 @@ class ServWorld(seed: Int, sameSquare: Boolean, symetrical: Boolean, bots: List[
       if (!c) {
         officialMap.dat(tr.x)(tr.y) = id;
         owner(id)=owner(id).set(tr.x)(tr.y)(1)
+        
+        val capture=BitMap.enclosed(owner, id);
+        if(!capture.isNull){
+          capture.forAllSet{
+            (x : Int, y : Int) => { officialMap.dat(x)(y) = id; }
+          }
+        }
       }
 
       id = id + 1;
@@ -178,13 +185,18 @@ class ServWorld(seed: Int, sameSquare: Boolean, symetrical: Boolean, bots: List[
     }    
     System.err.println;
     
-    for (b <- owner) {
-      System.err.print(""+b+"\n")
-    }  
+    for (id <- 0 until bots.size) {
+      System.err.print(" | "+ bots(id).name + " score -> "+ owner(id).countBitset )
+    }    
+    System.err.println;    
     
-    for( i <- 0 until bots.size){
-      System.err.print(""+BitMap.enclosed(owner, i)+"\n")
-    }
+    //for (b <- owner) {
+    //  System.err.print(""+b+"\n")
+    //}  
+    
+   // for( i <- 0 until bots.size){
+   //   System.err.print(""+BitMap.enclosed(owner, i)+"\n")
+   // }
     
     System.err.println;    
 

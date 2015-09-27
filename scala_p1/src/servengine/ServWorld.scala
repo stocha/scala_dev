@@ -87,7 +87,7 @@ class randBot extends servBot{
     if(flip)
       new servCoord(coord.x,clipy(y),0);     
     else
-      new servCoord(clipy(x),coord.y,0);
+      new servCoord(clipx(x),coord.y,0);
   }
   override def name : String  = {
     "Default ("+idP+")";
@@ -106,7 +106,7 @@ class ServWorld(seed : Int,sameSquare : Boolean, symetrical : Boolean, bots : Li
   
   val rand=new Random(seed)
   
-  {
+  { // Init world
     val lco= for(b <- bots) yield {
         val scoord=new servCoord(rand.nextInt(ServWorld.W),rand.nextInt(ServWorld.H),1)
         scoord
@@ -120,6 +120,10 @@ class ServWorld(seed : Int,sameSquare : Boolean, symetrical : Boolean, bots : Li
        b.init(bots.size, id)
       id=id+1;
     }
+    
+  }
+  
+  def applyRawTurn(){
     
   }
   

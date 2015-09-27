@@ -124,10 +124,29 @@ class ServWorld(seed: Int, sameSquare: Boolean, symetrical: Boolean, bots: List[
   }
 
   def applyRawTurn(raw: List[servCoord]) {
-    var id = 0 //raw.size;
-    for (tr <- raw) {
 
-      if (officialMap.dat(tr.x)(tr.y) == -1) {
+    val pointed = new scala.collection.mutable.HashSet[Tuple2[Int, Int]]();
+    val canceled = new scala.collection.mutable.HashSet[Tuple2[Int, Int]]();
+
+    var id = 0;
+    for (tr <- raw) {
+      val at = new Tuple2(tr.x, tr.y);
+
+      val p = pointed.contains(at);
+      if (officialMap.dat(tr.x)(tr.y) == -1 && !p) {
+        pointed.add(at)
+      } else {
+        canceled.add(at)
+      }
+
+      id = id + 1;
+    }
+
+    id = 0;
+    for (tr <- raw) {
+      val at = new Tuple2(tr.x, tr.y);
+      val c = canceled.contains(at)
+      if (!c) {
         officialMap.dat(tr.x)(tr.y) = id;
       }
 

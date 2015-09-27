@@ -13,6 +13,7 @@ object ServWorld {
 }
 
 
+
 object BitMap {
 
   val zero = {
@@ -135,6 +136,27 @@ object BitMap {
     }
     ~void
   }
+  
+  def closeDiag(frontier : BitMap, void : BitMap)={
+    val ul = ((frontier--) & (frontier<<) )
+    val ur = ((frontier--) & (frontier>>) )
+    val dl = ((frontier++) & (frontier<<) )
+    val dr = ((frontier++) & (frontier>>) )
+    
+    ((ul | ur | dl | dr ) & void)
+  }
+  
+  def followTrail(pos : BitMap,trail : BitMap) = {
+    var curr=pos.scramble&trail;
+    var last=BitMap.zero
+    
+    while(!(curr ^last).isNull){
+      last=curr
+      curr=curr.scramble&trail
+    }
+    
+    curr
+  }
 
   def firstArea(all: Array[BitMap], pos: Array[servCoord], id: Int) = {
     var e = zero;
@@ -198,6 +220,7 @@ object BitMap {
   }
 
 }
+
 
 class BitMap(
     val u00: Long,
@@ -815,16 +838,30 @@ class Bot003 extends servBot {
     
     val consolidatedZone = (firstZone | bms(idP))
     val bordFirstExt= ( consolidatedZone).scramble ^ consolidatedZone 
-    val bordFirst = (bordFirstExt.scramble & consolidatedZone ) & (~bms(idP))
+    val rawFront =  (bordFirstExt.scramble & consolidatedZone )
+    val consolidateFront = BitMap.closeDiag(rawFront, void)
+    
+    
+    
+    
+    //val bordFirst = (bordFirstExt.scramble & consolidatedZone ) & (~bms(idP))
+    //val bordFirst = (consolidateFront | rawFront) & (~bms(idP))
+    
+    val trail = BitMap.followTrail(BitMap.zero.set(coord.x)(coord.y)(1), (consolidateFront | rawFront))
+    
+    val bordFirst = (if(!trail.isNull) trail else (consolidateFront | rawFront) ) &  (~bms(idP))
 
     if (!(bordFirst.isNull)) {
       val possibi = BitMap.firstDirTo(BitMap.zero.set(coord.x)(coord.y)(1), bordFirst)
 
       //println("\n"+BitMap.zero.set(coord.x)(coord.y)(1));
-      println("\n"+firstZone);
-      println("\n"+(firstZone | bms(idP)));
+      //println("\n"+firstZone);
+      //println("\n"+(firstZone | bms(idP)));
+     // println("rawFront\n"+rawFront);
+     // println("consolidateFront\n"+consolidateFront);
+     // println("bordFirst\n"+bordFirst);
       
-      println("bordFirst\n"+bordFirst);
+      // println("trail\n"+trail);
       //println(""+possibi);
 
       val rx = rand.nextInt(possibi.size)
@@ -863,6 +900,7 @@ class Bot003 extends servBot {
   }
 
 }
+
 
 
 object Const{

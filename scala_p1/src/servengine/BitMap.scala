@@ -126,6 +126,27 @@ object BitMap {
     }
     ~void
   }
+  
+  def closeDiag(frontier : BitMap, void : BitMap)={
+    val ul = ((frontier--) & (frontier<<) )
+    val ur = ((frontier--) & (frontier>>) )
+    val dl = ((frontier++) & (frontier<<) )
+    val dr = ((frontier++) & (frontier>>) )
+    
+    ((ul | ur | dl | dr ) & void)
+  }
+  
+  def followTrail(pos : BitMap,trail : BitMap) = {
+    var curr=pos.scramble&trail;
+    var last=BitMap.zero
+    
+    while(!(curr ^last).isNull){
+      last=curr
+      curr=curr.scramble&trail
+    }
+    
+    curr
+  }
 
   def firstArea(all: Array[BitMap], pos: Array[servCoord], id: Int) = {
     var e = zero;

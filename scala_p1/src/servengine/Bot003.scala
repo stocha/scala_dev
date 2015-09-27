@@ -44,7 +44,18 @@ class Bot003 extends servBot {
     
     val consolidatedZone = (firstZone | bms(idP))
     val bordFirstExt= ( consolidatedZone).scramble ^ consolidatedZone 
-    val bordFirst = (bordFirstExt.scramble & consolidatedZone ) & (~bms(idP))
+    val rawFront =  (bordFirstExt.scramble & consolidatedZone )
+    val consolidateFront = BitMap.closeDiag(rawFront, void)
+    
+    
+    
+    
+    //val bordFirst = (bordFirstExt.scramble & consolidatedZone ) & (~bms(idP))
+    //val bordFirst = (consolidateFront | rawFront) & (~bms(idP))
+    
+    val trail = BitMap.followTrail(BitMap.zero.set(coord.x)(coord.y)(1), (consolidateFront | rawFront))
+    
+    val bordFirst = (if(!trail.isNull) trail else (consolidateFront | rawFront) ) &  (~bms(idP))
 
     if (!(bordFirst.isNull)) {
       val possibi = BitMap.firstDirTo(BitMap.zero.set(coord.x)(coord.y)(1), bordFirst)
@@ -52,8 +63,11 @@ class Bot003 extends servBot {
       //println("\n"+BitMap.zero.set(coord.x)(coord.y)(1));
       //println("\n"+firstZone);
       //println("\n"+(firstZone | bms(idP)));
+      println("rawFront\n"+rawFront);
+      println("consolidateFront\n"+consolidateFront);
+      println("bordFirst\n"+bordFirst);
       
-      //println("bordFirst\n"+bordFirst);
+       println("trail\n"+trail);
       //println(""+possibi);
 
       val rx = rand.nextInt(possibi.size)

@@ -199,6 +199,147 @@ class BitMap(
     res
   }
   
+  def unary_~ = {
+        new BitMap(BitMap.umask & ~u00,BitMap.umask & ~u01,BitMap.umask & ~u02,BitMap.umask & ~u03,BitMap.umask & ~u04,
+            BitMap.umask & ~u05,BitMap.umask & ~u06,BitMap.umask & ~u07,BitMap.umask & ~u08,BitMap.umask & ~u09,
+            BitMap.umask & ~u10,BitMap.umask & ~u11,BitMap.umask & ~u12,BitMap.umask & ~u13,BitMap.umask & ~u14,
+            BitMap.umask & ~u15,BitMap.umask & ~u16,BitMap.umask & ~u17,BitMap.umask & ~u18,BitMap.umask & ~u19)
+
+  }
+  
+  
+  def &(that : BitMap)={
+    new BitMap(
+        u00 & that.u00
+        ,
+        u01 & that.u01
+        ,
+        u02 & that.u02
+        ,
+        u03 & that.u03
+        ,
+        u04 & that.u04
+        ,
+        u05 & that.u05
+        ,
+        u06 & that.u06
+        ,
+        u07 & that.u07
+        ,
+        u08 & that.u08
+        ,
+        u09 & that.u09
+        ,
+        u10 & that.u10
+        ,
+        u11 & that.u11
+        ,
+        u12 & that.u12
+        ,
+        u13 & that.u13
+        ,
+        u14 & that.u14
+        ,
+        u15 & that.u15
+        ,
+        u16 & that.u16
+        ,
+        u17 & that.u17
+        ,
+        u18 & that.u18
+        ,
+        u19 & that.u19
+        )
+  }
+  
+  def |(that : BitMap)={
+    new BitMap(
+        u00 | that.u00
+        ,
+        u01 | that.u01
+        ,
+        u02 | that.u02
+        ,
+        u03 | that.u03
+        ,
+        u04 | that.u04
+        ,
+        u05 | that.u05
+        ,
+        u06 | that.u06
+        ,
+        u07 | that.u07
+        ,
+        u08 | that.u08
+        ,
+        u09 | that.u09
+        ,
+        u10 | that.u10
+        ,
+        u11 | that.u11
+        ,
+        u12 | that.u12
+        ,
+        u13 | that.u13
+        ,
+        u14 | that.u14
+        ,
+        u15 | that.u15
+        ,
+        u16 | that.u16
+        ,
+        u17 | that.u17
+        ,
+        u18 | that.u18
+        ,
+        u19 | that.u19
+        )
+  }  
+  
+  def ^(that : BitMap)={
+    new BitMap(
+        u00 ^ that.u00
+        ,
+        u01 ^ that.u01
+        ,
+        u02 ^ that.u02
+        ,
+        u03 ^ that.u03
+        ,
+        u04 ^ that.u04
+        ,
+        u05 ^ that.u05
+        ,
+        u06 ^ that.u06
+        ,
+        u07 ^ that.u07
+        ,
+        u08 ^ that.u08
+        ,
+        u09 ^ that.u09
+        ,
+        u10 ^ that.u10
+        ,
+        u11 ^ that.u11
+        ,
+        u12 ^ that.u12
+        ,
+        u13 ^ that.u13
+        ,
+        u14 ^ that.u14
+        ,
+        u15 ^ that.u15
+        ,
+        u16 ^ that.u16
+        ,
+        u17 ^ that.u17
+        ,
+        u18 ^ that.u18
+        ,
+        u19 ^ that.u19
+        )
+  }    
+  
   def ++ ={
     new BitMap(0L,u00,u01,u02,u03,u04, u05,u06,u07,u08,u09, u10,u11,u12,u13,u14, u15,u16,u17,u18)
 

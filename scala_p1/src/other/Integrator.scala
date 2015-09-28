@@ -269,7 +269,6 @@ object BitMap {
 }
 
 
-
 class BitMap(
     val u00: Long,
     val u01: Long,
@@ -588,10 +587,16 @@ class BitMap(
   def >>+ = {
     new BitMap(0L, BitMap.umask & u00 << 1, BitMap.umask & u01 << 1, BitMap.umask & u02 << 1, BitMap.umask & u03 << 1, BitMap.umask & u04 << 1, BitMap.umask & u05 << 1, BitMap.umask & u06 << 1, BitMap.umask & u07 << 1, BitMap.umask & u08 << 1, BitMap.umask & u09 << 1, BitMap.umask & u10 << 1, BitMap.umask & u11 << 1, BitMap.umask & u12 << 1, BitMap.umask & u13 << 1, BitMap.umask & u14 << 1, BitMap.umask & u15 << 1, BitMap.umask & u16 << 1, BitMap.umask & u17 << 1, BitMap.umask & u18 << 1)
   }
+    
+    def paintCrossAt(x : Int, y : Int)={      
+      var res=l_setAt(y)(-1L)
+      for(i <- 0 until 20){
+        res=res.set(x)(i)(1)
+      }
+      res
+    }
 
 }
-
-
 
 
 
@@ -708,6 +713,18 @@ object Player extends App {
 
     
     val map=convertMap(ls)
+    val bms = map.extractBm(someCoord.size)
+    
+    val sc : List[Int] = for(b <- bms.toList) yield{
+      b.countBitset
+    }
+          
+    val maxSc = sc.max
+    val diff=maxSc - sc.head
+    Console.err.println("max score is "+maxSc+"  to be first is "+diff);
+    
+
+    
     myBot.input(someCoord.toArray, map)
     
     val order=myBot.turn
@@ -720,7 +737,10 @@ object Player extends App {
     // Write an action using println
     // To debug: Console.err.println("Debug messages...")
 
-    println("" + order.x + " " + order.y) // action: "x y" to move or "BACK rounds" to go back in time
+    if(diff > 20 && someCoord.head.back==1){
+      println("BACK 25");
+    }else
+      println("" + order.x + " " + order.y) // action: "x y" to move or "BACK rounds" to go back in time
   }
 }
 
@@ -1138,7 +1158,98 @@ class Bot005 extends servBot {
 
 }
 
+class Bot006 extends servBot {
+  var nbPlay = -1;
+  var idP = -1;
+  var coord = new servCoord(0, 0, 0)
+  var rand: Random = null
+
+  var coords: Array[servCoord] = null
+  var dat: servMap = null
+
+  override def init(nbPlay: Int, idP: Int) {
+    this.nbPlay = nbPlay;
+    this.idP = idP;
+
+    val r = new Random(0xFF88773);
+    var ssN = 0x77889E76;
+    for (i <- 0 until 10 * (idP + 10)) {
+      ssN = (ssN << idP) ^ r.nextInt()
+    }
+    rand = new Random(ssN)
+  }
+  override def input(coords: Array[servCoord], dat: servMap) {
+    coord = coords(idP)
+
+    this.coords = coords
+    this.dat = dat
+  }
+  
+  def goTarget(pos : servCoord,targs : List[BitMap], void : BitMap) : servCoord ={
+    
+    if(targs.isEmpty){
+      pos
+    }else
+    if(!targs.head.isNull){
+        val currMap=BitMap.zero.set(pos.x)(pos.y)(1)
+         //Console.err.println("currMap\n"+currMap);
+       // Console.err.println("dest\n"+targs.head);
+        //Console.err.println("void\n"+void);
+          val possibi = BitMap.firstDirToThrough(currMap, targs.head,void)
+         // Console.err.println("possibi Through void "+possibi);
+          if(possibi.nonEmpty){
+                  val rx = rand.nextInt(possibi.size)
+                  val dir = possibi(rx)
+                  pos.dirToCoord(dir)
+          }else{
+              val possibi = BitMap.firstDirTo(BitMap.zero.set(pos.x)(pos.y)(1), targs.head)
+                  val rx = rand.nextInt(possibi.size)
+                  val dir = possibi(rx)
+                  pos.dirToCoord(dir)            
+          }
+          
+    }else{
+      goTarget(pos,targs.tail,void)
+    }
+
+  }
+  
+  def stratBase ={
+    
+    
+        val bms = dat.extractBm(coords.size);
+        val terri= bms(idP)
+        val void = BitMap.voidArea(bms)
+        val firstZone = BitMap.firstArea(bms, coords, idP)
+        
+        val terriDiag=BitMap.closeDiag(terri, void)
+        
+        val cross=BitMap.zero.paintCrossAt(coord.x, coord.y) & void // important : uniquement les cases vides vieux !!
+        Console.err.println("(terri | cross)\n"+(terri | cross));
+        //Console.err.println("BitMap.enclosed((terri | cross), void & (~cross))\n"+BitMap.enclosed((terri | cross), void & (~cross)));
+        val captIfCross=BitMap.enclosed((terri | cross), void  & (~cross)) & firstZone
+         Console.err.println("captIfCross\n"+captIfCross);
+        val prioCross=if(captIfCross.countBitset >=9) (captIfCross.scramble^captIfCross ) & (~terri | captIfCross) else BitMap.zero
+        
+        Console.err.println("prioCross\n"+prioCross);
+        
+        val bordFirst = (( firstZone | terri).frontierMap) &  (~terri)
+        
+        goTarget(coord, List(prioCross,terriDiag,bordFirst,void), void)
+        
+  }
+
+  override def turn: servCoord = {
+    stratBase
+
+  }
+  override def name: String = {
+    "Bot006 (" + idP + ")";
+  }
+
+}
+
 object Const{
-  val BOT = new Bot004()
+  val BOT = new Bot006()
   
 }

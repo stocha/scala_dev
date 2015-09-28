@@ -574,6 +574,14 @@ class BitMap(
   def >>+ = {
     new BitMap(0L, BitMap.umask & u00 << 1, BitMap.umask & u01 << 1, BitMap.umask & u02 << 1, BitMap.umask & u03 << 1, BitMap.umask & u04 << 1, BitMap.umask & u05 << 1, BitMap.umask & u06 << 1, BitMap.umask & u07 << 1, BitMap.umask & u08 << 1, BitMap.umask & u09 << 1, BitMap.umask & u10 << 1, BitMap.umask & u11 << 1, BitMap.umask & u12 << 1, BitMap.umask & u13 << 1, BitMap.umask & u14 << 1, BitMap.umask & u15 << 1, BitMap.umask & u16 << 1, BitMap.umask & u17 << 1, BitMap.umask & u18 << 1)
   }
+    
+    def paintCrossAt(x : Int, y : Int)={      
+      var res=l_setAt(y)(-1L)
+      for(i <- 0 until 20){
+        res=res.set(x)(i)(1)
+      }
+      res
+    }
 
 }
 

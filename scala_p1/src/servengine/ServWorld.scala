@@ -54,6 +54,15 @@ class servCoord(
     " " + x + " " + y
   }
 
+  
+  def dirToCoord(dir : Int)={
+      dir match {
+        case 0 => new servCoord(x, y - 1, 0);
+        case 1 => new servCoord(x + 1, y, 0);
+        case 2 => new servCoord(x, y + 1, 0);
+        case 3 => new servCoord(x - 1, y, 0);
+      }    
+  }  
 }
 
 abstract class servBot {
@@ -199,7 +208,7 @@ class ServWorld(seed: Int, sameSquare: Boolean, symetrical: Boolean, bots: List[
       val t1 = System.nanoTime()
       
       var t : Double =( t1 - t0) / 1000000
-      println(""+ b.name+" "+t+" ms");
+      Console.err.println(""+ b.name+" "+t+" ms");
 
       val tr = b.turn
       id = id + 1
@@ -209,17 +218,17 @@ class ServWorld(seed: Int, sameSquare: Boolean, symetrical: Boolean, bots: List[
 
     applyRawTurn(tM)
 
-    System.err.println("turn : " + turn);
-    System.err.println(" " + tM);
+    Console.err.println("turn : " + turn);
+    Console.err.println(" " + tM);
     for (b <- bots) {
-      System.err.print(b.name + " ")
+      Console.err.print(b.name + " ")
     }    
-    System.err.println;
+    Console.err.println;
     
     for (id <- 0 until bots.size) {
-      System.err.print(" | "+ bots(id).name + " score -> "+ owner(id).countBitset )
+      Console.err.print(" | "+ bots(id).name + " score -> "+ owner(id).countBitset )
     }    
-    System.err.println;    
+    Console.err.println;    
     
     //for (b <- owner) {
     //  System.err.print(""+b+"\n")

@@ -14,6 +14,7 @@ object ServWorld {
 
 
 
+
 object BitMap {
 
   val zero = {
@@ -127,6 +128,34 @@ object BitMap {
     res
 
   }
+  
+  def enclosed(friend : BitMap, void : BitMap, id: Int) = {
+    var check = (~void | border) & ~friend ;
+    var oldcheck = zero;
+
+    while (!(check ^ oldcheck).isNull) {
+      oldcheck = check
+
+      check = (check | (oldcheck>>-))
+      check = (check | (oldcheck>>+))
+      check = (check | (oldcheck<<-))
+      check = (check | (oldcheck<<+))
+      check = (check | (oldcheck>>))
+      check = (check | (oldcheck<<))
+      check = (check | (oldcheck--))
+      check = (check | (oldcheck++))
+
+      check = (check & void)
+
+      //println("check boucle  \n" + check);
+    }
+    //println("not f  \n" + void);
+    //println("check  \n" + check);
+    val res = (~check ^ friend)
+    //println("check result \n" + res);
+    res
+
+  }  
 
   def voidArea(all: Array[BitMap]) = {
     var void = zero;
@@ -138,13 +167,16 @@ object BitMap {
   }
   
   def closeDiag(frontier : BitMap, void : BitMap)={
-    val ul = ((frontier--) & (frontier<<) )
-    val ur = ((frontier--) & (frontier>>) )
-    val dl = ((frontier++) & (frontier<<) )
-    val dr = ((frontier++) & (frontier>>) )
+    val ul = ((frontier--) & (frontier<<) ) & ~(frontier<<-)
+    val ur = ((frontier--) & (frontier>>) ) & ~(frontier>>-)
+    val dl = ((frontier++) & (frontier<<) ) & ~(frontier<<+)
+    val dr = ((frontier++) & (frontier>>) ) & ~(frontier>>+)
+    
+    
     
     ((ul | ur | dl | dr ) & void)
   }
+ 
   
   def followTrail(pos : BitMap,trail : BitMap) = {
     var curr=pos.scramble&trail;
@@ -191,35 +223,50 @@ object BitMap {
 
     (firste & void)
   }
-
-  def firstDirTo(pos: BitMap, goal: BitMap) = {
+  
+  def firstDirToThrough(pos: BitMap, goal: BitMap, conduction : BitMap) = {
 
     var last = zero
-    var curr = pos
+    var curr = goal
 
     var res = List[Int]();
+    
+    val conduct=conduction|pos;
 
+   // Console.err.println("begin search to\n"+goal );
     while (!(last ^ curr).isNull && res.size == 0) {
       last = curr
-      val up = curr--
-      val down = curr++
-      val left = curr<<
-      val right = curr>>
+      val up = (curr++)  & conduct
+      val down = (curr--)  & conduct
+      val left = (curr>> ) & conduct
+      val right = (curr<< ) & conduct
+      
+      //Console.err.println("(up & pos)\n"+(up & pos) );
+      //Console.err.println("(right & pos)\n"+(right & pos) );
+      //Console.err.println("(down & pos)\n"+(down & pos) );
+      //Console.err.println("(left & pos)\n"+(left & pos) );
+      
 
-      if (!(up & goal).isNull) res = 0 :: res;
-      if (!(right & goal).isNull) res = 1 :: res;
-      if (!(down & goal).isNull) res = 2 :: res;
-      if (!(left & goal).isNull) res = 3 :: res;
+      if (!(up & pos).isNull) res = 0 :: res; 
+      if (!(right & pos).isNull) res = 1 :: res; 
+      if (!(down & pos).isNull) res = 2 :: res;
+      if (!(left & pos).isNull) res = 3 :: res;
 
       curr = curr | up
       curr = curr | down
       curr = curr | left
       curr = curr | right
+      
+      //Console.err.println("curr\n"+curr );
     }
     res
-  }
+  }  
 
+  def firstDirTo(pos: BitMap, goal: BitMap) = {
+    firstDirToThrough(pos, goal, full)
+  }
 }
+
 
 
 class BitMap(
@@ -278,6 +325,11 @@ class BitMap(
 
     (acc == 0)
   }
+  
+  def frontierMap={
+    val ext=this.scramble ^ this;
+    (ext.scramble & this)
+  }  
 
   def l_getAt(at: Int): Long = {
     at match {
@@ -538,6 +590,9 @@ class BitMap(
 
 }
 
+
+
+
 class servMap {
   val dat = Array.fill[Int](ServWorld.W, ServWorld.H) { -1 }
 
@@ -567,7 +622,6 @@ class servMap {
     res
   }
 }
-
 class servCoord(
     val x: Int, val y: Int, val back: Int) {
 
@@ -575,8 +629,16 @@ class servCoord(
     " " + x + " " + y
   }
 
+  
+  def dirToCoord(dir : Int)={
+      dir match {
+        case 0 => new servCoord(x, y - 1, 0);
+        case 1 => new servCoord(x + 1, y, 0);
+        case 2 => new servCoord(x, y + 1, 0);
+        case 3 => new servCoord(x - 1, y, 0);
+      }    
+  }  
 }
-
 abstract class servBot {
   def init(nbPlay: Int, idP: Int)
   def input(coords: Array[servCoord], dat: servMap)
@@ -799,6 +861,7 @@ class Bot002 extends servBot {
 
 }
 
+
 class Bot003 extends servBot {
   var nbPlay = -1;
   var idP = -1;
@@ -849,7 +912,7 @@ class Bot003 extends servBot {
     
     val trail = BitMap.followTrail(BitMap.zero.set(coord.x)(coord.y)(1), (consolidateFront | rawFront))
     
-    val bordFirst = (if(!trail.isNull) trail else (consolidateFront | rawFront) ) &  (~bms(idP))
+    val bordFirst = ( rawFront) &  (~bms(idP))
 
     if (!(bordFirst.isNull)) {
       val possibi = BitMap.firstDirTo(BitMap.zero.set(coord.x)(coord.y)(1), bordFirst)
@@ -861,7 +924,7 @@ class Bot003 extends servBot {
      // println("consolidateFront\n"+consolidateFront);
      // println("bordFirst\n"+bordFirst);
       
-      // println("trail\n"+trail);
+    //   println("trail\n"+trail);
       //println(""+possibi);
 
       val rx = rand.nextInt(possibi.size)
@@ -902,8 +965,91 @@ class Bot003 extends servBot {
 }
 
 
+class Bot004 extends servBot {
+  var nbPlay = -1;
+  var idP = -1;
+  var coord = new servCoord(0, 0, 0)
+  var rand: Random = null
+
+  var coords: Array[servCoord] = null
+  var dat: servMap = null
+
+  override def init(nbPlay: Int, idP: Int) {
+    this.nbPlay = nbPlay;
+    this.idP = idP;
+
+    val r = new Random(0xFF88773);
+    var ssN = 0x77889E76;
+    for (i <- 0 until 10 * (idP + 10)) {
+      ssN = (ssN << idP) ^ r.nextInt()
+    }
+    rand = new Random(ssN)
+  }
+  override def input(coords: Array[servCoord], dat: servMap) {
+    coord = coords(idP)
+
+    this.coords = coords
+    this.dat = dat
+  }
+  
+  def goTarget(pos : servCoord,targs : List[BitMap], void : BitMap) : servCoord ={
+    
+    if(targs.isEmpty){
+      pos
+    }else
+    if(!targs.head.isNull){
+        val currMap=BitMap.zero.set(pos.x)(pos.y)(1)
+         Console.err.println("currMap\n"+currMap);
+        Console.err.println("dest\n"+targs.head);
+        //Console.err.println("void\n"+void);
+          val possibi = BitMap.firstDirToThrough(currMap, targs.head,void)
+          Console.err.println("possibi Through void "+possibi);
+          if(possibi.nonEmpty){
+                  val rx = rand.nextInt(possibi.size)
+                  val dir = possibi(rx)
+                  pos.dirToCoord(dir)
+          }else{
+              val possibi = BitMap.firstDirTo(BitMap.zero.set(pos.x)(pos.y)(1), targs.head)
+                  val rx = rand.nextInt(possibi.size)
+                  val dir = possibi(rx)
+                  pos.dirToCoord(dir)            
+          }
+          
+    }else{
+      goTarget(pos,targs.tail,void)
+    }
+
+  }
+  
+  def stratBase ={
+    
+    
+        val bms = dat.extractBm(coords.size);
+        val terri= bms(idP)
+        val void = BitMap.voidArea(bms)
+        val firstZone = BitMap.firstArea(bms, coords, idP)
+        
+        val terriDiag=BitMap.closeDiag(terri, void)
+        
+        Console.err.println("terriDiag\n"+terriDiag);
+        
+        val bordFirst = (( firstZone | terri).frontierMap) &  (~terri)
+        
+        goTarget(coord, List(terriDiag,bordFirst,void), void)
+        
+  }
+
+  override def turn: servCoord = {
+    stratBase
+
+  }
+  override def name: String = {
+    "Bot004 (" + idP + ")";
+  }
+
+}
 
 object Const{
-  val BOT = new Bot003()
+  val BOT = new Bot004()
   
 }

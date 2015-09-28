@@ -117,6 +117,34 @@ object BitMap {
     res
 
   }
+  
+  def enclosed(friend : BitMap, void : BitMap, id: Int) = {
+    var check = (~void | border) & ~friend ;
+    var oldcheck = zero;
+
+    while (!(check ^ oldcheck).isNull) {
+      oldcheck = check
+
+      check = (check | (oldcheck>>-))
+      check = (check | (oldcheck>>+))
+      check = (check | (oldcheck<<-))
+      check = (check | (oldcheck<<+))
+      check = (check | (oldcheck>>))
+      check = (check | (oldcheck<<))
+      check = (check | (oldcheck--))
+      check = (check | (oldcheck++))
+
+      check = (check & void)
+
+      //println("check boucle  \n" + check);
+    }
+    //println("not f  \n" + void);
+    //println("check  \n" + check);
+    val res = (~check ^ friend)
+    //println("check result \n" + res);
+    res
+
+  }  
 
   def voidArea(all: Array[BitMap]) = {
     var void = zero;
@@ -128,13 +156,16 @@ object BitMap {
   }
   
   def closeDiag(frontier : BitMap, void : BitMap)={
-    val ul = ((frontier--) & (frontier<<) )
-    val ur = ((frontier--) & (frontier>>) )
-    val dl = ((frontier++) & (frontier<<) )
-    val dr = ((frontier++) & (frontier>>) )
+    val ul = ((frontier--) & (frontier<<) ) & ~(frontier<<-)
+    val ur = ((frontier--) & (frontier>>) ) & ~(frontier>>-)
+    val dl = ((frontier++) & (frontier<<) ) & ~(frontier<<+)
+    val dr = ((frontier++) & (frontier>>) ) & ~(frontier>>+)
+    
+    
     
     ((ul | ur | dl | dr ) & void)
   }
+ 
   
   def followTrail(pos : BitMap,trail : BitMap) = {
     var curr=pos.scramble&trail;
@@ -181,34 +212,48 @@ object BitMap {
 
     (firste & void)
   }
-
-  def firstDirTo(pos: BitMap, goal: BitMap) = {
+  
+  def firstDirToThrough(pos: BitMap, goal: BitMap, conduction : BitMap) = {
 
     var last = zero
-    var curr = pos
+    var curr = goal
 
     var res = List[Int]();
+    
+    val conduct=conduction|pos;
 
+   // Console.err.println("begin search to\n"+goal );
     while (!(last ^ curr).isNull && res.size == 0) {
       last = curr
-      val up = curr--
-      val down = curr++
-      val left = curr<<
-      val right = curr>>
+      val up = (curr++)  & conduct
+      val down = (curr--)  & conduct
+      val left = (curr>> ) & conduct
+      val right = (curr<< ) & conduct
+      
+      //Console.err.println("(up & pos)\n"+(up & pos) );
+      //Console.err.println("(right & pos)\n"+(right & pos) );
+      //Console.err.println("(down & pos)\n"+(down & pos) );
+      //Console.err.println("(left & pos)\n"+(left & pos) );
+      
 
-      if (!(up & goal).isNull) res = 0 :: res;
-      if (!(right & goal).isNull) res = 1 :: res;
-      if (!(down & goal).isNull) res = 2 :: res;
-      if (!(left & goal).isNull) res = 3 :: res;
+      if (!(up & pos).isNull) res = 0 :: res; 
+      if (!(right & pos).isNull) res = 1 :: res; 
+      if (!(down & pos).isNull) res = 2 :: res;
+      if (!(left & pos).isNull) res = 3 :: res;
 
       curr = curr | up
       curr = curr | down
       curr = curr | left
       curr = curr | right
+      
+      //Console.err.println("curr\n"+curr );
     }
     res
-  }
+  }  
 
+  def firstDirTo(pos: BitMap, goal: BitMap) = {
+    firstDirToThrough(pos, goal, full)
+  }
 }
 
 class BitMap(
@@ -267,6 +312,11 @@ class BitMap(
 
     (acc == 0)
   }
+  
+  def frontierMap={
+    val ext=this.scramble ^ this;
+    (ext.scramble & this)
+  }  
 
   def l_getAt(at: Int): Long = {
     at match {

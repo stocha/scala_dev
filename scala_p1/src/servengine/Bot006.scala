@@ -63,19 +63,34 @@ class Bot006 extends servBot {
   
   def stratBase ={
     
+      def maxOrEmpty(y : List[BitMap])={
+        if(y.isEmpty) BitMap.zero else
+        {
+          y.maxBy { x => x.countBitset }
+        }
+      }
+      
+      def extractMax(x : BitMap)={
+        maxOrEmpty(x.extractZones)
+      }
+    
     
         val bms = dat.extractBm(coords.size);
         val terri= bms(idP)
         val void = BitMap.voidArea(bms)
         val firstZone = BitMap.firstArea(bms, coords, idP)
         
+        val maxFirstZone= extractMax(firstZone&void)
+     //   Console.err.println("maxFirstZone\n"+maxFirstZone);
+        
+        val maxEmpty = extractMax(void)
+      //  Console.err.println("maxEmpty\n"+maxEmpty);
+        
         val terriDiag=BitMap.closeDiag(terri, void)
         
         val cross=BitMap.zero.paintCrossAt(coord.x, coord.y) & void // important : uniquement les cases vides vieux !!
-       // Console.err.println("(terri | cross)\n"+(terri | cross));
-        //Console.err.println("BitMap.enclosed((terri | cross), void & (~cross))\n"+BitMap.enclosed((terri | cross), void & (~cross)));
-        val captIfCross=BitMap.enclosed((terri | cross), void  & (~cross)) & firstZone
-      //   Console.err.println("captIfCross\n"+captIfCross);
+        val captIfCross=extractMax(BitMap.enclosed((terri | cross), void  & (~cross)) & firstZone)
+       // Console.err.println("captIfCross\n"+captIfCross);
         
         val trig = coords.size match {
           case 2 => 25
@@ -84,14 +99,12 @@ class Bot006 extends servBot {
           
         }
         
-        val prioCross=if(captIfCross.countBitset >=trig) (captIfCross.scramble^captIfCross ) & (~terri | captIfCross) else BitMap.zero
+        val prioCross=if(captIfCross.countBitset >=trig) (captIfCross.scramble^captIfCross ) & (~terri ) else BitMap.zero
         
        // Console.err.println("prioCross\n"+prioCross);
         
         
-        val bordFirst = (( firstZone | terri).frontierMap) &  (~terri)
-        
-        Console.err.println("void\n"+void+" firstB\n"+void.firstSetBitBm);
+        val bordFirst = (( maxFirstZone | terri).frontierMap) &  (~terri)        
         
         goTarget(coord, List(prioCross,bordFirst,void), void)
         

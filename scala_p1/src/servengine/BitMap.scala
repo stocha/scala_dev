@@ -493,7 +493,17 @@ class BitMap(
     
     var res: List[BitMap] = Nil
     
+    var suivi=this
     
+    while(!suivi.isNull){
+      val bit=suivi.firstSetBitBm
+      val fill=BitMap.followTrail(bit, suivi)
+      
+      res = fill :: res
+      suivi= suivi ^ fill
+      
+    }
+    res
     
   }
 

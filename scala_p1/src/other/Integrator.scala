@@ -473,11 +473,51 @@ class BitMap(
       }
     }
   }
+  
+  def firstSetBitBm ={
+    
+    def firstInLong(l : Long)={
+      ((l - 1) ^ l) & l
+    }
+    
+    def recLook(h : Int) : BitMap={
+      if(h<0){
+        BitMap.zero
+      }else{
+        val lat=l_getAt(h)
+        if(lat!=0){
+          BitMap.zero.l_setAt(h)(firstInLong(lat))
+        }else{
+          recLook(h-1)
+        }
+      }
+    }
+    
+    recLook(19)
+  }  
 
   def countBitset = {
     var add = 0;
     forAllSet((_, _) => add = add + 1)
     add
+  }
+  
+  def extractZones ={
+    
+    var res: List[BitMap] = Nil
+    
+    var suivi=this
+    
+    while(!suivi.isNull){
+      val bit=suivi.firstSetBitBm
+      val fill=BitMap.followTrail(bit, suivi)
+      
+      res = fill :: res
+      suivi= suivi ^ fill
+      
+    }
+    res
+    
   }
 
   def &(that: BitMap) = {
@@ -597,7 +637,6 @@ class BitMap(
     }
 
 }
-
 
 
 class servMap {
@@ -1193,7 +1232,7 @@ class Bot006 extends servBot {
     if(!targs.head.isNull){
         val currMap=BitMap.zero.set(pos.x)(pos.y)(1)
          //Console.err.println("currMap\n"+currMap);
-       // Console.err.println("dest\n"+targs.head);
+        //Console.err.println("dest\n"+targs.head);
         //Console.err.println("void\n"+void);
           val possibi = BitMap.firstDirToThrough(currMap, targs.head,void)
          // Console.err.println("possibi Through void "+possibi);
@@ -1216,26 +1255,50 @@ class Bot006 extends servBot {
   
   def stratBase ={
     
+      def maxOrEmpty(y : List[BitMap])={
+        if(y.isEmpty) BitMap.zero else
+        {
+          y.maxBy { x => x.countBitset }
+        }
+      }
+      
+      def extractMax(x : BitMap)={
+        maxOrEmpty(x.extractZones)
+      }
+    
     
         val bms = dat.extractBm(coords.size);
         val terri= bms(idP)
         val void = BitMap.voidArea(bms)
         val firstZone = BitMap.firstArea(bms, coords, idP)
         
+        val maxFirstZone= extractMax(firstZone&void)
+     //   Console.err.println("maxFirstZone\n"+maxFirstZone);
+        
+        val maxEmpty = extractMax(void)
+      //  Console.err.println("maxEmpty\n"+maxEmpty);
+        
         val terriDiag=BitMap.closeDiag(terri, void)
         
         val cross=BitMap.zero.paintCrossAt(coord.x, coord.y) & void // important : uniquement les cases vides vieux !!
-        Console.err.println("(terri | cross)\n"+(terri | cross));
-        //Console.err.println("BitMap.enclosed((terri | cross), void & (~cross))\n"+BitMap.enclosed((terri | cross), void & (~cross)));
-        val captIfCross=BitMap.enclosed((terri | cross), void  & (~cross)) & firstZone
-         Console.err.println("captIfCross\n"+captIfCross);
-        val prioCross=if(captIfCross.countBitset >=9) (captIfCross.scramble^captIfCross ) & (~terri | captIfCross) else BitMap.zero
+        val captIfCross=extractMax(BitMap.enclosed((terri | cross), void  & (~cross)) & firstZone)
+       // Console.err.println("captIfCross\n"+captIfCross);
         
-        Console.err.println("prioCross\n"+prioCross);
+        val trig = coords.size match {
+          case 2 => 25
+          case 3 => 14
+          case 4 => 9
+          
+        }
         
-        val bordFirst = (( firstZone | terri).frontierMap) &  (~terri)
+        val prioCross=if(captIfCross.countBitset >=trig) (captIfCross.scramble^captIfCross ) & (~terri ) else BitMap.zero
         
-        goTarget(coord, List(prioCross,terriDiag,bordFirst,void), void)
+       // Console.err.println("prioCross\n"+prioCross);
+        
+        
+        val bordFirst = (( maxFirstZone | terri).frontierMap) &  (~terri)        
+        
+        goTarget(coord, List(prioCross,bordFirst,void), void)
         
   }
 

@@ -118,7 +118,7 @@ object BitMap {
 
   }
   
-  def enclosed(friend : BitMap, void : BitMap, id: Int) = {
+  def enclosed(friend : BitMap, void : BitMap) = {
     var check = (~void | border) & ~friend ;
     var oldcheck = zero;
 
@@ -142,7 +142,7 @@ object BitMap {
     //println("check  \n" + check);
     val res = (~check ^ friend)
     //println("check result \n" + res);
-    res
+    res & void 
 
   }  
 

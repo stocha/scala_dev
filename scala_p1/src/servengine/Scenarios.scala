@@ -22,6 +22,8 @@ object Scenarios {
     val serv4R_5_5 = new ServWorld(1154, false, false, List(new Bot005(), new Bot005(), new Bot005(), new Bot005()))
     
     val serv4R_6_5 = new ServWorld(1154, false, false, List(new Bot005(), new Bot006(), new Bot005(), new Bot005()))
+    
+    val serv4R_7_6 = new ServWorld(1154, false, false, List(new Bot006(), new Bot006(), new Bot006(), new Bot006()))
 
     val serv = serv4R_6_5
     serv

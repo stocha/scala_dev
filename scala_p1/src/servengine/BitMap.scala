@@ -460,11 +460,41 @@ class BitMap(
       }
     }
   }
+  
+  def firstSetBitBm ={
+    
+    def firstInLong(l : Long)={
+      ((l - 1) ^ l) & l
+    }
+    
+    def recLook(h : Int) : BitMap={
+      if(h<0){
+        BitMap.zero
+      }else{
+        val lat=l_getAt(h)
+        if(lat!=0){
+          BitMap.zero.l_setAt(h)(firstInLong(lat))
+        }else{
+          recLook(h-1)
+        }
+      }
+    }
+    
+    recLook(19)
+  }  
 
   def countBitset = {
     var add = 0;
     forAllSet((_, _) => add = add + 1)
     add
+  }
+  
+  def extractZones ={
+    
+    var res: List[BitMap] = Nil
+    
+    
+    
   }
 
   def &(that: BitMap) = {

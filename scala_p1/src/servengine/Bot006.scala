@@ -40,7 +40,7 @@ class Bot006 extends servBot {
     if(!targs.head.isNull){
         val currMap=BitMap.zero.set(pos.x)(pos.y)(1)
          //Console.err.println("currMap\n"+currMap);
-       // Console.err.println("dest\n"+targs.head);
+        //Console.err.println("dest\n"+targs.head);
         //Console.err.println("void\n"+void);
           val possibi = BitMap.firstDirToThrough(currMap, targs.head,void)
          // Console.err.println("possibi Through void "+possibi);
@@ -88,9 +88,12 @@ class Bot006 extends servBot {
         
        // Console.err.println("prioCross\n"+prioCross);
         
+        
         val bordFirst = (( firstZone | terri).frontierMap) &  (~terri)
         
-        goTarget(coord, List(prioCross,terriDiag,bordFirst,void), void)
+        Console.err.println("void\n"+void+" firstB\n"+void.firstSetBitBm);
+        
+        goTarget(coord, List(prioCross,bordFirst,void), void)
         
   }
 

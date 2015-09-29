@@ -11,9 +11,16 @@ object Testeur extends App {
   def testGS001{
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
-    val game=GameState4P.start(64564544557L)
+    var game=GameState4P.start(64564544557L)
     
     System.err.println(""+game);
+    
+    for(i <- 0 until 10){
+      val n = r.nextInt(GameState4P.moveMax)
+      game= game.transition(n)
+      System.err.println("Turn "+i);
+      System.err.println(""+game);
+    }
     
   }
   

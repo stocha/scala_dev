@@ -9,8 +9,10 @@ object GameState4P {
   val H = 20
   val W = 35
   val WH = H * W
+  val NMOVE=5  
   val startMax: Long = WH * WH * WH * WH
-  val moveMax = 5 * 5 * 5 * 5
+  val moveMax = NMOVE * NMOVE * NMOVE * NMOVE
+
 
   // long start pos
   // long transition (625)
@@ -35,9 +37,18 @@ object GameState4P {
 
   def p(x0: Int, x1: Int, x2: Int, x3: Int) = {
     var res: Long = x3
-    res = res * 700 + x2
-    res = res * 700 + x1
-    res = res * 700 + x0
+    res = res * WH + x2
+    res = res * WH + x1
+    res = res * WH + x0
+    res
+  }
+  
+  def m(x0: Int, x1: Int, x2: Int, x3: Int) = {
+    var res: Int = x3
+    res = res * NMOVE + x2
+    res = res * NMOVE + x1
+    res = res * NMOVE + x0
+    res
   }
 
   def start(init: Long) = {
@@ -62,6 +73,26 @@ class GameVect4P(
     val pos1: BitMap,
     val pos2: BitMap,
     val pos3: BitMap) {
+  
+  
+  def applyCapture={
+    
+    val v=void
+    val nPos= new GameVect4P(
+          BitMap.enclosed(pos0,v ),
+          BitMap.enclosed(pos1,v ),
+          BitMap.enclosed(pos2,v ),
+          BitMap.enclosed(pos3,v )
+        )    
+    
+    ( nPos | this)
+  }
+  
+  
+  def void ={
+    var res = ~(pos0 | pos1 | pos2 | pos3)
+    res
+  }  
 
   def trace = {
     var s = pos0 ^ pos1
@@ -118,13 +149,21 @@ class GameVect4P(
   }
   
   def | (t : GameVect4P)={
-    
     new GameVect4P(
       pos0|t(0),
       pos1|t(1),
       pos2|t(2),
       pos3|t(3)
     )
+  }
+  
+  def & (t : BitMap) ={
+    new GameVect4P(
+      pos0 & t,
+      pos1 & t,
+      pos2 & t,
+      pos3 & t
+    )    
   }
 
 }
@@ -136,30 +175,45 @@ class GameState4P(
   override def toString = {
     var res = ""
 
-    res = res + pos.toString()
-    res = res + "--- \n"
+    //res = res + pos.toString()
+    //res = res + "--- \n"
     res = res + tr.toString()
     res = res + "=== \n"
 
     res
 
   }
+  
+  def toPosString = {
+    var res = ""
+
+    res = res + pos.toString()
+    res = res + "--- \n"
+    //res = res + tr.toString()
+    //res = res + "=== \n"
+
+    res
+
+  }  
+ 
 
   private def transitionApplyMap(m: BitMap, vect: Int) = {
-    vect match {
+    val r=vect match {
       case 0 => m--
       case 1 => m>>
       case 2 => m++
       case 3 => m<<
       case 4 => m
     }
+    
+    if(r.isNull) m else r
   }
 
   def transition(vect: Int) ={
     val t0 = vect % 5;
     val t1 = (vect / 5) % 5;
-    val t2 = (vect / 5*5) % 5;
-    val t3 = (vect / 5*5*5) % 5;
+    val t2 = (vect / (5*5)) % 5;
+    val t3 = (vect / (5*5*5)) % 5;
     
     val nPos= new GameVect4P(
           transitionApplyMap(pos(0),t0 ),
@@ -169,10 +223,15 @@ class GameState4P(
         )
     val t=nPos.trace
     
+    val ntr=(tr | (t & tr.void))
+    
+    //System.err.println(""+ntr);
+    //System.err.println("capture\n"+ntr.applyCapture);
+    
     new GameState4P(
           nPos,
-          tr | t
+          ntr.applyCapture
         )
   }
-
+  
 }

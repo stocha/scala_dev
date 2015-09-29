@@ -77,19 +77,14 @@ object BitMap {
 
   }
 
-  def enclosed(all: Array[BitMap], id: Int) = {
-    var e = border;
-    var f = zero;
+  def enclosed(friend : BitMap, void : BitMap) = {
+    var e = border |  ~void ;
+    var f = friend;
+    
+   // println("f \n" + f);
+   // println("v \n" + void);
 
-    for (i <- 0 until all.size) {
-      if (i == id) {
-        f = f | all(i)
-      } else {
-        e = e | all(i)
-      }
-    }
-    val void = ~f;
-    e = e & void
+    e = e & ~f
 
     var check = e;
     var oldcheck = zero;
@@ -113,34 +108,6 @@ object BitMap {
     //println("not f  \n" + void);
     //println("check  \n" + check);
     val res = (~check ^ f)
-    //println("check result \n" + res);
-    res
-
-  }
-
-  def enclosed(friend: BitMap, void: BitMap) = {
-    var check = (~void | border) & ~friend;
-    var oldcheck = zero;
-
-    while (!(check ^ oldcheck).isNull) {
-      oldcheck = check
-
-      check = (check | (oldcheck>>-))
-      check = (check | (oldcheck>>+))
-      check = (check | (oldcheck<<-))
-      check = (check | (oldcheck<<+))
-      check = (check | (oldcheck>>))
-      check = (check | (oldcheck<<))
-      check = (check | (oldcheck--))
-      check = (check | (oldcheck++))
-
-      check = (check & void)
-
-      //println("check boucle  \n" + check);
-    }
-    //println("not f  \n" + void);
-    //println("check  \n" + check);
-    val res = (~check ^ friend)
     //println("check result \n" + res);
     res & void
 

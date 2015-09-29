@@ -36,8 +36,11 @@ class SimulBot (seed : Long , val  ref : GameState4P,val agents : Array[agentAbs
   private var sim=ref
  // private val agents = Array(new stupidAgent,new stupidAgent,new stupidAgent,new stupidAgent)
   
-
+  var log=List[Int]()
   
+  def apply(i : Int )(j : Int) ={
+    sim.tr.get(i)(j)
+  }  
   
   def reset(){
     sim=ref
@@ -53,8 +56,21 @@ class SimulBot (seed : Long , val  ref : GameState4P,val agents : Array[agentAbs
       sim= sim.transition(move)
       //System.err.println("Turn "+i);
       //System.err.println(""+game);    
-    
+      log = move :: log
       move
+  }
+  
+  def doBackward(){
+    
+    if(!log.isEmpty){
+      log= log.tail
+      sim=ref
+      
+      for(i <- log.reverse){
+        //System.err.println(""+i);
+        sim=sim.transition(i)
+      }
+    }
   }
   
   def eval()={

@@ -13,6 +13,10 @@ class Simulateur001(seed : Long , val  ref : GameState4P) {
   private var sim=ref
   private val agents = Array(new agent,new agent,new agent,new agent)
   
+  def apply(i : Int )(j : Int){
+    ref.tr.get(i)(j)
+  }
+  
   class agent{
     var currdir=4
     

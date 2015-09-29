@@ -20,6 +20,7 @@ class score(val x0 : Int,val x1 : Int,val x2 : Int,val x3 : Int){
 
   abstract class agentAbstract{
     def genMove (ref : GameState4P) : Int    
+    def backMove(){}
   }  
 
   class stupidAgent extends agentAbstract{
@@ -70,6 +71,11 @@ class SimulBot (seed : Long , val  ref : GameState4P,val agents : Array[agentAbs
         //System.err.println(""+i);
         sim=sim.transition(i)
       }
+    }
+    
+    for(b <- agents){
+      //System.err.println("backing up");
+      b.backMove()
     }
   }
   

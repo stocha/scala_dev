@@ -48,10 +48,10 @@ class SimulBot (seed : Long , val  ref : GameState4P,val agents : Array[agentAbs
   
   def turn()={
       val n = rand.nextInt(GameState4P.moveMax)
-      val d0=agents(0).genMove(sim)
-      val d1=      if(agents.size>1) agents(1).genMove(sim) else 4
-      val d2=      if(agents.size>2) agents(2).genMove(sim) else 4
-      val d3=       if(agents.size>3) agents(3).genMove(sim) else 4
+      val d0=agents(0).genMove(sim.swap(0))
+      val d1=      if(agents.size>1) agents(1).genMove(sim.swap(1)) else 4
+      val d2=      if(agents.size>2) agents(2).genMove(sim.swap(2)) else 4
+      val d3=       if(agents.size>3) agents(3).genMove(sim.swap(3)) else 4
       val move =GameState4P.m(d0, d1, d2, d3)
       sim= sim.transition(move)
       //System.err.println("Turn "+i);

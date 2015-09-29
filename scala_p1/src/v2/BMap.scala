@@ -77,12 +77,12 @@ object BMap {
 
   }
 
-  def enclosed(friend : BMap, void : BMap) = {
-    var e = border |  ~void ;
+  def enclosed(friend: BMap, void: BMap) = {
+    var e = border | ~void;
     var f = friend;
-    
-   // println("f \n" + f);
-   // println("v \n" + void);
+
+    // println("f \n" + f);
+    // println("v \n" + void);
 
     e = e & ~f
 
@@ -142,7 +142,6 @@ object BMap {
 
     curr
   }
-
 
   def firstDirToThrough(pos: BMap, goal: BMap, conduction: BMap) = {
 
@@ -243,7 +242,12 @@ class BMap(
     (acc == 0)
   }
 
-  def frontierMap = {
+  def split = {
+    extractZones
+
+  }
+
+  def border = {
     val ext = this.scramble ^ this;
     (ext.scramble & this)
   }
@@ -334,6 +338,50 @@ class BMap(
     check
   }
 
+  def scrUL = {
+    var check = this;
+    val oldcheck = check;
+
+    check = (check | (oldcheck<<-))
+    check = (check | (oldcheck<<))
+    check = (check | (oldcheck--))
+
+    check
+  }
+
+  def scrUR = {
+    var check = this;
+    val oldcheck = check;
+
+    check = (check | (oldcheck>>-))
+    check = (check | (oldcheck>>))
+    check = (check | (oldcheck--))
+
+    check
+  }
+
+  def scrDL = {
+    var check = this;
+    val oldcheck = check;
+
+    check = (check | (oldcheck<<+))
+    check = (check | (oldcheck<<))
+    check = (check | (oldcheck++))
+
+    check
+  }
+
+  def scrDR = {
+    var check = this;
+    val oldcheck = check;
+
+    check = (check | (oldcheck>>+))
+    check = (check | (oldcheck>>))
+    check = (check | (oldcheck++))
+
+    check
+  }
+
   def l_toString(at: Int) = {
     val r = l_getAt(at)
     llong_toString(r)
@@ -353,8 +401,8 @@ class BMap(
     val r = l_getAt(y)
     (r >>> x) & 1L
   }
-  
-  def apply(x : Int) (y : Int) = {
+
+  def apply(x: Int)(y: Int) = {
     get(x)(y)
   }
 
@@ -558,30 +606,29 @@ class BMap(
   }
 
   def noyau = {
-    var last= ~this    
-    var curr=(~this).scramble | BMap.border;
+    var last = ~this
+    var curr = (~this).scramble | BMap.border;
 
-    
-    while(!(~curr).isNull){
-      last=curr
-      curr=curr.scramble
+    while (!(~curr).isNull) {
+      last = curr
+      curr = curr.scramble
     }
-    
+
     ~last
   }
-  
-  def closestPointHere(from : BMap)={
-    var dist=0;
-    var curr=from;
-    
-    val thisNotNull= !this.isNull && !from.isNull
-    while(((curr & this).isNull) & (thisNotNull) ){
-      curr= curr | curr.scramble
-      dist= dist+1
-     // Console.err.println("curr\n"+curr);
+
+  def closestPointHere(from: BMap) = {
+    var dist = 0;
+    var curr = from;
+
+    val thisNotNull = !this.isNull && !from.isNull
+    while (((curr & this).isNull) & (thisNotNull)) {
+      curr = curr | curr.scramble
+      dist = dist + 1
+      // Console.err.println("curr\n"+curr);
     }
-    
-    new Tuple2(dist,curr & this)
+
+    new Tuple2(dist, curr & this)
   }
 
 }

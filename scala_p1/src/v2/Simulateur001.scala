@@ -56,16 +56,21 @@ class Simulateur001(seed : Long , val  ref : GameState4P) {
     sim=ref
   }
   
-  def turn(){
+  def turn()={
       val n = rand.nextInt(GameState4P.moveMax)
       val d0=agents(0).genMove()
       val d1=agents(1).genMove()
       val d2=agents(2).genMove()
       val d3=agents(3).genMove()
-      sim= sim.transition(GameState4P.m(d0, d1, d2, d3))
+      val move =GameState4P.m(d0, d1, d2, d3)
+      sim= sim.transition(move)
       //System.err.println("Turn "+i);
       //System.err.println(""+game);    
     
+      move
+  }
+  
+  def eval={
     
   }
   

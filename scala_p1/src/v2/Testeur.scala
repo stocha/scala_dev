@@ -24,6 +24,59 @@ object Testeur extends App {
     }    
   }
   
+  def testGS002{
+    val r = new Random(0x8377);
+    val randLong=Math.abs(r.nextLong())
+    var game=GameState4P.start(64564544557L)
+    
+    val simul = new SimulBot(r.nextLong(),game,Array(new stupidAgent))
+    System.err.println(""+game);
+    
+    for(i <- 0 until 10){
+      simul.reset()
+      val score = simul.eval()
+      System.err.println(""+simul.getState);
+      System.err.println(""+score);
+    }    
+  }  
+  
+  def bench002{
+    val r = new Random(0x8377);
+    val randLong=Math.abs(r.nextLong())
+    var game=GameState4P.start(64564544557L)
+    val simul1 = new Simulateur001(r.nextLong(),game)
+    
+    for(i<-0 until 4){
+      simul1.turn() 
+    }
+    
+    val simul = new Simulateur001(r.nextLong(),simul1.getState)
+    
+    System.err.println(""+simul.ref);
+    
+    def nbBoucle=100;
+    
+    val t0 = System.nanoTime()
+    val sc=  for(i <- 0 until nbBoucle) yield{
+      simul.reset()
+      val score = simul.eval()
+      //System.err.println(""+simul.getState);
+      //System.err.println(""+score);
+      score
+    }    
+    val t1 = System.nanoTime()
+    
+    val t : Double=(t1 - t0)
+    
+    val sumsc=sc.foldLeft(new Tuple4[Double,Double,Double,Double](0,0,0,0))((x : Tuple4[Double,Double,Double,Double], y: score) =>new Tuple4[Double,Double,Double,Double](x._1+y.x0,x._2+y.x1,x._3+y.x2,x._4+y.x3))
+    
+   System.err.println(""+simul.getState);        
+    System.err.println(""+sumsc);
+   System.err.println(" Per sec "+(nbBoucle.toDouble / (t/(1000*1000*1000)) ));
+
+    
+  }  
+  
   def bench001{
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
@@ -49,7 +102,8 @@ object Testeur extends App {
   
    override def main(args: Array[String]) {
     //testGS001
-     bench001
+     testGS002
+     //bench002
   }
   
 }

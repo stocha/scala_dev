@@ -5,6 +5,9 @@ import scala.util.Random
 /**
  * @author Jahan
  */
+
+
+
 class Simulateur001(seed : Long , val  ref : GameState4P) {
   private val rand = new Random(seed);  
   private var sim=ref
@@ -70,9 +73,14 @@ class Simulateur001(seed : Long , val  ref : GameState4P) {
       move
   }
   
-  def eval={
+  def eval()={
+    for(i<-0 until 700){
+      turn()
+    }
     
+    new score(sim.tr(0).countBitset,sim.tr(1).countBitset,sim.tr(2).countBitset,sim.tr(3).countBitset)
   }
+    
   
   def getState={
     

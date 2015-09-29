@@ -5,7 +5,7 @@ import scala.util.Random
 /**
  * @author Jahan
  */
-class Bot006 extends servBot {
+class Bot007Defender extends servBot {
   var nbPlay = -1;
   var idP = -1;
   var coord = new servCoord(0, 0, 0)
@@ -63,6 +63,21 @@ class Bot006 extends servBot {
   
   def stratBase ={
     
+        val maxFirstLim = coords.size match {
+          case 2 => 9
+          case 3 => 9
+          case 4 => 9
+          
+        }        
+        
+        val trig = coords.size match {
+          case 2 => 25
+          case 3 => 14
+          case 4 => 14
+          
+        }        
+            
+    
       def maxOrEmpty(y : List[BitMap])={
         if(y.isEmpty) BitMap.zero else
         {
@@ -70,43 +85,46 @@ class Bot006 extends servBot {
         }
       }
       
-      def extractMax(x : BitMap)={
-        maxOrEmpty(x.extractZones)
+      def extractMax(x : BitMap,minCount : Int)={
+        val map=maxOrEmpty(x.extractZones)
+        if(map.countBitset < minCount) BitMap.zero else map
       }
     
     
         val bms = dat.extractBm(coords.size);
         val terri= bms(idP)
         val void = BitMap.voidArea(bms)
-        val firstZone = BitMap.firstArea(bms, coords, idP)
+        val firstZone = BitMap.rawFirstMap( coords, idP)
         
-        val maxFirstZone= extractMax(firstZone&void)
+        val playerPosMap=coords.map( x=> BitMap.zero.set(x.x)(x.y)(1))
+        val me = playerPosMap(idP)
+        val ePoint=playerPosMap.foldLeft(BitMap.zero){_ | _}^me
+        //Console.err.println("firstZone\n"+firstZone);
+        //Console.err.println("firstZone noyau\n"+firstZone.noyau);
+        
+        val maxFirstZone= extractMax(firstZone&(void |terri),maxFirstLim)
         //Console.err.println("maxFirstZone\n"+maxFirstZone);
         
-        val maxEmpty = extractMax(void)
+        
+         //Console.err.println("ePoint\n"+ePoint);
+        val (dist,clothestTo)=(maxFirstZone & void).closestPointHere(ePoint)
+        //Console.err.println("clothestTo\n"+clothestTo);
+        
+        //val noyau= (firstZone );
+
+        val maxEmpty = extractMax(void,0)
       //  Console.err.println("maxEmpty\n"+maxEmpty);
         
-        val terriDiag=BitMap.closeDiag(terri, void)
         
-        val cross=BitMap.zero.paintCrossAt(coord.x, coord.y) & void // important : uniquement les cases vides vieux !!
-        val captIfCross=extractMax(BitMap.enclosed((terri | cross), void  & (~cross)) & firstZone)
+        //val cross=BitMap.zero.paintCrossAt(coord.x, coord.y) & void // important : uniquement les cases vides vieux !!
+       // val captIfCross=extractMax(BitMap.enclosed((terri | cross), void  & (~cross)) & firstZone , trig)
        // Console.err.println("captIfCross\n"+captIfCross);
+                     
         
-        val trig = coords.size match {
-          case 2 => 25
-          case 3 => 14
-          case 4 => 9
-          
-        }
+        val bordFirstZone = (( maxFirstZone | terri).frontierMap ) &  (~terri)      
+        //Console.err.println("bordFirst\n"+bordFirstZone);
         
-        val prioCross=if(captIfCross.countBitset >=trig) (captIfCross.scramble^captIfCross ) & (~terri ) else BitMap.zero
-        
-       // Console.err.println("prioCross\n"+prioCross);
-        
-        
-        val bordFirst = (( maxFirstZone | terri).frontierMap) &  (~terri)        
-        
-        goTarget(coord, List(prioCross,bordFirst,void), void)
+        goTarget(coord, List(clothestTo,bordFirstZone,void), void)
         
   }
 
@@ -115,7 +133,7 @@ class Bot006 extends servBot {
 
   }
   override def name: String = {
-    "Bot006 (" + idP + ")";
+    "Bot007Defender (" + idP + ")";
   }
 
 }

@@ -1,4 +1,4 @@
-package servengine
+package v2
 
 /**
  * @author Jahan
@@ -176,65 +176,6 @@ object BitMap {
     curr
   }
 
-  def firstArea(all: Array[BitMap], pos: Array[servCoord], id: Int) = {
-    var e = zero;
-    var f = zero;
-    var void = zero;
-
-    var firste = zero;
-
-    for (i <- 0 until all.size) {
-      void = void | all(i)
-      if (i == id) {
-        val c = pos(i)
-        f = f.set(c.x)(c.y)(1)
-      } else {
-        val c = pos(i)
-        if (c.x != -1 && c.y != -1)
-          e = e.set(c.x)(c.y)(1)
-      }
-    }
-    void = ~void
-
-    while (!(~(f | e)).isNull) {
-      e = e.scramble
-      f = f.scramble
-
-      //println("e\n"+e);
-
-      //println("\nf\n"+f);
-
-      firste = firste | (~e & f)
-    }
-
-    (firste & void)
-  }
-  
-
-  def rawFirstMap(pos: Array[servCoord], id: Int) = {
-    var e = zero;
-    var f = zero;
-
-    var firste = zero;
-
-    for (i <- 0 until pos.size) {
-      if (i == id) {
-        val c = pos(i)
-        f = f.set(c.x)(c.y)(1)
-      } else {
-        val c = pos(i)
-        if (c.x != -1 && c.y != -1)
-          e = e.set(c.x)(c.y)(1)
-      }
-    }
-    while (!(~(f | e)).isNull) {
-      e = e.scramble
-      f = f.scramble
-      firste = firste | (~e & f)
-    }
-
-    (firste )
-  }  
 
   def firstDirToThrough(pos: BitMap, goal: BitMap, conduction: BitMap) = {
 
@@ -444,6 +385,10 @@ class BitMap(
   def get(x: Int)(y: Int) = {
     val r = l_getAt(y)
     (r >>> x) & 1L
+  }
+  
+  def apply(x : Int) (y : Int) = {
+    get(x)(y)
   }
 
   def set(x: Int)(y: Int)(v: Long) = {

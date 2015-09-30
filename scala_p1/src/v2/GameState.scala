@@ -70,7 +70,7 @@ object GameState4P {
   def convertDirToOfficialString(dir : Int, sc : Seq[Tuple3[Int,Int,Int]])={
     
     val x=sc(0)._1
-    val y=sc(1)._2
+    val y=sc(0)._2
     
        val out=dir match {
         case 0 => new Tuple3(x, y - 1, 0);
@@ -89,7 +89,7 @@ object GameState4P {
   }
   
   private def readOfficialCoords(sl : Seq[Tuple3[Int,Int,Int]]) ={
-    val them=new Array[BMap](4);
+    val them=Array(BMap.zero,BMap.zero,BMap.zero,BMap.zero);
     var ind=0
     
     for(t <- sl){
@@ -103,7 +103,7 @@ object GameState4P {
   }
   
   private def readOfficialMapTrace(sl : Seq[String]) = {
-    val them=new Array[BMap](4);
+    val them=Array(BMap.zero,BMap.zero,BMap.zero,BMap.zero);
     
 
     var j=0;

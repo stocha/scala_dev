@@ -10,7 +10,6 @@ import java.awt.Color
 import scala.swing.event.MouseDragged
 import scala.swing.event.MouseClicked
 import v2.GameState4P
-import v2.SimulatorModel
 
 /**
  * @author Jahan

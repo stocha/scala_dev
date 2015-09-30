@@ -25,8 +25,8 @@ class tb001() extends agentAbstract{
      }
     
     val area=(bv.nthBm(maxfirst.noyau, 3){x => x.angularScramble })&(void|bv.me)
-    Console.err.println("target area\n"+area);
-    Console.err.println("target border\n"+area.border);
+    //Console.err.println("target area\n"+area);
+    //Console.err.println("target border\n"+area.border);
     
     currPlan=new bv_followTrail(area.border) (x => x)
     
@@ -37,7 +37,7 @@ class tb001() extends agentAbstract{
   
     var logMove : log = new log
     override def backMove(){
-      System.err.println("backing "+logMove);
+      //System.err.println("backing "+logMove);
       logMove.undo()
     }
     

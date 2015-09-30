@@ -33,7 +33,6 @@ class score(val x0 : Int,val x1 : Int,val x2 : Int,val x3 : Int){
   }
 
 class SimulBot (seed : Long , val  ref : GameState4P,val agents : Array[agentAbstract]) {
-  private val rand = new Random(seed);  
   private var sim=ref
  // private val agents = Array(new stupidAgent,new stupidAgent,new stupidAgent,new stupidAgent)
   
@@ -48,7 +47,6 @@ class SimulBot (seed : Long , val  ref : GameState4P,val agents : Array[agentAbs
   }
   
   def turn()={
-      val n = rand.nextInt(GameState4P.moveMax)
       val d0=agents(0).genMove(sim.swap(0))
       val d1=      if(agents.size>1) agents(1).genMove(sim.swap(1)) else 4
       val d2=      if(agents.size>2) agents(2).genMove(sim.swap(2)) else 4

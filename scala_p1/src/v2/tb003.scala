@@ -41,7 +41,7 @@ class tb003 extends agentAbstract{
     
     //val bmToTry=Array(bv.border( bv.squareInDir(0, 5) ),bv.border( bv.squareInDir(2, 5) ),bv.border( bv.squareInDir(2, 3) )).sortBy { x => -x.countBitset }
     
-    val tmpF0=for (d<-0 until 4; s<- 4 to 6) yield{
+    val tmpF0=for (d<-0 until 4; s<- 4 to 8) yield{
      (new Tuple2(d,s))
     }
     val bmToTry=  (genBmSquare (tmpF0,bv).sortBy { y  => - (y.countBitset ) })
@@ -54,7 +54,23 @@ class tb003 extends agentAbstract{
       currPlan= new bv_trailStop(bmToTry.reverse( idPlan -1))( _ => false) (x=>x)
          currPlan.genMove(ref)
     }else{
-      4
+      val specialVoid=ref.tr.void|ref.tr.pos0
+      //Console.err.println("specialVoid\n"+specialVoid)
+      val targNoBorder= bv.border( ref.tr.void) & ~BMap.border
+      val targ=if(targNoBorder.isNull) (BMap.border & ref.tr.void) else targNoBorder
+      //Console.err.println("frontier\n"+targ)
+      val resp=bv.goTo(targ)
+      
+      if(resp.size>0) resp(0) else {
+        //Console.err.println("Nowhere to go !\n");
+        val lastChance = bv.goTo(ref.tr.void)
+        
+        if(lastChance.size>0){
+          lastChance(0)
+        }else
+          4
+        
+      }
     }
     
  

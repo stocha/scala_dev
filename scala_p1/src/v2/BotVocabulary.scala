@@ -36,6 +36,10 @@ class BotVocabulary(val  st : GameState4P) {
         
 
   }    
+
+  def border(area : BMap)={
+    ((area|st.tr.pos0).border)&( ~st.tr.pos0)
+  }
   
   def simpleSquareRuleZone = {
     val ref= st
@@ -59,6 +63,25 @@ class BotVocabulary(val  st : GameState4P) {
   
   def goTo(to : BMap) = {
     BMap.firstDirTo(me, to)
+  }
+  
+  def goToWithVoid(to : BMap) = {
+    BMap.firstDirToThrough(me, to,st.tr.void)
+  }  
+  
+  def direction(dir : Int)={
+    val r = dir match {
+      case 0 => st.pos.pos0--
+      case 1 => st.pos.pos0>>
+      case 2 => st.pos.pos0++
+      case 3 => st.pos.pos0<<
+      case 4 => st.pos.pos0
+    }
+    r
+  }
+  
+  def testDirVoid(dir : Int)={
+    !(direction(dir)&st.tr.void).isNull
   }
   
   

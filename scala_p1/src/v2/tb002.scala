@@ -13,24 +13,45 @@ class tb002 extends agentAbstract{
     val bv = new BotVocabulary(ref)
     
     val area=   bv.simpleSquareRuleZone 
-    Console.err.println("target area\n"+area);
-    Console.err.println("target border\n"+area.border);
+    //Console.err.println("target area\n"+area);
     
-    val toPlan : agentAbstract=new bv_followTrail(area.border) (x => x)
+    val consolBorder=bv.border(area)
+        //Console.err.println("target border\n"+consolBorder);
     
-    val futur=bv.forsee_withSquarers(area.border^area,toPlan)
+    val toPlan : agentAbstract=new bv_followTrail(consolBorder) (x => x)
+    
+    val futur=bv.forsee_withZerger(consolBorder,toPlan)
     //val futur=ref   
     
-    if((futur.tr.pos0 & area) ==area)
-      Console.err.println("future success !\n"+futur);
-    else{
-      Console.err.println("future success !\n"+futur);
-      Console.err.println("future failure !\n"+(futur.tr.pos0 & area));
+    val success : Boolean = !area.isNull && ((futur.tr.pos0 & area) ==area)  
+    
+    if(success){
+      //Console.err.println("future success !\n"+futur);
+      currPlan=new bv_followTrail(consolBorder) (x => x)    
+      val move=currPlan.genMove(ref)       
+      move      
+    }else{
+      //Console.err.println("future failure !\n"+futur);
+      val specialVoid=ref.tr.void|ref.tr.pos0
+      //Console.err.println("specialVoid\n"+specialVoid)
+      val targNoBorder= bv.border( ref.tr.void) & ~BMap.border
+      val targ=if(targNoBorder.isNull) (BMap.border & ref.tr.void) else targNoBorder
+      //Console.err.println("frontier\n"+targ)
+      val resp=bv.goTo(targ)
+      
+      if(resp.size>0) resp(0) else {
+        //Console.err.println("Nowhere to go !\n");
+        val lastChance = bv.goTo(ref.tr.void)
+        
+        if(lastChance.size>0){
+          lastChance(0)
+        }else
+          4
+        
+      }
+      
     }
-    
-    currPlan=new bv_followTrail(area.border) (x => x)
-    
-    currPlan.genMove(ref)
+
   }
   
   

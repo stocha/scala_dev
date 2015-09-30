@@ -65,6 +65,67 @@ object GameState4P {
     new GameState4P(
       st, st.trace)
   }
+  
+  
+  def convertDirToOfficialString(dir : Int, sc : Seq[Tuple3[Int,Int,Int]])={
+    
+    val x=sc(0)._1
+    val y=sc(1)._2
+    
+       val out=dir match {
+        case 0 => new Tuple3(x, y - 1, 0);
+        case 1 => new Tuple3(x + 1, y, 0);
+        case 2 => new Tuple3(x, y + 1, 0);
+        case 3 => new Tuple3(x - 1, y, 0);
+        case 4 => new Tuple3(x , y, 0);
+        case _ => new Tuple3(0 , 0, -dir);
+      }    
+    
+    if(out._3==0) (""+out._1+" "+out._2) else ("BACK "+(-out._3))
+  }
+  
+  def readOfficialGameState(sc : Seq[Tuple3[Int,Int,Int]])(sm : Seq[String]) = {
+    new GameState4P(readOfficialCoords(sc),readOfficialMapTrace(sm))
+  }
+  
+  private def readOfficialCoords(sl : Seq[Tuple3[Int,Int,Int]]) ={
+    val them=new Array[BMap](4);
+    var ind=0
+    
+    for(t <- sl){
+      them(ind)=them(ind).set(t._1)(t._2)(1)
+      
+      ind=ind+1
+    }
+    
+    new GameVect4P(them(0),them(1),them(2),them(3)
+        )    
+  }
+  
+  private def readOfficialMapTrace(sl : Seq[String]) = {
+    val them=new Array[BMap](4);
+    
+
+    var j=0;
+    for(s <- sl){
+      var i=0;
+      for(c <- s){
+        c match{
+          case '0' => them(0)=them(0).set(i)(j)(1);
+          case '1' => them(1)=them(1).set(i)(j)(1);
+          case '2' => them(2)=them(2).set(i)(j)(1);
+          case '3' => them(3)=them(3).set(i)(j)(1);
+          case _ =>
+        }
+        
+        i=i+1
+      }
+      
+      j=j+1;
+    }
+    new GameVect4P(them(0),them(1),them(2),them(3)
+        )
+  }
 }
 
 class GameVect4P(

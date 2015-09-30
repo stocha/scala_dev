@@ -90,6 +90,23 @@ class BotVocabulary(val st: GameState4P) {
     r
   }
 
+  def squareInDir(dir: Int, sz: Int) ={
+    def squareInDirRec(start: BMap, dir: Int, sz: Int): BMap = {
+
+      if (sz == 0) start else {
+
+        val r = dir match {
+          case 0 => start.scrUL
+          case 1 => start.scrUR
+          case 2 => start.scrDR
+          case 3 => start.scrDL
+        }
+        squareInDirRec(r, dir, sz - 1)
+      }
+    }
+    squareInDirRec(me, dir, sz)
+  }
+
   def testDirVoid(dir: Int) = {
     !(direction(dir) & st.tr.void).isNull
   }
@@ -112,15 +129,34 @@ class BotVocabulary(val st: GameState4P) {
     sim.getState
   }
 
-  def forsee_withSquarers(to: BMap, plan: agentAbstract) = {
-    val zerg = new tb001
+  def forsee_with(w: agentAbstract, plan: agentAbstract)(success: GameState4P => Boolean)(whenSuccess: => Int)(fail: GameState4P => Boolean)(whenFail: => Int)= {
+    val zerg = w
     val sim = new SimulBot(0, st, Array(plan, zerg, zerg, zerg))
     var dir = 0
+    
+    var retval= -1;
+    var break=false;
 
-    while (GameState4P.m(dir)(0) != 4) {
+    while (GameState4P.m(dir)(0) != 4 && !break) {
       dir = sim.turn()
+      
+      val state=sim.getState
+      
+      if(success(state)){
+        retval = whenSuccess
+        break=true
+      }else{
+        if(fail(state)){
+          retval = whenFail
+          break=true
+        }
+        
+      }      
     }
+    Console.err.println(""+sim.getState);
+    if(break) retval else whenFail
 
-    sim.getState
+
   }
+
 }

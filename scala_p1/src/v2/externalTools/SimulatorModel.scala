@@ -9,6 +9,8 @@ import v2.tb001
 import v2.test_bv_square
 import v2.test_bv_squareUndo
 import v2.tb002
+import v2.tb003
+import v2.bv_racer
 
 /**
  * @author Jahan
@@ -25,10 +27,11 @@ object SimulatorModel {
     
     val tb001T = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new tb001,new test_bv_square(2,7,false),new test_bv_squareUndo(2,7,true)))
     
-    val tb002T = new SimulBot(r.nextLong(),game,Array(new tb001,new tb002,new test_bv_square(2,7,false),new test_bv_squareUndo(2,7,true)))
+    val tb002T = new SimulBot(r.nextLong(),game,Array(new tb003,new tb002,new test_bv_square(2,7,false),new test_bv_squareUndo(2,7,true)))
+    val tb003T = new SimulBot(r.nextLong(),game,Array(new tb003,new tb002,new bv_racer,new bv_racer))
     
     
     //simul
-    tb002T
+    tb003T
   }
 }

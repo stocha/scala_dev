@@ -145,8 +145,7 @@ class test_bv_square(dir_min45 : Int, halfRad : Int , direct : Boolean) extends 
             case 3 => b.scrDL
           }
           op(r,nb-1)
-        }
-        
+        }        
       }
       
       if(b==null){
@@ -177,5 +176,48 @@ extends agentAbstract{
         r      
       
     }          
+}
+
+class bv_trailStop(var  dst :BMap ) ( stopr : GameState4P=>Boolean)( choicePriority : (Int)=>Int = (x => x))
+extends agentAbstract{
+    var countMove=0
+
+  
+    def genMove (ref : GameState4P) ={
+      
+      //System.err.println(""+dst);
+      dst=dst&ref.tr.void
+        val bv = new BotVocabulary(ref)      
+        dst= dst & (~bv.me)      
+        val dir =bv.goTo(dst)
+        val r=if(dir.size>=1 && !stopr(ref)) dir.maxBy(choicePriority) else 4        
+        r      
+      
+    }          
+}
+
+class bv_racer extends agentAbstract{
+    def genMove (ref : GameState4P) ={
+       val bv = new BotVocabulary(ref)     
+      
+      val specialVoid=ref.tr.void|ref.tr.pos0
+      //Console.err.println("specialVoid\n"+specialVoid)
+      val targNoBorder= bv.border( ref.tr.void) & ~BMap.border
+      val targ=if(targNoBorder.isNull) (BMap.border & ref.tr.void) else targNoBorder
+      //Console.err.println("frontier\n"+targ)
+      val resp=bv.goTo(targ)
+      
+      if(resp.size>0) resp(0) else {
+        //Console.err.println("Nowhere to go !\n");
+        val lastChance = bv.goTo(ref.tr.void)
+        
+        if(lastChance.size>0){
+          lastChance(0)
+        }else
+          4
+        
+      }
+      
+    }   
 }
 

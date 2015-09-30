@@ -37,6 +37,26 @@ class BotVocabulary(val  st : GameState4P) {
 
   }    
   
+  def simpleSquareRuleZone = {
+    val ref= st
+    val bv = new BotVocabulary(ref)
+    val first=bv.firstZoneHeuristic
+    val void =ref.tr.void
+    
+    val allFirstEmpty=(first&void).split
+    val maxfirst= if(allFirstEmpty.size>0) {allFirstEmpty.maxBy { x => x.countBitset } }
+     else{
+       if(void.isNull){
+         void
+       }else{
+         void.split.maxBy { x => x.countBitset }
+       }
+     }
+    
+    val area=(bv.nthBm(maxfirst.noyau, 3){x => x.angularScramble })&(void|ref.tr.pos0)        
+    (area & (first&void))
+  }
+  
   def goTo(to : BMap) = {
     BMap.firstDirTo(me, to)
   }
@@ -48,5 +68,27 @@ class BotVocabulary(val  st : GameState4P) {
     }
   }
   
+  def forsee_withZerger(to : BMap, plan : agentAbstract) ={
+    val zerg=new bv_followTrail(to)(identity)
+    val sim =  new SimulBot(0,st,Array(plan,zerg,zerg,zerg))
+        var dir= 0
+        
+        while(GameState4P.m(dir)(0)!=4){
+          dir = sim.turn()
+        }
+        
+        sim.getState
+  }
   
+  def forsee_withSquarers(to : BMap, plan : agentAbstract) ={
+    val zerg=new tb001
+    val sim =  new SimulBot(0,st,Array(plan,zerg,zerg,zerg))
+        var dir= 0
+        
+        while(GameState4P.m(dir)(0)!=4){
+          dir = sim.turn()
+        }
+        
+        sim.getState
+  }  
 }

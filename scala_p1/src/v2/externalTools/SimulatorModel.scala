@@ -8,6 +8,7 @@ import v2.stupidAgent
 import v2.tb001
 import v2.test_bv_square
 import v2.test_bv_squareUndo
+import v2.tb002
 
 /**
  * @author Jahan
@@ -24,8 +25,10 @@ object SimulatorModel {
     
     val tb001T = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new tb001,new test_bv_square(2,7,false),new test_bv_squareUndo(2,7,true)))
     
+    val tb002T = new SimulBot(r.nextLong(),game,Array(new tb001,new tb002,new test_bv_square(2,7,false),new test_bv_squareUndo(2,7,true)))
+    
     
     //simul
-    tb001T
+    tb002T
   }
 }

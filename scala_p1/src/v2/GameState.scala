@@ -49,6 +49,16 @@ object GameState4P {
     res = res * NMOVE + x0
     res
   }
+  
+  def m(x: Int)( i: Int): Int = {
+    i match {
+      case 0 => (x % NMOVE).toInt
+      case 1 => (x / (NMOVE) % NMOVE).toInt
+      case 2 => (x / (NMOVE * NMOVE) % NMOVE).toInt
+      case 3 => (x / (NMOVE * NMOVE * NMOVE) % NMOVE).toInt
+
+    }  
+  }
 
   def start(init: Long) = {
     val p0 = p(init, 0)

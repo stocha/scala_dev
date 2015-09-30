@@ -169,15 +169,13 @@ extends agentAbstract{
     def genMove (ref : GameState4P) ={
       
       //System.err.println(""+dst);
+      dst=dst&ref.tr.void
         val bv = new BotVocabulary(ref)      
         dst= dst & (~bv.me)      
         val dir =bv.goTo(dst)
         val r=if(dir.size>=1) dir.maxBy(choicePriority) else 4        
         r      
       
-    }
-    
-    
-
-  
+    }          
 }
+

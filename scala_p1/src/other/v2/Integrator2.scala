@@ -1,7 +1,5 @@
 package other.v2
 
-
-
 object BMap {
 
   val zero = {
@@ -247,7 +245,7 @@ class BMap(
 
   def border = {
     val ext = this.scramble ^ this;
-    (ext.angularScramble & this) | (this&BMap.border)
+    (ext.angularScramble & this) | (this & BMap.border)
   }
 
   def l_getAt(at: Int): Long = {
@@ -631,7 +629,6 @@ class BMap(
 
 }
 
-
 // @author Jahan
 
 object GameState4P {
@@ -679,8 +676,8 @@ object GameState4P {
     res = res * NMOVE + x0
     res
   }
-  
-  def m(x: Int)( i: Int): Int = {
+
+  def m(x: Int)(i: Int): Int = {
     i match {
       case 0 => (x % NMOVE).toInt
       case 1 => (x / (NMOVE) % NMOVE).toInt
@@ -689,7 +686,7 @@ object GameState4P {
 
     }
 
-  }  
+  }
 
   def start(init: Long) = {
     val p0 = p(init, 0)
@@ -706,80 +703,72 @@ object GameState4P {
     new GameState4P(
       st, st.trace)
   }
-  
-  
-  def convertDirToOfficialString(dir : Int, sc : Seq[Tuple3[Int,Int,Int]])={
-    
-    val x=sc(0)._1
-    val y=sc(0)._2
-    
-       val out=dir match {
-        case 0 => new Tuple3(x, y - 1, 0);
-        case 1 => new Tuple3(x + 1, y, 0);
-        case 2 => new Tuple3(x, y + 1, 0);
-        case 3 => new Tuple3(x - 1, y, 0);
-        case 4 => new Tuple3(x , y, 0);
-        case _ => new Tuple3(0 , 0, -dir);
-      }    
-    
-    if(out._3==0) (""+out._1+" "+out._2) else ("BACK "+(-out._3))
-  }
-  
 
-  def readOfficialGameState(sc : Seq[Tuple3[Int,Int,Int]])(sm : Seq[String]) = {
-    new GameState4P(readOfficialCoords(sc),readOfficialMapTrace(sm))
-  }
-  
-  private def readOfficialCoords(sl : Seq[Tuple3[Int,Int,Int]]) ={
-    val them=Array(BMap.zero,BMap.zero,BMap.zero,BMap.zero);
-    var ind=0
-    
-    for(t <- sl){
-      if(t._1!= -1 && t._2 != -1)them(ind)=them(ind).set(t._1)(t._2)(1)
-      
-      ind=ind+1
+  def convertDirToOfficialString(dir: Int, sc: Seq[Tuple3[Int, Int, Int]]) = {
+
+    val x = sc(0)._1
+    val y = sc(0)._2
+
+    val out = dir match {
+      case 0 => new Tuple3(x, y - 1, 0);
+      case 1 => new Tuple3(x + 1, y, 0);
+      case 2 => new Tuple3(x, y + 1, 0);
+      case 3 => new Tuple3(x - 1, y, 0);
+      case 4 => new Tuple3(x, y, 0);
+      case _ => new Tuple3(0, 0, -dir);
     }
-    
-    new GameVect4P(them(0),them(1),them(2),them(3)
-        )    
-  }
-  
-  private def readOfficialMapTrace(sl : Seq[String]) = {
-    val them=Array(BMap.zero,BMap.zero,BMap.zero,BMap.zero);
-    
 
-    var j=0;
-    for(s <- sl){
-      var i=0;
-      for(c <- s){
-        c match{
-          case '0' => them(0)=them(0).set(i)(j)(1);
-          case '1' => them(1)=them(1).set(i)(j)(1);
-          case '2' => them(2)=them(2).set(i)(j)(1);
-          case '3' => them(3)=them(3).set(i)(j)(1);
-          case _ =>
+    if (out._3 == 0) ("" + out._1 + " " + out._2) else ("BACK " + (-out._3))
+  }
+
+  def readOfficialGameState(sc: Seq[Tuple3[Int, Int, Int]])(sm: Seq[String]) = {
+    new GameState4P(readOfficialCoords(sc), readOfficialMapTrace(sm))
+  }
+
+  private def readOfficialCoords(sl: Seq[Tuple3[Int, Int, Int]]) = {
+    val them = Array(BMap.zero, BMap.zero, BMap.zero, BMap.zero);
+    var ind = 0
+
+    for (t <- sl) {
+      if (t._1 != -1 && t._2 != -1) them(ind) = them(ind).set(t._1)(t._2)(1)
+
+      ind = ind + 1
+    }
+
+    new GameVect4P(them(0), them(1), them(2), them(3))
+  }
+
+  private def readOfficialMapTrace(sl: Seq[String]) = {
+    val them = Array(BMap.zero, BMap.zero, BMap.zero, BMap.zero);
+
+    var j = 0;
+    for (s <- sl) {
+      var i = 0;
+      for (c <- s) {
+        c match {
+          case '0' => them(0) = them(0).set(i)(j)(1);
+          case '1' => them(1) = them(1).set(i)(j)(1);
+          case '2' => them(2) = them(2).set(i)(j)(1);
+          case '3' => them(3) = them(3).set(i)(j)(1);
+          case _   =>
         }
-        
-        i=i+1
+
+        i = i + 1
       }
-      
-      j=j+1;
+
+      j = j + 1;
     }
-    new GameVect4P(them(0),them(1),them(2),them(3)
-        )
+    new GameVect4P(them(0), them(1), them(2), them(3))
   }
 }
 
-  
-  
-  
 class GameVect4P(
     val pos0: BMap,
     val pos1: BMap,
     val pos2: BMap,
     val pos3: BMap) {
 
-  def swap(at: Int) : GameVect4P = {
+  def swap(at: Int): GameVect4P = {
 
     val r = at match {
       case 1 =>
@@ -962,320 +951,363 @@ class GameState4P(
   }
 
 }
- 
-class BotVocabulary(val  st : GameState4P) {
+
+class BotVocabulary(val st: GameState4P) {
   val void = st.tr.void
   val me = st.pos.pos0
-  
-  
+
   def currZones = {
-    val near= me.scramble & void
-    val trail=BMap.followTrail(near, void)
+    val near = me.scramble & void
+    val trail = BMap.followTrail(near, void)
     trail.split
-    
+
   }
-  
-  
+
   def firstZoneHeuristic = {
     var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;
     var f = st.pos.pos0;
 
     var firste = BMap.zero;
-    
-    if(!e.isNull && !f.isNull){
+
+    if (!e.isNull && !f.isNull) {
       while (!(~(f | e)).isNull) {
         e = e.scramble
         f = f.scramble
         firste = firste | (~e & f)
       }
-  
-      (firste )      
-    }else{
+
+      (firste)
+    } else {
       BMap.full
     }
-        
 
-  }    
-  
-  def goTo(to : BMap) = {
+  }
+
+  def border(area: BMap) = {
+    ((area | st.tr.pos0).border) & (~st.tr.pos0)
+  }
+
+  def simpleSquareRuleZone = {
+    val ref = st
+    val bv = new BotVocabulary(ref)
+    val first = bv.firstZoneHeuristic
+    val void = ref.tr.void
+
+    val allFirstEmpty = (first & void).split
+    val maxfirst = if (allFirstEmpty.size > 0) { allFirstEmpty.maxBy { x => x.countBitset } }
+    else {
+      if (void.isNull) {
+        void
+      } else {
+        void.split.maxBy { x => x.countBitset }
+      }
+    }
+
+    val area = (bv.nthBm(maxfirst.noyau, 3) { x => x.angularScramble }) & (void | ref.tr.pos0)
+    (area & (first & void))
+  }
+
+  def goTo(to: BMap) = {
     BMap.firstDirTo(me, to)
   }
-  
-  
-  def nthBm(to : BMap, nb : Int)(code : BMap => BMap) : BMap={
-    if(nb ==0) to else{
-      nthBm( code(to) , nb-1)(code)
+
+  def goToElseGo(to: BMap)(elsego: => Int): Int = {
+
+    if (to.isNull) {
+      elsego
+    } else {
+      val resp = goTo(to)
+
+      if (resp.size > 0) resp(0) else {
+        elsego
+      }
     }
   }
-  
-  
+
+  def goToWithVoid(to: BMap) = {
+    BMap.firstDirToThrough(me, to, st.tr.void)
+  }
+
+  def direction(dir: Int) = {
+    val r = dir match {
+      case 0 => st.pos.pos0--
+      case 1 => st.pos.pos0>>
+      case 2 => st.pos.pos0++
+      case 3 => st.pos.pos0<<
+      case 4 => st.pos.pos0
+    }
+    r
+  }
+
+  def testDirVoid(dir: Int) = {
+    !(direction(dir) & st.tr.void).isNull
+  }
+
+  def nthBm(to: BMap, nb: Int)(code: BMap => BMap): BMap = {
+    if (nb == 0) to else {
+      nthBm(code(to), nb - 1)(code)
+    }
+  }
+
+  def forsee_withZerger(to: BMap, plan: agentAbstract) = {
+    val zerg = new bv_followTrail(to)(identity)
+    val sim = new SimulBot(0, st, Array(plan, zerg, zerg, zerg))
+    var dir = 0
+
+    while (GameState4P.m(dir)(0) != 4) {
+      dir = sim.turn()
+    }
+
+    sim.getState
+  }
+
 }
 
+class log {
+  private var donel: List[Int] = List()
+  private var undol: List[Int] = List()
+  private var t = 0
 
-class log{
-  private var donel : List[Int] = List()
-  private var undol : List[Int] = List()
-  private var t=0
-  
-  override def toString={
-    var res =""
-    res =  res + t+"  "+donel+"   /    "+undol
-    
+  override def toString = {
+    var res = ""
+    res = res + t + "  " + donel + "   /    " + undol
+
     res
   }
-  
-  private def stack(v : Int){
+
+  private def stack(v: Int) {
     donel = v :: donel
-    t=  t+1
+    t = t + 1
   }
-  
+
   private def canReplay = {
     !undol.isEmpty
   }
-  
-  def hasStarted ={
-    t>=0
+
+  def hasStarted = {
+    t >= 0
   }
-  
-  def undo(){
-    if(t>0){
-    
-      undol= donel.head::undol
+
+  def undo() {
+    if (t > 0) {
+
+      undol = donel.head :: undol
       donel = donel.tail
     }
-    t=t-1
+    t = t - 1
   }
-  
-  private def popRedo()={
-    t=t+1
+
+  private def popRedo() = {
+    t = t + 1
     val r = undol.head;
-    donel = undol.head::donel
+    donel = undol.head :: donel
     undol = undol.tail
     r
   }
-  
-  private def inc(){
-    System.err.println("incing "+t+" to "+(t+1));
-    t=t+1
+
+  private def inc() {
+    System.err.println("incing " + t + " to " + (t + 1));
+    t = t + 1
   }
-  
-  def blockControl(todo : =>Int ) : Int ={
-      if(hasStarted && canReplay){
-        popRedo()
-      }else if(!hasStarted){
-        inc()
-        4
-      }else
-      {
-       val r= todo
-       stack(r)
-       r
-      }    
-    
+
+  def blockControl(todo: => Int): Int = {
+    if (hasStarted && canReplay) {
+      popRedo()
+    } else if (!hasStarted) {
+      inc()
+      4
+    } else {
+      val r = todo
+      stack(r)
+      r
+    }
 
   }
-  
-  def discard(){
-    undol=Nil
+
+  def discard() {
+    undol = Nil
   }
-  
-  
-  
+
 }
 
-class score(val x0 : Int,val x1 : Int,val x2 : Int,val x3 : Int){
-  override def toString={
-    val res="("+x0+" / "+x1+" / "+x2+" / "+x3+")"
-    
+class score(val x0: Int, val x1: Int, val x2: Int, val x3: Int) {
+  override def toString = {
+    val res = "(" + x0 + " / " + x1 + " / " + x2 + " / " + x3 + ")"
+
     res
   }
-  
+
 }
 
+abstract class agentAbstract {
+  def genMove(ref: GameState4P): Int
+  def backMove() {}
+}
 
-  abstract class agentAbstract{
-    def genMove (ref : GameState4P) : Int    
-    def backMove(){}
-  }  
+class SimulBot(seed: Long, val ref: GameState4P, val agents: Array[agentAbstract]) {
+  private var sim = ref
+  // private val agents = Array(new stupidAgent,new stupidAgent,new stupidAgent,new stupidAgent)
 
+  var log = List[Int]()
 
-class SimulBot (seed : Long , val  ref : GameState4P,val agents : Array[agentAbstract]) {
-  private var sim=ref
- // private val agents = Array(new stupidAgent,new stupidAgent,new stupidAgent,new stupidAgent)
-  
-  var log=List[Int]()
-  
-  def apply(i : Int )(j : Int) ={
+  def apply(i: Int)(j: Int) = {
     sim.tr.get(i)(j)
-  }  
-  
-  def reset(){
-    sim=ref
   }
-  
-  def turn()={
-      val d0=agents(0).genMove(sim.swap(0))
-      val d1=      if(agents.size>1) agents(1).genMove(sim.swap(1)) else 4
-      val d2=      if(agents.size>2) agents(2).genMove(sim.swap(2)) else 4
-      val d3=       if(agents.size>3) agents(3).genMove(sim.swap(3)) else 4
-      val move =GameState4P.m(d0, d1, d2, d3)
-      sim= sim.transition(move)
-      //System.err.println("Turn "+i);
-      //System.err.println(""+game);    
-      log = move :: log
-      move
+
+  def reset() {
+    sim = ref
   }
-  
-  def doBackward(){
-    
-    if(!log.isEmpty){
-      log= log.tail
-      sim=ref
-      
-      for(i <- log.reverse){
+
+  def turn() = {
+    val d0 = agents(0).genMove(sim.swap(0))
+    val d1 = if (agents.size > 1) agents(1).genMove(sim.swap(1)) else 4
+    val d2 = if (agents.size > 2) agents(2).genMove(sim.swap(2)) else 4
+    val d3 = if (agents.size > 3) agents(3).genMove(sim.swap(3)) else 4
+    val move = GameState4P.m(d0, d1, d2, d3)
+    sim = sim.transition(move)
+    //System.err.println("Turn "+i);
+    //System.err.println(""+game);    
+    log = move :: log
+    move
+  }
+
+  def doBackward() {
+
+    if (!log.isEmpty) {
+      log = log.tail
+      sim = ref
+
+      for (i <- log.reverse) {
         //System.err.println(""+i);
-        sim=sim.transition(i)
+        sim = sim.transition(i)
       }
     }
-    
-    for(b <- agents){
+
+    for (b <- agents) {
       //System.err.println("backing up");
       b.backMove()
     }
   }
-  
-  def eval()={
-    for(i<-0 until 350){
+
+  def eval() = {
+    for (i <- 0 until 350) {
       turn()
     }
-    
-    new score(sim.tr(0).countBitset,sim.tr(1).countBitset,sim.tr(2).countBitset,sim.tr(3).countBitset)
+
+    new score(sim.tr(0).countBitset, sim.tr(1).countBitset, sim.tr(2).countBitset, sim.tr(3).countBitset)
   }
-    
-  
-  def getState={
-    
+
+  def getState = {
+
     sim
   }
-    
+
 }
 
+class botVocTest extends agentAbstract {
 
-class botVocTest extends agentAbstract{
-  
-    def genMove (ref : GameState4P) ={
-      val bv = new BotVocabulary(ref)
-      
-      val currz=bv.currZones
-      if(currz.size==1){
-        System.err.println("currz\n"+currz);
-        
-        System.err.println("me\n"+bv.me);
-        
-        val dir =bv.goTo(currz(0))
-        System.err.println("dir\n"+dir);
-        dir(0)
-        
-        
-      }else{
-        4
-      }
+  def genMove(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
 
+    val currz = bv.currZones
+    if (currz.size == 1) {
+      System.err.println("currz\n" + currz);
+
+      System.err.println("me\n" + bv.me);
+
+      val dir = bv.goTo(currz(0))
+      System.err.println("dir\n" + dir);
+      dir(0)
+
+    } else {
+      4
     }
-  
+
+  }
+
 }
 
-class test_bv_squareUndo(dir_min45 : Int, halfRad : Int , direct : Boolean) extends agentAbstract{
-  
-    var b =new test_bv_square(dir_min45,halfRad,direct)
-  
-    var logMove : log = new log
-    override def backMove(){
-      System.err.println("backing "+logMove);
-      logMove.undo()
-    }
-    
-      def genMove (ref : GameState4P) ={
-        logMove.blockControl{
-          b.genMove(ref)
-          
-        }
-      
-      }
-  
-}
+class test_bv_squareUndo(dir_min45: Int, halfRad: Int, direct: Boolean) extends agentAbstract {
 
-class test_bv_square(dir_min45 : Int, halfRad : Int , direct : Boolean) extends agentAbstract{
-  
-  var b : bv_followTrail = null
-  
-  def genMove (ref : GameState4P) ={
-      val bv = new BotVocabulary(ref)
-      
-      val fundir = if((!direct & halfRad!=0) | (direct & halfRad==0)){
-         (x : Int) =>  x 
-      }else
-      {
-        (x : Int) => 4- x
-      }
-      
-      def op(b: BMap, nb : Int) : BMap ={
-        if(nb==0) b else
-        {
-        
-          val r=dir_min45 match{
-            case 0 => b.scrUL
-            case 1 => b.scrUR
-            case 2 => b.scrDR
-            case 3 => b.scrDL
-          }
-          op(r,nb-1)
-        }
-        
-      }
-      
-      if(b==null){
-        b = new bv_followTrail((op ( bv.me,halfRad)   ).border)(
-          fundir
-        )
-      }
+  var b = new test_bv_square(dir_min45, halfRad, direct)
+
+  var logMove: log = new log
+  override def backMove() {
+    System.err.println("backing " + logMove);
+    logMove.undo()
+  }
+
+  def genMove(ref: GameState4P) = {
+    logMove.blockControl {
       b.genMove(ref)
 
-    }    
-  
-}
-
-
-class bv_followTrail(var  dst :BMap ) ( choicePriority : (Int)=>Int)
-extends agentAbstract{
-    var countMove=0
-
-  
-    def genMove (ref : GameState4P) ={
-      
-      //System.err.println(""+dst);
-        val bv = new BotVocabulary(ref)      
-        dst= dst & (~bv.me)      
-        val dir =bv.goTo(dst)
-        val r=if(dir.size>=1) dir.maxBy(choicePriority) else 4        
-        r      
-      
     }
-    
-    
 
-  
+  }
+
 }
 
+class test_bv_square(dir_min45: Int, halfRad: Int, direct: Boolean) extends agentAbstract {
+
+  var b: bv_followTrail = null
+
+  def genMove(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+
+    val fundir = if ((!direct & halfRad != 0) | (direct & halfRad == 0)) {
+      (x: Int) => x
+    } else {
+      (x: Int) => 4 - x
+    }
+
+    def op(b: BMap, nb: Int): BMap = {
+      if (nb == 0) b else {
+
+        val r = dir_min45 match {
+          case 0 => b.scrUL
+          case 1 => b.scrUR
+          case 2 => b.scrDR
+          case 3 => b.scrDL
+        }
+        op(r, nb - 1)
+      }
+
+    }
+
+    if (b == null) {
+      b = new bv_followTrail((op(bv.me, halfRad)).border)(
+        fundir)
+    }
+    b.genMove(ref)
+
+  }
+
+}
+
+class bv_followTrail(var dst: BMap)(choicePriority: (Int) => Int)
+    extends agentAbstract {
+  var countMove = 0
+
+  def genMove(ref: GameState4P) = {
+
+    //System.err.println(""+dst);
+    val bv = new BotVocabulary(ref)
+    dst = dst & (~bv.me)
+    val dir = bv.goTo(dst)
+    val r = if (dir.size >= 1) dir.maxBy(choicePriority) else 4
+    r
+
+  }
+
+}
 
 object Player extends App {
 
-  
   val opponentcount = readInt // Opponent count
-  
-  val bot=new tb001
-  
-  var date=0;
+
+  val bot = new tb002
+
+  var date = 0;
 
   // game loop
   while (true) {
@@ -1283,25 +1315,24 @@ object Player extends App {
     // x: Your x position
     // y: Your y position
     // backintimeleft: Remaining back in time
-    
-    if(gameround<=date){
-      while(date>=gameround){
-          Console.err.println("back to "+gameround+" / "+date);
-        date=date-1
+
+    if (gameround <= date) {
+      while (date >= gameround) {
+        Console.err.println("back to " + gameround + " / " + date);
+        date = date - 1
         bot.backMove()
       }
     }
-    date=date+1
-    
-    
+    date = date + 1
+
     val someCoord = for (i <- 0 until (opponentcount + 1)) yield {
       // opponentx: X position of the opponent
       // opponenty: Y position of the opponent
       // opponentbackintimeleft: Remaining back in time of the opponent
       val Array(opponentxb, opponentyb, opponentbackintimeleft) = for (i <- readLine split " ") yield i.toInt
-      val opponentx = if(opponentxb>0) opponentxb else 0;
-      val opponenty = if(opponentyb>0) opponentyb else 0;
-      
+      val opponentx = if (opponentxb > 0) opponentxb else 0;
+      val opponenty = if (opponentyb > 0) opponentyb else 0;
+
       new Tuple3(opponentx, opponenty, opponentbackintimeleft)
 
     }
@@ -1310,86 +1341,98 @@ object Player extends App {
       val line = readLine // One line of the map ('.' = free, '0' = you, otherwise the id of the opponent)
       line
     }
-    
+
     val t0 = System.nanoTime()
 
-    
-    val map=GameState4P.readOfficialGameState(someCoord)(ls)
-    
-          
-    
-    
-        
-    
-    val order=bot.genMove(map)
-    
-      val t1 = System.nanoTime()
-      
-      var t : Double =( t1 - t0) / 1000
-      Console.err.println(" "+t+" nanoseconds "+(t/1000)+" millisecondes");    
+    val map = GameState4P.readOfficialGameState(someCoord)(ls)
+
+    val order = bot.genMove(map)
+
+    val t1 = System.nanoTime()
+
+    var t: Double = (t1 - t0) / 1000
+    Console.err.println(" " + t + " nanoseconds " + (t / 1000) + " millisecondes");
 
     // Write an action using println
     // To debug: Console.err.println("Debug messages...")
 
-        println( GameState4P.convertDirToOfficialString(order,someCoord))
+    println(GameState4P.convertDirToOfficialString(order, someCoord))
   }
 }
 
+class tb002 extends agentAbstract {
 
-class tb001() extends agentAbstract{
-  
-  
-   var currPlan : agentAbstract=null
-  
-  def doPlan(ref : GameState4P) ={
-  
+  var currPlan: agentAbstract = null
+
+  def doPlan(ref: GameState4P) = {
+
     val bv = new BotVocabulary(ref)
-    val first=bv.firstZoneHeuristic
-    val void =ref.tr.void
-    
-    val allFirstEmpty=(first&void).split
-    val maxfirst= if(allFirstEmpty.size>0) {allFirstEmpty.maxBy { x => x.countBitset } }
-     else{
-       if(void.isNull){
-         void
-       }else{
-         void.split.maxBy { x => x.countBitset }
-       }
-     }
-    
-    val area=(bv.nthBm(maxfirst.noyau, 3){x => x.angularScramble })&(void|bv.me)
+
+    val area = bv.simpleSquareRuleZone
     //Console.err.println("target area\n"+area);
-    //Console.err.println("target border\n"+area.border);
-    
-    currPlan=new bv_followTrail(area.border) (x => x)
-    
-    currPlan.genMove(ref)
-  }
-  
-  
-  
-    var logMove : log = new log
-    override def backMove(){
-     // System.err.println("backing "+logMove);
-      logMove.undo()
-    }
-    
-      def genMove (ref : GameState4P) ={
-        logMove.blockControl{
-          
-          if(currPlan==null){
-           doPlan(ref )
-          }else{
-            val m = currPlan.genMove(ref)
-            if(m!=4) m else{
-              currPlan=null
-              doPlan(ref)
-              
-            }
-          }
-          
+
+    val consolBorder = bv.border(area)
+    //Console.err.println("target border\n"+consolBorder);
+
+    val toPlan: agentAbstract = new bv_followTrail(consolBorder)(x => x)
+
+    val futur = bv.forsee_withZerger(consolBorder, toPlan)
+    //val futur=ref   
+
+    val success: Boolean = !area.isNull && ((futur.tr.pos0 & area) == area)
+
+    if (success) {
+      currPlan = new bv_followTrail(consolBorder)(x => x)
+      val move = currPlan.genMove(ref)
+      move
+    } else
+      bv.goToElseGo(if (success) consolBorder else BMap.zero) {
+
+        val specialVoid = ref.tr.void | ref.tr.pos0
+        //Console.err.println("specialVoid\n"+specialVoid)
+        val targNoBorder = bv.border(ref.tr.void) & ~BMap.border
+        val targ = if (targNoBorder.isNull) (BMap.border & ref.tr.void) else targNoBorder
+        //Console.err.println("frontier\n"+targ)
+        val resp = bv.goTo(targ)
+
+        if (resp.size > 0) resp(0) else {
+          //Console.err.println("Nowhere to go !\n");
+          val lastChance = bv.goTo(ref.tr.void)
+
+          if (lastChance.size > 0) {
+            lastChance(0)
+          } else
+            4
+
         }
-      
+
       }
-  
+
+  }
+
+  var logMove: log = new log
+  override def backMove() {
+    //System.err.println("backing "+logMove);
+    logMove.undo()
+  }
+
+  def genMove(ref: GameState4P) = {
+    logMove.blockControl {
+
+      if (currPlan == null) {
+        doPlan(ref)
+      } else {
+        val m = currPlan.genMove(ref)
+        if (m != 4) m else {
+          currPlan = null
+          doPlan(ref)
+
+        }
+      }
+
+    }
+
+  }
+
 }
+  

@@ -25,13 +25,15 @@ class tb002 extends agentAbstract{
     
     val success : Boolean = !area.isNull && ((futur.tr.pos0 & area) ==area)  
     
+    
     if(success){
-      //Console.err.println("future success !\n"+futur);
       currPlan=new bv_followTrail(consolBorder) (x => x)    
       val move=currPlan.genMove(ref)       
-      move      
-    }else{
-      //Console.err.println("future failure !\n"+futur);
+      move         
+    }
+    else
+    bv.goToElseGo(if(success) consolBorder else BMap.zero){
+      
       val specialVoid=ref.tr.void|ref.tr.pos0
       //Console.err.println("specialVoid\n"+specialVoid)
       val targNoBorder= bv.border( ref.tr.void) & ~BMap.border

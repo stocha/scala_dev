@@ -15,7 +15,10 @@ object SimulatorModel {
     
     val simul = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new botVocTest,new test_bv_square(2,7,false),new test_bv_squareUndo(2,7,true)))
     
+    val tb001T = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new tb001,new test_bv_square(2,7,false),new test_bv_squareUndo(2,7,true)))
     
-    simul
+    
+    //simul
+    tb001T
   }
 }

@@ -249,7 +249,7 @@ class BMap(
 
   def border = {
     val ext = this.scramble ^ this;
-    (ext.scramble & this)
+    (ext.angularScramble & this) | (this&BMap.border)
   }
 
   def l_getAt(at: Int): Long = {

@@ -80,7 +80,7 @@ class SimulBot (seed : Long , val  ref : GameState4P,val agents : Array[agentAbs
   }
   
   def eval()={
-    for(i<-0 until 700){
+    for(i<-0 until 350){
       turn()
     }
     

@@ -15,8 +15,38 @@ class BotVocabulary(val  st : GameState4P) {
     
   }
   
+  
+  def firstZoneHeuristic = {
+    var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;
+    var f = st.pos.pos0;
+
+    var firste = BMap.zero;
+    
+    if(!e.isNull && !f.isNull){
+      while (!(~(f | e)).isNull) {
+        e = e.scramble
+        f = f.scramble
+        firste = firste | (~e & f)
+      }
+  
+      (firste )      
+    }else{
+      BMap.full
+    }
+        
+
+  }    
+  
   def goTo(to : BMap) = {
     BMap.firstDirTo(me, to)
   }
+  
+  
+  def nthBm(to : BMap, nb : Int)(code : BMap => BMap) : BMap={
+    if(nb ==0) to else{
+      nthBm( code(to) , nb-1)(code)
+    }
+  }
+  
   
 }

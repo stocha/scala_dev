@@ -93,7 +93,7 @@ object GameState4P {
     var ind=0
     
     for(t <- sl){
-      them(ind)=them(ind).set(t._1)(t._2)(1)
+      if(t._1!= -1 && t._2 != -1)them(ind)=them(ind).set(t._1)(t._2)(1)
       
       ind=ind+1
     }

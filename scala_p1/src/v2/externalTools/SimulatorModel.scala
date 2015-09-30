@@ -27,8 +27,10 @@ object SimulatorModel {
     
     val tb001T = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new tb001,new test_bv_square(2,7,false),new test_bv_squareUndo(2,7,true)))
     
-    val tb002T = new SimulBot(r.nextLong(),game,Array(new tb003,new tb002,new test_bv_square(2,7,false),new test_bv_squareUndo(2,7,true)))
-    val tb003T = new SimulBot(r.nextLong(),game,Array(new tb003,new tb002,new bv_racer,new bv_racer))
+    val tb002T = new SimulBot(r.nextLong(),game,Array(new tb003,new tb003,new test_bv_square(2,7,false),new test_bv_squareUndo(2,7,true)))
+   // val tb003T = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new stupidAgent,new stupidAgent,new tb003))
+    
+     val tb003T = new SimulBot(r.nextLong(),game,Array(new tb003,new tb003,new tb003,new tb003))
     
     
     //simul

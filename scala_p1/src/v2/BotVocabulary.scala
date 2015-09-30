@@ -3,6 +3,7 @@ package v2
 /**
  * @author Jahan
  */
+
 class BotVocabulary(val st: GameState4P) {
   val void = st.tr.void
   val me = st.pos.pos0
@@ -153,7 +154,7 @@ class BotVocabulary(val st: GameState4P) {
         
       }      
     }
-    Console.err.println(""+sim.getState);
+    //Console.err.println(""+sim.getState);
     if(break) retval else whenFail
 
 

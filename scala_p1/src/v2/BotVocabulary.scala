@@ -35,10 +35,17 @@ class BotVocabulary(val st: GameState4P) {
 
   }
   
-  def firstTronZoneHeuristic : Tuple2[BMap,BMap] = {
+  def firstTronZoneHeuristic : Tuple3[BMap,BMap,Int] = {
     var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;
     var f = st.pos.pos0;
     var v = st.tr.void
+    
+    var dist=0
+    var countIt=0
+    
+    def collide = {
+      ((!(e&f).isNull)) || ( ! (e.scramble&f).isNull  )
+    }
     
   //  Console.err.println("start v\n"+v);
  //   Console.err.println("start e\n"+e);
@@ -62,14 +69,20 @@ class BotVocabulary(val st: GameState4P) {
         firste = firste | (e & f)
        // Console.err.println("firste\n"+firste);
        // Console.err.println("vide\n"+v);
+        
+        if(dist==0 && collide){
+          dist=countIt
+        }
+        
+        countIt=countIt+1
       }
       {
-        (firste ,(e.scramble & f)|(f.scramble & e)&st.tr.void)
+        (firste ,(e.scramble & f)|(f.scramble & e)&st.tr.void,dist)
       }
       
     }     
  else {
-      (BMap.full,BMap.full)
+      (BMap.full,BMap.full,0)
     }
 
   }  

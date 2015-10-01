@@ -216,9 +216,6 @@ class bv_tronFrontierInside extends agentAbstract {
     val bv = new BotVocabulary(ref)
 
     if ((ref.pos.pos0 & ref.tr.pos0).isNull) {
-      val targ = bv.firstTronZoneHeuristic
-      //Console.err.println("raw front when same sq\n"+targ)
-
       4
     } else {
 
@@ -234,8 +231,8 @@ class bv_tronFrontierInside extends agentAbstract {
         val resp = bv.goToWithVoid(mtarg)
         ra = ((ra << 3) + 13) & 0xFFFFFF;
         def rind = ((ra % resp.size) & 3)
-        if (resp.size > 0) {
-          //   Console.err.println(""+resp);
+        if (resp.size > 0 && targ._3<11) {
+             Console.err.println("Tron dist "+targ._3);
           resp(rind)
         } else {
           4

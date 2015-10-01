@@ -60,17 +60,23 @@ object GameState4P {
     }  
   }
 
-  def start(init: Long) = {
+  def start(init: Long,nbP : Int) = {
     val p0 = p(init, 0)
     val p1 = p(init, 1)
     val p2 = p(init, 2)
     val p3 = p(init, 3)
+    
+    val m= nbP match {
+      case 2 => 1
+      case 3 => 3
+      case 4 => 7
+    }
 
     val st = new GameVect4P(
-      BMap.zero.set(x(p0))(y(p0))(1),
-      BMap.zero.set(x(p1))(y(p1))(1),
-      BMap.zero.set(x(p2))(y(p2))(1),
-      BMap.zero.set(x(p3))(y(p3))(1))
+      BMap.zero.set(x(p0))(y(p0))(m&1),
+      BMap.zero.set(x(p1))(y(p1))(m&1),
+      BMap.zero.set(x(p2))(y(p2))((m>>>1)&1),
+      BMap.zero.set(x(p3))(y(p3))((m>>>2)&1))
 
     new GameState4P(
       st, st.trace)
@@ -143,6 +149,7 @@ class GameVect4P(
     val pos1: BMap,
     val pos2: BMap,
     val pos3: BMap) {
+  
 
   def swap(at: Int) : GameVect4P = {
 
@@ -289,6 +296,11 @@ class GameState4P(
 
     res
 
+  }
+  
+  def scores ={
+    List(tr.pos0.countBitset,tr.pos1.countBitset,tr.pos2.countBitset,tr.pos3.countBitset)
+    
   }
 
   private def transitionApplyMap(m: BMap, vect: Int) = {

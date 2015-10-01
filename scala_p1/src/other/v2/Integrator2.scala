@@ -663,6 +663,39 @@ class BotVocabulary(val st: GameState4P) {
     }
 
   }
+  
+  def firstTronZoneHeuristic = {
+    var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;
+    var f = st.pos.pos0;
+    var v = st.tr.void
+
+    var firste = BMap.zero;
+    var last = BMap.zero
+
+    if (!e.isNull && !f.isNull ) {
+      while (!(~(f | e)).isNull && !((v^last).isNull)) {
+        e = e.scramble & v
+        f = f.scramble & v
+        
+        
+        
+        last=v
+        v=v & (~e & (~f))
+        firste = firste | (e & f)
+        //Console.err.println(""+v);
+      }
+      if((firste==last)){
+        BMap.zero
+      } else{
+        (firste)
+      }
+      
+    }     
+ else {
+      BMap.full
+    }
+
+  }  
 
   def border(area: BMap) = {
     ((area | st.tr.pos0).border) & (~st.tr.pos0)
@@ -790,8 +823,6 @@ class BotVocabulary(val st: GameState4P) {
   }
 
 }
-
-
 class log{
   private var donel : List[Int] = List()
   private var undol : List[Int] = List()
@@ -1422,9 +1453,14 @@ object Player extends App {
 
   val opponentcount = readInt // Opponent count
 
-  val bot = new tb003
+  val bot2 = new oo001
+  val other = new tb003
+  
+  val bot = if(opponentcount==1) bot2 else other
 
   var date = 0;
+  
+  var maxT=0L
 
   // game loop
   while (true) {
@@ -1466,14 +1502,20 @@ object Player extends App {
     val order = bot.genMove(map)
 
     val t1 = System.nanoTime()
+    
+    if((t1-t0) > maxT ) maxT=(t1-t0)
 
     var t: Double = (t1 - t0) / 1000
-    Console.err.println(" " + t + " nanoseconds " + (t / 1000) + " millisecondes");
+    var tMax: Double = maxT / 1000
+    Console.err.println(" " + t + " nanoseconds " + (t / 1000) + " millisecondes"+"   max is "+tMax);
 
     // Write an action using println
     // To debug: Console.err.println("Debug messages...")
 
     println(GameState4P.convertDirToOfficialString(order, someCoord))
+    
+    System.gc()
+    
   }
 }
 
@@ -1493,7 +1535,7 @@ class tb003 extends agentAbstract {
 
   def tryPlansList(p: List[Tuple2[BMap, agentAbstract]], bv: BotVocabulary): Int = {
     if (p.isEmpty) -1 else {
-      bv.forsee_with(new bv_racer, p.head._2)((x: GameState4P) => ((p.head._1 & x.tr.pos0) == p.head._1))(p.size)((x: GameState4P) => false)(tryPlansList(p.tail, bv))
+      bv.forsee_with(new oo001, p.head._2)((x: GameState4P) => ((p.head._1 & x.tr.pos0) == p.head._1))(p.size)((x: GameState4P) => false)(tryPlansList(p.tail, bv))
     }
 
   }
@@ -1573,6 +1615,92 @@ class tb003 extends agentAbstract {
 
         }
       }
+
+    }
+
+  }
+
+}
+
+class oo001 extends agentAbstract {
+
+  var currPlan: agentAbstract = null
+    var ra=0xAA88319
+
+  val stopr: ((GameState4P, BMap) => Boolean) = { (x, y) => !((y & (x.tr.void | x.pos.pos0)) == y) }
+  
+
+  def doTronFirst(ref: GameState4P) ={ 
+    
+    val bv = new BotVocabulary(ref)
+    val targraw= bv.firstTronZoneHeuristic 
+    val targSplit= BMap.closeDiag(targraw, bv.void).split
+    Console.err.println("raw front\n"+targraw)
+    
+    if(targSplit.size>0){
+      
+      val mtarg=targSplit.maxBy { x => x.countBitset }
+          
+        val targf= bv.border(mtarg)
+        Console.err.println("f front\n"+targf)
+        
+    
+        if(targf.countBitset > 1){
+          currPlan=null
+          val resp = bv.goToWithVoid(targf)
+          ra=((ra<<3)+13)&0xFFFFFF;
+          ra=(ra*ra) / 7 & 0x98293 + ra
+          Console.err.println(""+ra+" "+resp)
+          def rind= (((ra>>2) % resp.size) & 3)
+          if (resp.size > 0){
+            resp(rind)
+          }  else {
+              4
+          }      
+          
+        }else{
+          doPlan(ref)
+        }       
+        
+        
+    }else{
+      doPlan(ref)
+    }
+  }
+  
+  def doPlan(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+
+    val specialVoid = ref.tr.void | ref.tr.pos0
+    //Console.err.println("specialVoid\n"+specialVoid)
+    val targNoBorder = bv.border(ref.tr.void) & ~BMap.border
+    val targ = if (targNoBorder.isNull) (BMap.border & ref.tr.void) else targNoBorder
+    //Console.err.println("frontier\n"+targ)
+    val resp = bv.goTo(targ)
+
+    if (resp.size > 0) resp(0) else {
+      //Console.err.println("Nowhere to go !\n");
+      val lastChance = bv.goTo(ref.tr.void)
+
+      if (lastChance.size > 0) {
+        lastChance(0)
+      } else
+        4
+
+    }
+
+  }
+
+  var logMove: log = new log
+  override def backMove() {
+    //System.err.println("backing "+logMove);
+    logMove.undo()
+  }
+
+  def genMove(ref: GameState4P) = {
+    logMove.blockControl {
+      doTronFirst(ref)
+
 
     }
 

@@ -34,6 +34,39 @@ class BotVocabulary(val st: GameState4P) {
     }
 
   }
+  
+  def firstTronZoneHeuristic = {
+    var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;
+    var f = st.pos.pos0;
+    var v = st.tr.void
+
+    var firste = BMap.zero;
+    var last = BMap.zero
+
+    if (!e.isNull && !f.isNull ) {
+      while (!(~(f | e)).isNull && !((v^last).isNull)) {
+        e = e.scramble & v
+        f = f.scramble & v
+        
+        
+        
+        last=v
+        v=v & (~e & (~f))
+        firste = firste | (e & f)
+        //Console.err.println(""+v);
+      }
+      if((firste==last)){
+        BMap.zero
+      } else{
+        (firste)
+      }
+      
+    }     
+ else {
+      BMap.full
+    }
+
+  }  
 
   def border(area: BMap) = {
     ((area | st.tr.pos0).border) & (~st.tr.pos0)

@@ -35,7 +35,7 @@ object SimulatorVisu extends SimpleSwingApplication {
     listenTo(mouse.moves)
         listenTo(mouse.clicks)
     reactions += {
-          case e: MouseClicked => { if(e.peer.getButton==3) (model.doBackward()) else model.turn(); repaint();  }
+          case e: MouseClicked => { if(e.peer.getButton==3) (model.doBackward()) else model.turn(); repaint(); Console.err.println(""+model.getState.scores)  }
       case e: MouseDragged => { model.turn(); repaint(); }
     }
 

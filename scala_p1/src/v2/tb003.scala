@@ -42,7 +42,7 @@ class tb003 extends agentAbstract {
 
     //val bmToTry=Array(bv.border( bv.squareInDir(0, 5) ),bv.border( bv.squareInDir(2, 5) ),bv.border( bv.squareInDir(2, 3) )).sortBy { x => -x.countBitset }
 
-    val tmpF0 = for (d <- 0 until 4; s <- 4 to 8) yield {
+    val tmpF0 = for (d <- 0 until 4; s <- 4 to 14) yield {
       (new Tuple2(d, s))
     }
     val bmToTry = (genBmSquare(tmpF0, bv).sortBy { y => -(y.countBitset) }).filter { x => x.countBitset>0 }

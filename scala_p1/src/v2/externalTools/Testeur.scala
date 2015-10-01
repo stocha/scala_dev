@@ -16,7 +16,7 @@ object Testeur extends App {
   def testGS001{
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
-    var game=GameState4P.start(64564544557L)
+    var game=GameState4P.start(64564544557L,4)
     
     val simul = new Simulateur001(r.nextLong(),game)
     System.err.println(""+game);
@@ -32,7 +32,7 @@ object Testeur extends App {
   def testGS002{
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
-    var game=GameState4P.start(64564544557L)
+    var game=GameState4P.start(64564544557L,4)
     
     val simul = new SimulBot(r.nextLong(),game,Array(new stupidAgent))
     System.err.println(""+game);
@@ -48,7 +48,7 @@ object Testeur extends App {
   def bench002{
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
-    var game=GameState4P.start(64564544557L)
+    var game=GameState4P.start(64564544557L,4)
     val simul1 = new Simulateur001(r.nextLong(),game)
     
     for(i<-0 until 4){
@@ -85,7 +85,7 @@ object Testeur extends App {
   def bench001{
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
-    var game=GameState4P.start(64564544557L)
+    var game=GameState4P.start(64564544557L,4)
     val simul = new Simulateur001(r.nextLong(),game)
     
     def nbBoucle=50000;

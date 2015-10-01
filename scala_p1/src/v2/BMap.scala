@@ -1,5 +1,7 @@
 package v2
 
+import scala.reflect.macros.FrontEnds
+
 /**
  * @author Jahan
  */
@@ -128,7 +130,7 @@ object BMap {
     val dl = ((frontier++) & (frontier<<)) & ~(frontier<<+)
     val dr = ((frontier++) & (frontier>>)) & ~(frontier>>+)
 
-    ((ul | ur | dl | dr) & void)
+    ((ul | ur | dl | dr) & void) | frontier
   }
 
   def followTrail(pos: BMap, trail: BMap) = {
@@ -140,7 +142,7 @@ object BMap {
       curr = curr.scramble & trail
     }
 
-    curr
+    curr 
   }
 
   def firstDirToThrough(pos: BMap, goal: BMap, conduction: BMap) = {

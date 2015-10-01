@@ -11,6 +11,8 @@ import v2.test_bv_squareUndo
 import v2.tb002
 import v2.tb003
 import v2.bv_racer
+import v2.oo001
+import v2.bv_tronFrontier
 
 /**
  * @author Jahan
@@ -19,7 +21,7 @@ object SimulatorModel {
   def getModel = {
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
-    var game=GameState4P.start(64564544557L)
+    var game=GameState4P.start(64564544557L,4)
     
     //val simul = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new stupidAgent,new stupidAgent,new stupidAgent))
     
@@ -32,8 +34,13 @@ object SimulatorModel {
     
      val tb003T = new SimulBot(r.nextLong(),game,Array(new tb003,new tb003,new tb003,new tb003))
     
+   //  val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new oo001,new tb003))
+    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new oo001,new bv_racer))
+    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new oo001,new bv_tronFrontier))
+    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new oo001,new bv_racer))
+    
     
     //simul
-    tb003T
+    oo001T
   }
 }

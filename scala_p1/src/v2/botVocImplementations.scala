@@ -298,12 +298,28 @@ class bv_tronRacer extends agentAbstract {
     if(specialVoid.isEmpty){
       4
     }else{
-      val targArea = bv.border( specialVoid.maxBy { x => x.countBitset } )
-      val resp = bv.goTo(targArea)
-  
-      if (resp.size > 0) resp(0) else {
-          4
-      }      
+      
+      val nearVoidL = (ref.pos.pos0.scramble & ref.tr.void).split
+      
+      if(nearVoidL.isEmpty) {
+        val targArea = bv.border( specialVoid.maxBy { x => x.countBitset } )
+        val resp = bv.goTo(targArea)
+    
+        if (resp.size > 0) resp(0) else {
+            4
+        }     
+      }else{
+        val nearVoids = nearVoidL.map { x => BMap.followTrail(x, ref.tr.void) }
+        
+        val targArea = bv.border( nearVoids.maxBy { x => x.countBitset } )
+        val resp = bv.goTo(targArea)
+        
+        if(resp.nonEmpty){
+          resp(0)
+        }else 4
+      }
+      
+ 
     }    
 
   }

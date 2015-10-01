@@ -1507,7 +1507,7 @@ object Player extends App {
 
     var t: Double = (t1 - t0) / 1000
     var tMax: Double = maxT / 1000
-    Console.err.println(" " + t + " nanoseconds " + (t / 1000) + " millisecondes"+"   max is "+tMax);
+    Console.err.println(" " + t + " nanoseconds " + (t / 1000) + " millisecondes"+"   max is "+(tMax/1000));
 
     // Write an action using println
     // To debug: Console.err.println("Debug messages...")
@@ -1635,14 +1635,14 @@ class oo001 extends agentAbstract {
     val bv = new BotVocabulary(ref)
     val targraw= bv.firstTronZoneHeuristic 
     val targSplit= BMap.closeDiag(targraw, bv.void).split
-    Console.err.println("raw front\n"+targraw)
+   // Console.err.println("raw front\n"+targraw)
     
     if(targSplit.size>0){
       
       val mtarg=targSplit.maxBy { x => x.countBitset }
           
         val targf= bv.border(mtarg)
-        Console.err.println("f front\n"+targf)
+        //Console.err.println("f front\n"+targf)
         
     
         if(targf.countBitset > 1){
@@ -1650,7 +1650,7 @@ class oo001 extends agentAbstract {
           val resp = bv.goToWithVoid(targf)
           ra=((ra<<3)+13)&0xFFFFFF;
           ra=(ra*ra) / 7 & 0x98293 + ra
-          Console.err.println(""+ra+" "+resp)
+          //Console.err.println(""+ra+" "+resp)
           def rind= (((ra>>2) % resp.size) & 3)
           if (resp.size > 0){
             resp(rind)

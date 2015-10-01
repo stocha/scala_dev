@@ -216,9 +216,9 @@ class bv_tronFrontier extends agentAbstract {
     val bv = new BotVocabulary(ref)
     
     val targ= bv.firstTronZoneHeuristic
-    Console.err.println("raw front\n"+targ)
+   // Console.err.println("raw front\n"+targ)
     val targf= bv.border(targ)
-    Console.err.println("f front\n"+targf)
+  //  Console.err.println("f front\n"+targf)
     
     
     

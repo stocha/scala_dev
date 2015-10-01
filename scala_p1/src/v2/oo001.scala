@@ -36,14 +36,14 @@ class oo001 extends agentAbstract {
     val bv = new BotVocabulary(ref)
     val targraw= bv.firstTronZoneHeuristic 
     val targSplit= BMap.closeDiag(targraw, bv.void).split
-    Console.err.println("raw front\n"+targraw)
+    //Console.err.println("raw front\n"+targraw)
     
     if(targSplit.size>0){
       
       val mtarg=targSplit.maxBy { x => x.countBitset }
           
         val targf= bv.border(mtarg)
-        Console.err.println("f front\n"+targf)
+        //Console.err.println("f front\n"+targf)
         
     
         if(targf.countBitset > 1){

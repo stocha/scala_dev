@@ -35,35 +35,41 @@ class BotVocabulary(val st: GameState4P) {
 
   }
   
-  def firstTronZoneHeuristic = {
+  def firstTronZoneHeuristic : Tuple2[BMap,BMap] = {
     var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;
     var f = st.pos.pos0;
     var v = st.tr.void
+    
+  //  Console.err.println("start v\n"+v);
+ //   Console.err.println("start e\n"+e);
+  //  Console.err.println("start f\n"+f);
 
     var firste = BMap.zero;
-    var last = BMap.zero
+    var last = BMap.full
 
     if (!e.isNull && !f.isNull ) {
-      while (!(~(f | e)).isNull && !((v^last).isNull)) {
-        e = e.scramble & v
-        f = f.scramble & v
+      while ( !((v^last).isNull)) {
+        e = (e.scramble & v) | e
+        f = (f.scramble & v) | f
         
-        
-        
+    //Console.err.println(" e\n"+e);
+    //Console.err.println(" f\n"+f);        
+        //Console.err.println(" v & ((~e) | (~f))\n"+( v &  ((~e) & (~f))));
         last=v
-        v=v & (~e & (~f))
+        v=(v & ((~e) & (~f)))
+        
+       // Console.err.println(" v\n"+v);   
         firste = firste | (e & f)
-        //Console.err.println(""+v);
+       // Console.err.println("firste\n"+firste);
+       // Console.err.println("vide\n"+v);
       }
-      if((firste==last)){
-        BMap.zero
-      } else{
-        (firste)
+      {
+        (firste ,(e.scramble & f)|(f.scramble & e)&st.tr.void)
       }
       
     }     
  else {
-      BMap.full
+      (BMap.full,BMap.full)
     }
 
   }  

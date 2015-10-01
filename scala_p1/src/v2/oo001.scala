@@ -34,7 +34,7 @@ class oo001 extends agentAbstract {
   def doTronFirst(ref: GameState4P) ={ 
     
     val bv = new BotVocabulary(ref)
-    val targraw= bv.firstTronZoneHeuristic 
+    val targraw= (bv.firstTronZoneHeuristic)._1 
     val targSplit= BMap.closeDiag(targraw, bv.void).split
     //Console.err.println("raw front\n"+targraw)
     
@@ -51,7 +51,7 @@ class oo001 extends agentAbstract {
           val resp = bv.goToWithVoid(targf)
           ra=((ra<<3)+13)&0xFFFFFF;
           ra=(ra*ra) / 7 & 0x98293 + ra
-          Console.err.println(""+ra+" "+resp)
+          //Console.err.println(""+ra+" "+resp)
           def rind= (((ra>>2) % resp.size) & 3)
           if (resp.size > 0){
             resp(rind)

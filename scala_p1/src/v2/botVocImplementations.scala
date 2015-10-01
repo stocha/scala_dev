@@ -189,53 +189,62 @@ class bv_trailStop(var dst: BMap)(stopr: (GameState4P, BMap) => Boolean)(choiceP
   }
 }
 
-class bv_zerg(dest : BMap)  extends agentAbstract {
-  var ra=898;
-  
+class bv_zerg(dest: BMap) extends agentAbstract {
+  var ra = 898;
+
   def genMove(ref: GameState4P) = {
     val bv = new BotVocabulary(ref)
-    
 
     //Console.err.println("frontier\n"+targ)
-    val resp = bv.goTo(dest&ref.tr.void)
-    ra=((ra<<3)+13)&0xFFFFFF;
-    def rind= ((ra % resp.size) & 3)
-    if (resp.size > 0){
+    val resp = bv.goTo(dest & ref.tr.void)
+    ra = ((ra << 3) + 13) & 0xFFFFFF;
+    def rind = ((ra % resp.size) & 3)
+    if (resp.size > 0) {
       resp(rind)
-    }  else {
-        4
+    } else {
+      4
     }
 
   }
 }
 
-class bv_tronFrontier extends agentAbstract {
-  var ra=898;
-  
+class bv_tronFrontierInside extends agentAbstract {
+  var ra = 898;
+
   def genMove(ref: GameState4P) = {
-    val bv = new BotVocabulary(ref)
-    
-    val targ= bv.firstTronZoneHeuristic
-   // Console.err.println("raw front\n"+targ)
-    val targf= bv.border(targ)
-  //  Console.err.println("f front\n"+targf)
-    
-    
-    
-    
-    val resp = bv.goToWithVoid(targf)
-    ra=((ra<<3)+13)&0xFFFFFF;
-    def rind= ((ra % resp.size) & 3)
-    if (resp.size > 0){
-      resp(rind)
-    }  else {
-        4
-    }
 
+    val bv = new BotVocabulary(ref)
+
+    if ((ref.pos.pos0 & ref.tr.pos0).isNull) {
+      val targ = bv.firstTronZoneHeuristic
+      //Console.err.println("raw front when same sq\n"+targ)
+
+      4
+    } else {
+
+      val targ = bv.firstTronZoneHeuristic
+      //Console.err.println("raw front\n"+targ)
+      val targSS = bv.border(targ._1.closeDiag)
+      val targf = if (targSS.isNull) targ._2.closeDiag else targSS
+      //  Console.err.println("f front\n"+targf)
+      val targfsp = targf.split
+      if (targfsp.nonEmpty) {
+        val mtarg = targfsp.maxBy { x => x.countBitset }
+        val resp = bv.goToWithVoid(mtarg)
+        ra = ((ra << 3) + 13) & 0xFFFFFF;
+        def rind = ((ra % resp.size) & 3)
+        if (resp.size > 0) {
+          //   Console.err.println(""+resp);
+          resp(rind)
+        } else {
+          4
+        }
+      } else {
+        4
+      }
+    }
   }
 }
-
-
 
 class bv_racer extends agentAbstract {
   def genMove(ref: GameState4P) = {
@@ -262,74 +271,47 @@ class bv_racer extends agentAbstract {
   }
 }
 
-
-
 class bv_tronRacer extends agentAbstract {
 
   var currPlan: agentAbstract = null
-    var ra=0xAA88319
+  var ra = 0xAA88319
 
-  val stopr: ((GameState4P, BMap) => Boolean) = { (x, y) => !((y & (x.tr.void | x.pos.pos0)) == y) }
+  def doTronFirst(ref: GameState4P) = {
 
-  def plansTrailTry(p: Array[BMap]) = {
-    val sorted = p
-
-    sorted.map { pp => new Tuple2(pp, new bv_trailStop(pp)(stopr)(x => x)) }
-
-  }
-
-  def tryPlansList(p: List[Tuple2[BMap, agentAbstract]], bv: BotVocabulary): Int = {
-    if (p.isEmpty) -1 else {
-      bv.forsee_with(new bv_zerg(p.head._1), p.head._2)((x: GameState4P) => ((p.head._1 & x.tr.pos0) == p.head._1))(p.size)((x: GameState4P) => false)(tryPlansList(p.tail, bv))
-    }
-
-  }
-
-  def genBmSquare(p: Seq[Tuple2[Int, Int]], bv: BotVocabulary) = {
-    for (Tuple2(x, y) <- p) yield {
-      bv.border(bv.squareInDir(x, y) & bv.st.tr.void)
-    }
-  }
-  
-
-  def doTronFirst(ref: GameState4P) ={ 
-    
     val bv = new BotVocabulary(ref)
-    val targraw= bv.firstTronZoneHeuristic 
-    val targSplit= BMap.closeDiag(targraw, bv.void).split
-    Console.err.println("raw front\n"+targraw)
-    
-    if(targSplit.size>0){
-      
-      val mtarg=targSplit.maxBy { x => x.countBitset }
-          
-        val targf= bv.border(mtarg)
-        Console.err.println("f front\n"+targf)
-        
-    
-        if(targf.countBitset > 1){
-          currPlan=null
-          val resp = bv.goToWithVoid(targf)
-          ra=((ra<<3)+13)&0xFFFFFF;
-          ra=(ra*ra) / 7 & 0x98293 + ra
-          Console.err.println(""+ra+" "+resp)
-          def rind= (((ra>>2) % resp.size) & 3)
-          if (resp.size > 0){
-            resp(rind)
-          }  else {
-              4
-          }      
-          
-        }else{
-          doPlan(ref)
-        }       
-        
-        
-    }else{
+    val targraw = bv.firstTronZoneHeuristic
+    val targSplit = BMap.closeDiag(targraw._1, bv.void).split
+    //Console.err.println("raw front\n" + targraw)
+
+    if (targSplit.size > 0) {
+
+      val mtarg = targSplit.maxBy { x => x.countBitset }
+
+      val targf = bv.border(mtarg)
+      // Console.err.println("f front\n" + targf)
+
+      if (targf.countBitset > 1) {
+        currPlan = null
+        val resp = bv.goToWithVoid(targf)
+        ra = ((ra << 3) + 13) & 0xFFFFFF;
+        ra = (ra * ra) / 7 & 0x98293 + ra
+        // Console.err.println("" + ra + " " + resp)
+        def rind = (((ra >> 2) % resp.size) & 3)
+        if (resp.size > 0) {
+          resp(rind)
+        } else {
+          4
+        }
+
+      } else {
+        doPlan(ref)
+      }
+
+    } else {
       doPlan(ref)
     }
   }
-  
+
   def doPlan(ref: GameState4P) = {
     val bv = new BotVocabulary(ref)
 
@@ -362,7 +344,6 @@ class bv_tronRacer extends agentAbstract {
   def genMove(ref: GameState4P) = {
     logMove.blockControl {
       doTronFirst(ref)
-
 
     }
 

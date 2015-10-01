@@ -154,7 +154,7 @@ object BMap {
 
     val conduct = conduction | pos;
 
-    // Console.err.println("begin search to\n"+goal );
+ //    Console.err.println("begin search to\n"+goal );
     while (!(last ^ curr).isNull && res.size == 0) {
       last = curr
       val up = (curr++) & conduct
@@ -177,7 +177,7 @@ object BMap {
       curr = curr | left
       curr = curr | right
 
-      //Console.err.println("curr\n"+curr );
+   //   Console.err.println("curr\n"+curr );
     }
     res
   }
@@ -248,6 +248,18 @@ class BMap(
     extractZones
 
   }
+  
+  def closeDiag = {
+    val frontier=this
+    val void = ~this
+    
+    val ul = ((frontier--) & (frontier<<)) & ~(frontier<<-)
+    val ur = ((frontier--) & (frontier>>)) & ~(frontier>>-)
+    val dl = ((frontier++) & (frontier<<)) & ~(frontier<<+)
+    val dr = ((frontier++) & (frontier>>)) & ~(frontier>>+)
+
+    ((ul | ur | dl | dr) & void) | frontier
+  }  
 
   def border = {
     val ext = this.scramble ^ this;

@@ -34,58 +34,83 @@ class BotVocabulary(val st: GameState4P) {
     }
 
   }
-  
-  def firstTronZoneHeuristic : Tuple3[BMap,BMap,Int] = {
+
+  def extractTronZone = {
+    val front = firstTronZoneHeuristic._1 | firstTronZoneHeuristic._2
+    val res = BMap.followTrail(st.pos.pos0, ~front)
+    res
+  }
+
+  def shadows = {
+    def exts(m : BMap) = {
+      for(b <- List(0,1,2,3)) yield{
+        m.shadow(void, b)
+      }          
+      
+    }
+    
+    st.tr.asList.map { x => exts(x) }
+    
+  }
+
+  def extractAllZone = {
+    List(extractTronZone,
+        (new BotVocabulary(st.swap(1))).extractTronZone,
+        (new BotVocabulary(st.swap(2))).extractTronZone,
+        (new BotVocabulary(st.swap(3))).extractTronZone).filter { x => !x.isNull }
+
+  }
+
+  def firstTronZoneHeuristic: Tuple3[BMap, BMap, Int] = {
     var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;
     var f = st.pos.pos0;
     var v = st.tr.void
-    
-    var dist=0
-    var countIt=0
-    
+
+    var dist = 0
+    var countIt = 0
+
     def collide = {
-      ((!(e&f).isNull)) || ( ! (e.scramble&f).isNull  )
+      ((!(e & f).isNull)) || (!(e.scramble & f).isNull)
     }
-    
-  //  Console.err.println("start v\n"+v);
- //   Console.err.println("start e\n"+e);
-  //  Console.err.println("start f\n"+f);
+
+    //  Console.err.println("start v\n"+v);
+    //   Console.err.println("start e\n"+e);
+    //  Console.err.println("start f\n"+f);
 
     var firste = BMap.zero;
     var last = BMap.full
 
-    if (!e.isNull && !f.isNull ) {
-      while ( !((v^last).isNull)) {
+    if (!e.isNull && !f.isNull) {
+      while (!((v ^ last).isNull)) {
         e = (e.scramble & v) | e
         f = (f.scramble & v) | f
-        
-    //Console.err.println(" e\n"+e);
-    //Console.err.println(" f\n"+f);        
+
+        //Console.err.println(" e\n"+e);
+        //Console.err.println(" f\n"+f);        
         //Console.err.println(" v & ((~e) | (~f))\n"+( v &  ((~e) & (~f))));
-        last=v
-        v=(v & ((~e) & (~f)))
-        
-       // Console.err.println(" v\n"+v);   
+        last = v
+        v = (v & ((~e) & (~f)))
+
+        // Console.err.println(" v\n"+v);   
         firste = firste | (e & f)
-       // Console.err.println("firste\n"+firste);
-       // Console.err.println("vide\n"+v);
-        
-        if(dist==0 && collide){
-          dist=countIt
+        // Console.err.println("firste\n"+firste);
+        // Console.err.println("vide\n"+v);
+
+        if (dist == 0 && collide) {
+          dist = countIt
         }
-        
-        countIt=countIt+1
+
+        countIt = countIt + 1
       }
       {
-        (firste ,(e.scramble & f)|(f.scramble & e)&st.tr.void,dist)
+        (firste, (e.scramble & f) | (f.scramble & e) & st.tr.void, dist)
       }
-      
-    }     
- else {
-      (BMap.full,BMap.full,0)
+
+    } else {
+      (BMap.full, BMap.full, 0)
     }
 
-  }  
+  }
 
   def border(area: BMap) = {
     ((area | st.tr.pos0).border) & (~st.tr.pos0)
@@ -143,7 +168,7 @@ class BotVocabulary(val st: GameState4P) {
     r
   }
 
-  def squareInDir(dir: Int, sz: Int) ={
+  def squareInDir(dir: Int, sz: Int) = {
     def squareInDirRec(start: BMap, dir: Int, sz: Int): BMap = {
 
       if (sz == 0) start else {
@@ -182,33 +207,32 @@ class BotVocabulary(val st: GameState4P) {
     sim.getState
   }
 
-  def forsee_with(w: agentAbstract, plan: agentAbstract)(success: GameState4P => Boolean)(whenSuccess: => Int)(fail: GameState4P => Boolean)(whenFail: => Int)= {
+  def forsee_with(w: agentAbstract, plan: agentAbstract)(success: GameState4P => Boolean)(whenSuccess: => Int)(fail: GameState4P => Boolean)(whenFail: => Int) = {
     val zerg = w
     val sim = new SimulBot(0, st, Array(plan, zerg, zerg, zerg))
     var dir = 0
-    
-    var retval= -1;
-    var break=false;
+
+    var retval = -1;
+    var break = false;
 
     while (GameState4P.m(dir)(0) != 4 && !break) {
       dir = sim.turn()
-      
-      val state=sim.getState
-      
-      if(success(state)){
+
+      val state = sim.getState
+
+      if (success(state)) {
         retval = whenSuccess
-        break=true
-      }else{
-        if(fail(state)){
+        break = true
+      } else {
+        if (fail(state)) {
           retval = whenFail
-          break=true
+          break = true
         }
-        
-      }      
+
+      }
     }
     //Console.err.println(""+sim.getState);
-    if(break) retval else whenFail
-
+    if (break) retval else whenFail
 
   }
 

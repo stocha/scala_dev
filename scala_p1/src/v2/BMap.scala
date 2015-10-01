@@ -432,7 +432,7 @@ class BMap(
   }
 
   override def toString() = {
-    var res = "";
+    var res = "\n";
 
     for (i <- 0 until 20) {
       res += l_toString(i);
@@ -634,20 +634,79 @@ class BMap(
 
     ~last
   }
+  
+  def shadow(v : BMap, dir : Int)={
+    
+   // System.err.println("shad\n"+this+" \n"+v);
+    def doCalc(op : BMap => BMap)={
+            
+      var last = this
+      var curr = (op(this)) & v;
 
-  def closestPointHere(from: BMap) = {
+      
+      
+      while ((!(last ^ curr).isNull) && (curr & ~v).isNull) {
+
+          
+        last = curr
+        curr = (op(curr) |curr)
+            //    System.err.println("last\n"+last+" \n"+curr+" currNV\n"+(curr & v)+" curXorLast\n "+(last ^ curr));
+      }
+  
+      last    
+      
+    }
+    
+    dir match {
+      case 0 => doCalc( x => x-- )
+      case 1 => doCalc( x => x>> )
+      case 2 => doCalc( x => x++ )
+      case 3 => doCalc( x => x<< )
+      
+      
+    }
+    
+    
+  }
+
+  def closestPointHere(from: BMap) : Tuple2[Int,BMap] = {
     var dist = 0;
     var curr = from;
+    //Console.err.println("curr\n"+curr+" \n"+dist);
 
-    val thisNotNull = !this.isNull && !from.isNull
+    val thisNotNull = (!this.isNull) && (!from.isNull)
     while (((curr & this).isNull) & (thisNotNull)) {
       curr = curr | curr.scramble
       dist = dist + 1
-      // Console.err.println("curr\n"+curr);
+      // Console.err.println("curr\n"+curr+" \n"+dist);
     }
 
     new Tuple2(dist, curr & this)
   }
+  
+    def scaleToSize(v : BMap, sz : Int) : BMap={
+      
+      val b = this
+      def up (it : BMap) : BMap ={
+        if(it.countBitset >= sz) it else{
+          val sc=it.scramble & v
+          if(sc==it) sc else
+            up(sc)
+          
+        }
+      }
+      
+      def down (it : BMap ) : BMap ={
+        if(it.countBitset < sz) it else{
+          val sc=it & ((~it).scramble)
+          if(sc==it) sc else
+          down(sc)
+          
+        }
+      }      
+      
+      if(b.countBitset <= sz) up(b) else up(down(b)) 
+    }
 
 }
 

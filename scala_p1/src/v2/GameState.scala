@@ -219,6 +219,11 @@ class GameVect4P(
     val code = (pos0(i)(j)) + (pos1(i)(j) << 1) + (pos2(i)(j) << 2) + (pos3(i)(j) << 3)
     code
   }
+  
+  def asList={
+    List(pos0,pos1,pos2,pos3)
+    
+  }
 
   def apply(i: Int) = {
     i match {

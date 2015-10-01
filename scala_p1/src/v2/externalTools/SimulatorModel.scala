@@ -17,6 +17,7 @@ import v2.bv_tronRacer
 import v2.bv_tronFrontierInside
 import v2.bv_tronFrontierInside
 import v2.bv_tronRacer
+import v2.oo002
 
 /**
  * @author Jahan
@@ -25,7 +26,8 @@ object SimulatorModel {
   def getModel = {
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
-    var game=GameState4P.start(64564544557L,4)
+    val size=4;
+    var game=GameState4P.start(64564544557L,size)
     
     //val simul = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new stupidAgent,new stupidAgent,new stupidAgent))
     
@@ -44,7 +46,9 @@ object SimulatorModel {
    // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronRacer,new bv_racer))
    // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new stupidAgent,new bv_tronRacer))
   //  val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronRacer,new tb001))
-    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronRacer,new tb003))
+   // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronRacer,new tb003))
+    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo002(size),new tb003,new tb003,new tb003))
+   // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo002(size),new tb003))
     
     
     //simul

@@ -275,63 +275,35 @@ class bv_tronRacer extends agentAbstract {
 
   var currPlan: agentAbstract = null
   var ra = 0xAA88319
+  
+  val tronIn = new bv_tronFrontierInside
 
   def doTronFirst(ref: GameState4P) = {
-
-    val bv = new BotVocabulary(ref)
-    val targraw = bv.firstTronZoneHeuristic
-    val targSplit = BMap.closeDiag(targraw._1, bv.void).split
-    //Console.err.println("raw front\n" + targraw)
-
-    if (targSplit.size > 0) {
-
-      val mtarg = targSplit.maxBy { x => x.countBitset }
-
-      val targf = bv.border(mtarg)
-      // Console.err.println("f front\n" + targf)
-
-      if (targf.countBitset > 1) {
-        currPlan = null
-        val resp = bv.goToWithVoid(targf)
-        ra = ((ra << 3) + 13) & 0xFFFFFF;
-        ra = (ra * ra) / 7 & 0x98293 + ra
-        // Console.err.println("" + ra + " " + resp)
-        def rind = (((ra >> 2) % resp.size) & 3)
-        if (resp.size > 0) {
-          resp(rind)
-        } else {
-          4
-        }
-
-      } else {
-        doPlan(ref)
-      }
-
-    } else {
-      doPlan(ref)
+    
+    val m=tronIn.genMove(ref)
+    
+    if(m==4 && ((ref.pos.pos0 & ref.tr.void).isNull)){
+        doPlan(ref)      
+    }
+    else{
+      m
     }
   }
 
   def doPlan(ref: GameState4P) = {
     val bv = new BotVocabulary(ref)
 
-    val specialVoid = ref.tr.void | ref.tr.pos0
-    //Console.err.println("specialVoid\n"+specialVoid)
-    val targNoBorder = bv.border(ref.tr.void) & ~BMap.border
-    val targ = if (targNoBorder.isNull) (BMap.border & ref.tr.void) else targNoBorder
-    //Console.err.println("frontier\n"+targ)
-    val resp = bv.goTo(targ)
-
-    if (resp.size > 0) resp(0) else {
-      //Console.err.println("Nowhere to go !\n");
-      val lastChance = bv.goTo(ref.tr.void)
-
-      if (lastChance.size > 0) {
-        lastChance(0)
-      } else
-        4
-
-    }
+    val specialVoid = (ref.tr.void | ref.tr.pos0 ).split
+    if(specialVoid.isEmpty){
+      4
+    }else{
+      val targArea = bv.border( specialVoid.maxBy { x => x.countBitset } )
+      val resp = bv.goTo(targArea)
+  
+      if (resp.size > 0) resp(0) else {
+          4
+      }      
+    }    
 
   }
 

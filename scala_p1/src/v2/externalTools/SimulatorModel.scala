@@ -15,6 +15,8 @@ import v2.oo001
 import v2.bv_tronFrontierInside
 import v2.bv_tronRacer
 import v2.bv_tronFrontierInside
+import v2.bv_tronFrontierInside
+import v2.bv_tronRacer
 
 /**
  * @author Jahan
@@ -38,9 +40,10 @@ object SimulatorModel {
     
    //  val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new oo001,new tb003))
     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new oo001,new bv_racer))
-    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new oo001,new bv_tronFrontier))
-    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new oo001,new bv_racer))
-    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronFrontierInside,new bv_tronRacer))
+    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new oo001,new bv_tronFrontierInside))
+   // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronRacer,new bv_racer))
+   // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new stupidAgent,new bv_tronRacer))
+    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronRacer,new tb001))
     
     
     //simul

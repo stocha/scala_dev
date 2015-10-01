@@ -1,6 +1,5 @@
 package other.v2
 
-import v2.bv_tronRacer
 
 
 object BMap {

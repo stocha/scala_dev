@@ -232,7 +232,7 @@ class bv_tronFrontierInside extends agentAbstract {
         ra = ((ra << 3) + 13) & 0xFFFFFF;
         def rind = ((ra % resp.size) & 3)
         if (resp.size > 0 && targ._3<11) {
-             Console.err.println("Tron dist "+targ._3);
+          //   Console.err.println("Tron dist "+targ._3);
           resp(rind)
         } else {
           4

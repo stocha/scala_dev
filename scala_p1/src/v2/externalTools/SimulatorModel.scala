@@ -43,7 +43,8 @@ object SimulatorModel {
     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new oo001,new bv_tronFrontierInside))
    // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronRacer,new bv_racer))
    // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new stupidAgent,new bv_tronRacer))
-    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronRacer,new tb001))
+  //  val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronRacer,new tb001))
+    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,2),Array(new bv_tronRacer,new tb003))
     
     
     //simul

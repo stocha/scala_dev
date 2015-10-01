@@ -1,5 +1,8 @@
 package other.v2
 
+import v2.bv_tronRacer
+
+
 object BMap {
 
   val zero = {
@@ -124,7 +127,7 @@ object BMap {
     val dl = ((frontier++) & (frontier<<)) & ~(frontier<<+)
     val dr = ((frontier++) & (frontier>>)) & ~(frontier>>+)
 
-    ((ul | ur | dl | dr) & void)
+    ((ul | ur | dl | dr) & void) | frontier
   }
 
   def followTrail(pos: BMap, trail: BMap) = {
@@ -136,7 +139,7 @@ object BMap {
       curr = curr.scramble & trail
     }
 
-    curr
+    curr 
   }
 
   def firstDirToThrough(pos: BMap, goal: BMap, conduction: BMap) = {
@@ -148,7 +151,7 @@ object BMap {
 
     val conduct = conduction | pos;
 
-    // Console.err.println("begin search to\n"+goal );
+ //    Console.err.println("begin search to\n"+goal );
     while (!(last ^ curr).isNull && res.size == 0) {
       last = curr
       val up = (curr++) & conduct
@@ -171,7 +174,7 @@ object BMap {
       curr = curr | left
       curr = curr | right
 
-      //Console.err.println("curr\n"+curr );
+   //   Console.err.println("curr\n"+curr );
     }
     res
   }
@@ -242,6 +245,18 @@ class BMap(
     extractZones
 
   }
+  
+  def closeDiag = {
+    val frontier=this
+    val void = ~this
+    
+    val ul = ((frontier--) & (frontier<<)) & ~(frontier<<-)
+    val ur = ((frontier--) & (frontier>>)) & ~(frontier>>-)
+    val dl = ((frontier++) & (frontier<<)) & ~(frontier<<+)
+    val dr = ((frontier++) & (frontier>>)) & ~(frontier>>+)
+
+    ((ul | ur | dl | dr) & void) | frontier
+  }  
 
   def border = {
     val ext = this.scramble ^ this;
@@ -664,35 +679,54 @@ class BotVocabulary(val st: GameState4P) {
 
   }
   
-  def firstTronZoneHeuristic = {
+  def firstTronZoneHeuristic : Tuple3[BMap,BMap,Int] = {
     var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;
     var f = st.pos.pos0;
     var v = st.tr.void
+    
+    var dist=0
+    var countIt=0
+    
+    def collide = {
+      ((!(e&f).isNull)) || ( ! (e.scramble&f).isNull  )
+    }
+    
+  //  Console.err.println("start v\n"+v);
+ //   Console.err.println("start e\n"+e);
+  //  Console.err.println("start f\n"+f);
 
     var firste = BMap.zero;
-    var last = BMap.zero
+    var last = BMap.full
 
     if (!e.isNull && !f.isNull ) {
-      while (!(~(f | e)).isNull && !((v^last).isNull)) {
-        e = e.scramble & v
-        f = f.scramble & v
+      while ( !((v^last).isNull)) {
+        e = (e.scramble & v) | e
+        f = (f.scramble & v) | f
         
-        
-        
+    //Console.err.println(" e\n"+e);
+    //Console.err.println(" f\n"+f);        
+        //Console.err.println(" v & ((~e) | (~f))\n"+( v &  ((~e) & (~f))));
         last=v
-        v=v & (~e & (~f))
+        v=(v & ((~e) & (~f)))
+        
+       // Console.err.println(" v\n"+v);   
         firste = firste | (e & f)
-        //Console.err.println(""+v);
+       // Console.err.println("firste\n"+firste);
+       // Console.err.println("vide\n"+v);
+        
+        if(dist==0 && collide){
+          dist=countIt
+        }
+        
+        countIt=countIt+1
       }
-      if((firste==last)){
-        BMap.zero
-      } else{
-        (firste)
+      {
+        (firste ,(e.scramble & f)|(f.scramble & e)&st.tr.void,dist)
       }
       
     }     
  else {
-      BMap.full
+      (BMap.full,BMap.full,0)
     }
 
   }  
@@ -823,177 +857,169 @@ class BotVocabulary(val st: GameState4P) {
   }
 
 }
-class log{
-  private var donel : List[Int] = List()
-  private var undol : List[Int] = List()
-  private var t=0
-  
-  override def toString={
-    var res =""
-    res =  res + t+"  "+donel+"   /    "+undol
-    
+
+
+class log {
+  private var donel: List[Int] = List()
+  private var undol: List[Int] = List()
+  private var t = 0
+
+  override def toString = {
+    var res = ""
+    res = res + t + "  " + donel + "   /    " + undol
+
     res
   }
-  
-  private def stack(v : Int){
+
+  private def stack(v: Int) {
     donel = v :: donel
-    t=  t+1
+    t = t + 1
   }
-  
+
   private def canReplay = {
     !undol.isEmpty
   }
-  
-  def hasStarted ={
-    t>=0
+
+  def hasStarted = {
+    t >= 0
   }
-  
-  def undo(){
-    if(t>0){
-    
-      undol= donel.head::undol
+
+  def undo() {
+    if (t > 0) {
+
+      undol = donel.head :: undol
       donel = donel.tail
     }
-    t=t-1
+    t = t - 1
   }
-  
-  private def popRedo()={
-    t=t+1
+
+  private def popRedo() = {
+    t = t + 1
     val r = undol.head;
-    donel = undol.head::donel
+    donel = undol.head :: donel
     undol = undol.tail
     r
   }
-  
-  private def inc(){
-    System.err.println("incing "+t+" to "+(t+1));
-    t=t+1
-  }
-  
-  def blockControl(todo : =>Int ) : Int ={
-      if(hasStarted && canReplay){
-        popRedo()
-      }else if(!hasStarted){
-        inc()
-        4
-      }else
-      {
-       val r= todo
-       stack(r)
-       r
-      }    
-    
 
+  private def inc() {
+    System.err.println("incing " + t + " to " + (t + 1));
+    t = t + 1
   }
-  
-  def discard(){
-    undol=Nil
-  }
-  
-  
-  
-}
 
-class botVocTest extends agentAbstract{
-  
-    def genMove (ref : GameState4P) ={
-      val bv = new BotVocabulary(ref)
-      
-      val currz=bv.currZones
-      if(currz.size==1){
-        System.err.println("currz\n"+currz);
-        
-        System.err.println("me\n"+bv.me);
-        
-        val dir =bv.goTo(currz(0))
-        System.err.println("dir\n"+dir);
-        dir(0)
-        
-        
-      }else{
-        4
-      }
-
+  def blockControl(todo: => Int): Int = {
+    if (hasStarted && canReplay) {
+      popRedo()
+    } else if (!hasStarted) {
+      inc()
+      4
+    } else {
+      val r = todo
+      stack(r)
+      r
     }
-  
+
+  }
+
+  def discard() {
+    undol = Nil
+  }
+
 }
 
-class test_bv_squareUndo(dir_min45 : Int, halfRad : Int , direct : Boolean) extends agentAbstract{
-  
-    var b =new test_bv_square(dir_min45,halfRad,direct)
-  
-    var logMove : log = new log
-    override def backMove(){
-      System.err.println("backing "+logMove);
-      logMove.undo()
+class botVocTest extends agentAbstract {
+
+  def genMove(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+
+    val currz = bv.currZones
+    if (currz.size == 1) {
+      System.err.println("currz\n" + currz);
+
+      System.err.println("me\n" + bv.me);
+
+      val dir = bv.goTo(currz(0))
+      System.err.println("dir\n" + dir);
+      dir(0)
+
+    } else {
+      4
     }
-    
-      def genMove (ref : GameState4P) ={
-        logMove.blockControl{
-          b.genMove(ref)
-          
-        }
-      
-      }
-  
+
+  }
+
 }
 
-class test_bv_square(dir_min45 : Int, halfRad : Int , direct : Boolean) extends agentAbstract{
-  
-  var b : bv_followTrail = null
-  
-  def genMove (ref : GameState4P) ={
-      val bv = new BotVocabulary(ref)
-      
-      val fundir = if((!direct & halfRad!=0) | (direct & halfRad==0)){
-         (x : Int) =>  x 
-      }else
-      {
-        (x : Int) => 4- x
-      }
-      
-      def op(b: BMap, nb : Int) : BMap ={
-        if(nb==0) b else
-        {
-        
-          val r=dir_min45 match{
-            case 0 => b.scrUL
-            case 1 => b.scrUR
-            case 2 => b.scrDR
-            case 3 => b.scrDL
-          }
-          op(r,nb-1)
-        }        
-      }
-      
-      if(b==null){
-        b = new bv_followTrail((op ( bv.me,halfRad)   ).border)(
-          fundir
-        )
-      }
+class test_bv_squareUndo(dir_min45: Int, halfRad: Int, direct: Boolean) extends agentAbstract {
+
+  var b = new test_bv_square(dir_min45, halfRad, direct)
+
+  var logMove: log = new log
+  override def backMove() {
+    System.err.println("backing " + logMove);
+    logMove.undo()
+  }
+
+  def genMove(ref: GameState4P) = {
+    logMove.blockControl {
       b.genMove(ref)
 
-    }    
-  
+    }
+
+  }
+
 }
 
+class test_bv_square(dir_min45: Int, halfRad: Int, direct: Boolean) extends agentAbstract {
 
-class bv_followTrail(var  dst :BMap ) ( choicePriority : (Int)=>Int)
-extends agentAbstract{
-    var countMove=0
+  var b: bv_followTrail = null
 
-  
-    def genMove (ref : GameState4P) ={
-      
-      //System.err.println(""+dst);
-      dst=dst&ref.tr.void
-        val bv = new BotVocabulary(ref)      
-        dst= dst & (~bv.me)      
-        val dir =bv.goTo(dst)
-        val r=if(dir.size>=1) dir.maxBy(choicePriority) else 4        
-        r      
-      
-    }          
+  def genMove(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+
+    val fundir = if ((!direct & halfRad != 0) | (direct & halfRad == 0)) {
+      (x: Int) => x
+    } else {
+      (x: Int) => 4 - x
+    }
+
+    def op(b: BMap, nb: Int): BMap = {
+      if (nb == 0) b else {
+
+        val r = dir_min45 match {
+          case 0 => b.scrUL
+          case 1 => b.scrUR
+          case 2 => b.scrDR
+          case 3 => b.scrDL
+        }
+        op(r, nb - 1)
+      }
+    }
+
+    if (b == null) {
+      b = new bv_followTrail((op(bv.me, halfRad)).border)(
+        fundir)
+    }
+    b.genMove(ref)
+
+  }
+
+}
+
+class bv_followTrail(var dst: BMap)(choicePriority: (Int) => Int)
+    extends agentAbstract {
+  var countMove = 0
+
+  def genMove(ref: GameState4P) = {
+
+    //System.err.println(""+dst);
+    dst = dst & ref.tr.void
+    val bv = new BotVocabulary(ref)
+    dst = dst & (~bv.me)
+    val dir = bv.goTo(dst)
+    val r = if (dir.size >= 1) dir.maxBy(choicePriority) else 4
+    r
+
+  }
 }
 
 class bv_trailStop(var dst: BMap)(stopr: (GameState4P, BMap) => Boolean)(choicePriority: (Int) => Int = (x => x))
@@ -1018,29 +1044,151 @@ class bv_trailStop(var dst: BMap)(stopr: (GameState4P, BMap) => Boolean)(choiceP
   }
 }
 
-class bv_racer extends agentAbstract{
-    def genMove (ref : GameState4P) ={
-       val bv = new BotVocabulary(ref)     
-      
-      val specialVoid=ref.tr.void|ref.tr.pos0
-      //Console.err.println("specialVoid\n"+specialVoid)
-      val targNoBorder= bv.border( ref.tr.void) & ~BMap.border
-      val targ=if(targNoBorder.isNull) (BMap.border & ref.tr.void) else targNoBorder
-      //Console.err.println("frontier\n"+targ)
-      val resp=bv.goTo(targ)
-      
-      if(resp.size>0) resp(0) else {
-        //Console.err.println("Nowhere to go !\n");
-        val lastChance = bv.goTo(ref.tr.void)
-        
-        if(lastChance.size>0){
-          lastChance(0)
-        }else
+class bv_zerg(dest: BMap) extends agentAbstract {
+  var ra = 898;
+
+  def genMove(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+
+    //Console.err.println("frontier\n"+targ)
+    val resp = bv.goTo(dest & ref.tr.void)
+    ra = ((ra << 3) + 13) & 0xFFFFFF;
+    def rind = ((ra % resp.size) & 3)
+    if (resp.size > 0) {
+      resp(rind)
+    } else {
+      4
+    }
+
+  }
+}
+
+class bv_tronFrontierInside extends agentAbstract {
+  var ra = 898;
+
+  def genMove(ref: GameState4P) = {
+
+    val bv = new BotVocabulary(ref)
+
+    if ((ref.pos.pos0 & ref.tr.pos0).isNull) {
+      4
+    } else {
+
+      val targ = bv.firstTronZoneHeuristic
+      //Console.err.println("raw front\n"+targ)
+      val targSS = bv.border(targ._1.closeDiag)
+      val targf = if (targSS.isNull) targ._2.closeDiag else targSS
+      //  Console.err.println("f front\n"+targf)
+     // val targfsp = targf.split
+      //if (targfsp.nonEmpty) {
+        //val mtarg = targfsp.maxBy { x => x.countBitset }
+        val mtarg=targf
+        val resp = bv.goToWithVoid(mtarg)
+        ra = ((ra << 3) + 13) & 0xFFFFFF;
+        def rind = ((ra % resp.size) & 3)
+        if (resp.size > 0 && targ._3<11) {
+           //  Console.err.println("Tron dist "+targ._3);
+          resp(rind)
+        } else {
           4
+        }
+    //  } else {
+       // 4
+     // }
+    }
+  }
+}
+
+class bv_racer extends agentAbstract {
+  def genMove(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+
+    val specialVoid = ref.tr.void | ref.tr.pos0
+    //Console.err.println("specialVoid\n"+specialVoid)
+    val targNoBorder = bv.border(ref.tr.void) & ~BMap.border
+    val targ = if (targNoBorder.isNull) (BMap.border & ref.tr.void) else targNoBorder
+    //Console.err.println("frontier\n"+targ)
+    val resp = bv.goTo(targ)
+
+    if (resp.size > 0) resp(0) else {
+      //Console.err.println("Nowhere to go !\n");
+      val lastChance = bv.goTo(ref.tr.void)
+
+      if (lastChance.size > 0) {
+        lastChance(0)
+      } else
+        4
+
+    }
+
+  }
+}
+
+class bv_tronRacer extends agentAbstract {
+
+  var currPlan: agentAbstract = null
+  var ra = 0xAA88319
+  
+  val tronIn = new bv_tronFrontierInside
+
+  def doTronFirst(ref: GameState4P) = {
+    
+    val m=tronIn.genMove(ref)
+    
+    if(m==4 && ((ref.pos.pos0 & ref.tr.void).isNull)){
+        doPlan(ref)      
+    }
+    else{
+      m
+    }
+  }
+
+  def doPlan(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+
+    val specialVoid = (ref.tr.void | ref.tr.pos0 ).split
+    if(specialVoid.isEmpty){
+      4
+    }else{
+      
+      val nearVoidL = (ref.pos.pos0.scramble & ref.tr.void).split
+      
+      if(nearVoidL.isEmpty) {
+        val targArea = bv.border( specialVoid.maxBy { x => x.countBitset } )
+        val resp = bv.goTo(targArea)
+    
+        if (resp.size > 0) resp(0) else {
+            4
+        }     
+      }else{
+        val nearVoids = nearVoidL.map { x => BMap.followTrail(x, ref.tr.void) }
         
+        val targArea = bv.border( nearVoids.maxBy { x => x.countBitset } )
+        val resp = bv.goTo(targArea)
+        
+        if(resp.nonEmpty){
+          resp(0)
+        }else 4
       }
       
-    }   
+ 
+    }    
+
+  }
+
+  var logMove: log = new log
+  override def backMove() {
+    //System.err.println("backing "+logMove);
+    logMove.undo()
+  }
+
+  def genMove(ref: GameState4P) = {
+    logMove.blockControl {
+      doTronFirst(ref)
+
+    }
+
+  }
 }
 
 
@@ -1453,7 +1601,7 @@ object Player extends App {
 
   val opponentcount = readInt // Opponent count
 
-  val bot2 = new oo001
+  val bot2 = new bv_tronRacer
   val other = new tb003
   
   val bot = if(opponentcount==1) bot2 else other
@@ -1535,7 +1683,7 @@ class tb003 extends agentAbstract {
 
   def tryPlansList(p: List[Tuple2[BMap, agentAbstract]], bv: BotVocabulary): Int = {
     if (p.isEmpty) -1 else {
-      bv.forsee_with(new oo001, p.head._2)((x: GameState4P) => ((p.head._1 & x.tr.pos0) == p.head._1))(p.size)((x: GameState4P) => false)(tryPlansList(p.tail, bv))
+      bv.forsee_with(new bv_tronRacer, p.head._2)((x: GameState4P) => ((p.head._1 & x.tr.pos0) == p.head._1))(p.size)((x: GameState4P) => false)(tryPlansList(p.tail, bv))
     }
 
   }
@@ -1555,7 +1703,7 @@ class tb003 extends agentAbstract {
 
     //val bmToTry=Array(bv.border( bv.squareInDir(0, 5) ),bv.border( bv.squareInDir(2, 5) ),bv.border( bv.squareInDir(2, 3) )).sortBy { x => -x.countBitset }
 
-    val tmpF0 = for (d <- 0 until 4; s <- 4 to 8) yield {
+    val tmpF0 = for (d <- 0 until 4; s <- 4 to 9) yield {
       (new Tuple2(d, s))
     }
     val bmToTry = (genBmSquare(tmpF0, bv).sortBy { y => -(y.countBitset) }).filter { x => x.countBitset>0 }
@@ -1615,92 +1763,6 @@ class tb003 extends agentAbstract {
 
         }
       }
-
-    }
-
-  }
-
-}
-
-class oo001 extends agentAbstract {
-
-  var currPlan: agentAbstract = null
-    var ra=0xAA88319
-
-  val stopr: ((GameState4P, BMap) => Boolean) = { (x, y) => !((y & (x.tr.void | x.pos.pos0)) == y) }
-  
-
-  def doTronFirst(ref: GameState4P) ={ 
-    
-    val bv = new BotVocabulary(ref)
-    val targraw= bv.firstTronZoneHeuristic 
-    val targSplit= BMap.closeDiag(targraw, bv.void).split
-   // Console.err.println("raw front\n"+targraw)
-    
-    if(targSplit.size>0){
-      
-      val mtarg=targSplit.maxBy { x => x.countBitset }
-          
-        val targf= bv.border(mtarg)
-        //Console.err.println("f front\n"+targf)
-        
-    
-        if(targf.countBitset > 1){
-          currPlan=null
-          val resp = bv.goToWithVoid(targf)
-          ra=((ra<<3)+13)&0xFFFFFF;
-          ra=(ra*ra) / 7 & 0x98293 + ra
-          //Console.err.println(""+ra+" "+resp)
-          def rind= (((ra>>2) % resp.size) & 3)
-          if (resp.size > 0){
-            resp(rind)
-          }  else {
-              4
-          }      
-          
-        }else{
-          doPlan(ref)
-        }       
-        
-        
-    }else{
-      doPlan(ref)
-    }
-  }
-  
-  def doPlan(ref: GameState4P) = {
-    val bv = new BotVocabulary(ref)
-
-    val specialVoid = ref.tr.void | ref.tr.pos0
-    //Console.err.println("specialVoid\n"+specialVoid)
-    val targNoBorder = bv.border(ref.tr.void) & ~BMap.border
-    val targ = if (targNoBorder.isNull) (BMap.border & ref.tr.void) else targNoBorder
-    //Console.err.println("frontier\n"+targ)
-    val resp = bv.goTo(targ)
-
-    if (resp.size > 0) resp(0) else {
-      //Console.err.println("Nowhere to go !\n");
-      val lastChance = bv.goTo(ref.tr.void)
-
-      if (lastChance.size > 0) {
-        lastChance(0)
-      } else
-        4
-
-    }
-
-  }
-
-  var logMove: log = new log
-  override def backMove() {
-    //System.err.println("backing "+logMove);
-    logMove.undo()
-  }
-
-  def genMove(ref: GameState4P) = {
-    logMove.blockControl {
-      doTronFirst(ref)
-
 
     }
 

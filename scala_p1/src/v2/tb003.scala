@@ -22,7 +22,7 @@ class tb003 extends agentAbstract {
 
   def tryPlansList(p: List[Tuple2[BMap, agentAbstract]], bv: BotVocabulary): Int = {
     if (p.isEmpty) -1 else {
-      bv.forsee_with(new bv_tronFrontierInside, p.head._2)((x: GameState4P) => ((p.head._1 & x.tr.pos0) == p.head._1))(p.size)((x: GameState4P) => false)(tryPlansList(p.tail, bv))
+      bv.forsee_with(new bv_tronRacer, p.head._2)((x: GameState4P) => ((p.head._1 & x.tr.pos0) == p.head._1))(p.size)((x: GameState4P) => false)(tryPlansList(p.tail, bv))
     }
 
   }

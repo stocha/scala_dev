@@ -227,9 +227,10 @@ class bv_tronFrontierInside extends agentAbstract {
       val targSS = bv.border(targ._1.closeDiag)
       val targf = if (targSS.isNull) targ._2.closeDiag else targSS
       //  Console.err.println("f front\n"+targf)
-      val targfsp = targf.split
-      if (targfsp.nonEmpty) {
-        val mtarg = targfsp.maxBy { x => x.countBitset }
+     // val targfsp = targf.split
+      //if (targfsp.nonEmpty) {
+        //val mtarg = targfsp.maxBy { x => x.countBitset }
+        val mtarg=targf
         val resp = bv.goToWithVoid(mtarg)
         ra = ((ra << 3) + 13) & 0xFFFFFF;
         def rind = ((ra % resp.size) & 3)
@@ -239,9 +240,9 @@ class bv_tronFrontierInside extends agentAbstract {
         } else {
           4
         }
-      } else {
-        4
-      }
+    //  } else {
+       // 4
+     // }
     }
   }
 }

@@ -1,7 +1,6 @@
 package other.v2
 
 
-
 object BMap {
 
   val zero = {
@@ -428,7 +427,7 @@ class BMap(
   }
 
   override def toString() = {
-    var res = "";
+    var res = "\n";
 
     for (i <- 0 until 20) {
       res += l_toString(i);
@@ -630,22 +629,83 @@ class BMap(
 
     ~last
   }
+  
+  def shadow(v : BMap, dir : Int)={
+    
+   // System.err.println("shad\n"+this+" \n"+v);
+    def doCalc(op : BMap => BMap)={
+            
+      var last = this
+      var curr = (op(this)) & v;
 
-  def closestPointHere(from: BMap) = {
+      
+      
+      while ((!(last ^ curr).isNull) && (curr & ~v).isNull) {
+
+          
+        last = curr
+        curr = (op(curr) |curr)
+            //    System.err.println("last\n"+last+" \n"+curr+" currNV\n"+(curr & v)+" curXorLast\n "+(last ^ curr));
+      }
+  
+      last    
+      
+    }
+    
+    dir match {
+      case 0 => doCalc( x => x-- )
+      case 1 => doCalc( x => x>> )
+      case 2 => doCalc( x => x++ )
+      case 3 => doCalc( x => x<< )
+      
+      
+    }
+    
+    
+  }
+
+  def closestPointHere(from: BMap) : Tuple2[Int,BMap] = {
     var dist = 0;
     var curr = from;
+    //Console.err.println("curr\n"+curr+" \n"+dist);
 
-    val thisNotNull = !this.isNull && !from.isNull
+    val thisNotNull = (!this.isNull) && (!from.isNull)
     while (((curr & this).isNull) & (thisNotNull)) {
       curr = curr | curr.scramble
       dist = dist + 1
-      // Console.err.println("curr\n"+curr);
+      // Console.err.println("curr\n"+curr+" \n"+dist);
     }
 
     new Tuple2(dist, curr & this)
   }
+  
+    def scaleToSize(v : BMap, sz : Int) : BMap={
+      
+      val b = this
+      def up (it : BMap) : BMap ={
+        if(it.countBitset >= sz) it else{
+          val sc=it.scramble & v
+          if(sc==it) sc else
+            up(sc)
+          
+        }
+      }
+      
+      def down (it : BMap ) : BMap ={
+        if(it.countBitset < sz) it else{
+          val sc=it & ((~it).scramble)
+          if(sc==it) sc else
+          down(sc)
+          
+        }
+      }      
+      
+      if(b.countBitset <= sz) up(b) else up(down(b)) 
+    }
 
 }
+
+
 
 class BotVocabulary(val st: GameState4P) {
   val void = st.tr.void
@@ -677,58 +737,83 @@ class BotVocabulary(val st: GameState4P) {
     }
 
   }
-  
-  def firstTronZoneHeuristic : Tuple3[BMap,BMap,Int] = {
+
+  def extractTronZone = {
+    val front = firstTronZoneHeuristic._1 | firstTronZoneHeuristic._2
+    val res = BMap.followTrail(st.pos.pos0, ~front)
+    res
+  }
+
+  def shadows = {
+    def exts(m : BMap) = {
+      for(b <- List(0,1,2,3)) yield{
+        m.shadow(void, b)
+      }          
+      
+    }
+    
+    st.tr.asList.map { x => exts(x) }
+    
+  }
+
+  def extractAllZone = {
+    List(extractTronZone,
+        (new BotVocabulary(st.swap(1))).extractTronZone,
+        (new BotVocabulary(st.swap(2))).extractTronZone,
+        (new BotVocabulary(st.swap(3))).extractTronZone).filter { x => !x.isNull }
+
+  }
+
+  def firstTronZoneHeuristic: Tuple3[BMap, BMap, Int] = {
     var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;
     var f = st.pos.pos0;
     var v = st.tr.void
-    
-    var dist=0
-    var countIt=0
-    
+
+    var dist = 0
+    var countIt = 0
+
     def collide = {
-      ((!(e&f).isNull)) || ( ! (e.scramble&f).isNull  )
+      ((!(e & f).isNull)) || (!(e.scramble & f).isNull)
     }
-    
-  //  Console.err.println("start v\n"+v);
- //   Console.err.println("start e\n"+e);
-  //  Console.err.println("start f\n"+f);
+
+    //  Console.err.println("start v\n"+v);
+    //   Console.err.println("start e\n"+e);
+    //  Console.err.println("start f\n"+f);
 
     var firste = BMap.zero;
     var last = BMap.full
 
-    if (!e.isNull && !f.isNull ) {
-      while ( !((v^last).isNull)) {
+    if (!e.isNull && !f.isNull) {
+      while (!((v ^ last).isNull)) {
         e = (e.scramble & v) | e
         f = (f.scramble & v) | f
-        
-    //Console.err.println(" e\n"+e);
-    //Console.err.println(" f\n"+f);        
+
+        //Console.err.println(" e\n"+e);
+        //Console.err.println(" f\n"+f);        
         //Console.err.println(" v & ((~e) | (~f))\n"+( v &  ((~e) & (~f))));
-        last=v
-        v=(v & ((~e) & (~f)))
-        
-       // Console.err.println(" v\n"+v);   
+        last = v
+        v = (v & ((~e) & (~f)))
+
+        // Console.err.println(" v\n"+v);   
         firste = firste | (e & f)
-       // Console.err.println("firste\n"+firste);
-       // Console.err.println("vide\n"+v);
-        
-        if(dist==0 && collide){
-          dist=countIt
+        // Console.err.println("firste\n"+firste);
+        // Console.err.println("vide\n"+v);
+
+        if (dist == 0 && collide) {
+          dist = countIt
         }
-        
-        countIt=countIt+1
+
+        countIt = countIt + 1
       }
       {
-        (firste ,(e.scramble & f)|(f.scramble & e)&st.tr.void,dist)
+        (firste, (e.scramble & f) | (f.scramble & e) & st.tr.void, dist)
       }
-      
-    }     
- else {
-      (BMap.full,BMap.full,0)
+
+    } else {
+      (BMap.full, BMap.full, 0)
     }
 
-  }  
+  }
 
   def border(area: BMap) = {
     ((area | st.tr.pos0).border) & (~st.tr.pos0)
@@ -786,7 +871,7 @@ class BotVocabulary(val st: GameState4P) {
     r
   }
 
-  def squareInDir(dir: Int, sz: Int) ={
+  def squareInDir(dir: Int, sz: Int) = {
     def squareInDirRec(start: BMap, dir: Int, sz: Int): BMap = {
 
       if (sz == 0) start else {
@@ -825,38 +910,36 @@ class BotVocabulary(val st: GameState4P) {
     sim.getState
   }
 
-  def forsee_with(w: agentAbstract, plan: agentAbstract)(success: GameState4P => Boolean)(whenSuccess: => Int)(fail: GameState4P => Boolean)(whenFail: => Int)= {
+  def forsee_with(w: agentAbstract, plan: agentAbstract)(success: GameState4P => Boolean)(whenSuccess: => Int)(fail: GameState4P => Boolean)(whenFail: => Int) = {
     val zerg = w
     val sim = new SimulBot(0, st, Array(plan, zerg, zerg, zerg))
     var dir = 0
-    
-    var retval= -1;
-    var break=false;
+
+    var retval = -1;
+    var break = false;
 
     while (GameState4P.m(dir)(0) != 4 && !break) {
       dir = sim.turn()
-      
-      val state=sim.getState
-      
-      if(success(state)){
+
+      val state = sim.getState
+
+      if (success(state)) {
         retval = whenSuccess
-        break=true
-      }else{
-        if(fail(state)){
+        break = true
+      } else {
+        if (fail(state)) {
           retval = whenFail
-          break=true
+          break = true
         }
-        
-      }      
+
+      }
     }
     //Console.err.println(""+sim.getState);
-    if(break) retval else whenFail
-
+    if (break) retval else whenFail
 
   }
 
 }
-
 
 class log {
   private var donel: List[Int] = List()
@@ -1325,11 +1408,13 @@ object GameState4P {
   }
 }
 
+
 class GameVect4P(
     val pos0: BMap,
     val pos1: BMap,
     val pos2: BMap,
     val pos3: BMap) {
+  
 
   def swap(at: Int) : GameVect4P = {
 
@@ -1399,6 +1484,11 @@ class GameVect4P(
     val code = (pos0(i)(j)) + (pos1(i)(j) << 1) + (pos2(i)(j) << 2) + (pos3(i)(j) << 3)
     code
   }
+  
+  def asList={
+    List(pos0,pos1,pos2,pos3)
+    
+  }
 
   def apply(i: Int) = {
     i match {
@@ -1445,6 +1535,7 @@ class GameVect4P(
   }
 
 }
+
 
 class GameState4P(
     val pos: GameVect4P,
@@ -1515,6 +1606,88 @@ class GameState4P(
 
 }
 
+
+
+class oo002(nbPlayer: Int) extends agentAbstract {
+
+  var currPlan: agentAbstract = null
+  var ra = 0xAA88319
+
+  var startZone: List[BMap] = null
+  var rootZone: List[BMap] = null
+
+  var myRight: BMap = null
+  var myRightSz = 0
+
+  val tron = new bv_tronRacer
+
+  def doOnce(ref: GameState4P) {
+    if (startZone == null) {
+      val bv = new BotVocabulary(ref)
+      startZone = bv.extractAllZone
+      myRightSz = (20 * 35) / nbPlayer
+      rootZone = startZone.map { x => x.noyau }
+
+      //  System.err.println(""+startZone);
+
+      //  System.err.println(""+scaleZone);
+
+      // System.err.println(""+rootZone)
+      myRight = rootZone.tail.minBy { x => x.closestPointHere(rootZone.head)._1 }
+      // System.err.println(""+myRight)      
+
+    }
+  }
+
+  def doPlan(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+
+    val shad = bv.shadows;
+    // System.err.println("TheShadows : \n"+bv.shadows);        
+
+    val myBiggest = shad.head.maxBy { x => x.countBitset }
+    val themBiggest = shad.tail.map { x => x.maxBy { x => x.countBitset } }
+
+    val themDangerous = themBiggest.filter { x => (x.countBitset >= (Math.max(myBiggest.countBitset,9))) }
+
+    if (themDangerous.size > 0) {
+      val maxDanger = themDangerous.maxBy { x => x.countBitset }
+      //Console.err.println("TheirBig"+maxDanger);
+      val res = bv.goTo(maxDanger)
+      if (res.size > 0) res(0) else tron.genMove(ref)
+    } else {
+
+      if (myBiggest.countBitset > 9) {
+        val limits = bv.border((myBiggest.scramble | ref.tr.pos0) & (~ref.tr.pos0))
+       // Console.err.println("MyBig"+myBiggest+" limit "+limits);
+        val res = bv.goTo(limits)
+        if (res.size > 0) res(0) else tron.genMove(ref)
+      } else if (!(bv.void & myRight).isNull && (ref.tr.pos0 & myRight).isNull) {
+        val res = bv.goTo(myRight)
+        if (res.size > 0) res(0) else tron.genMove(ref)
+      } else {
+        tron.genMove(ref)
+      }
+    }
+
+  }
+
+  var logMove: log = new log
+  override def backMove() {
+    //System.err.println("backing "+logMove);
+    logMove.undo()
+  }
+
+  def genMove(ref: GameState4P) = {
+    doOnce(ref)
+    logMove.blockControl {
+      doPlan(ref)
+
+    }
+
+  }
+
+}
 
 
 class score(val x0 : Int,val x1 : Int,val x2 : Int,val x3 : Int){

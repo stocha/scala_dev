@@ -43,10 +43,11 @@ class BotVocabulary(val st: GameState4P) {
 
   def shadows = {
     def exts(m : BMap) = {
-      for(b <- List(0,1,2,3)) yield{
-        m.shadow(void, b)
+     val s= for(b <- List(0,1,2,3)) yield{
+        val shad=m.shadow(void, b)
+        shad.split
       }          
-      
+      s.flatten
     }
     
     st.tr.asList.map { x => exts(x) }

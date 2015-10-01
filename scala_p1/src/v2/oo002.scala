@@ -34,30 +34,46 @@ class oo002(nbPlayer: Int) extends agentAbstract {
 
     }
   }
+  
 
   def doPlan(ref: GameState4P) = {
+    
+    def maxB(l : List[BMap])={
+      if(l.nonEmpty)
+        l.maxBy { x => x.countBitset }
+      else
+        BMap.zero
+    }
+    
     val bv = new BotVocabulary(ref)
+    
+    def takeThere(dst : BMap)={
+      val limitsToTrait = ( ~(~bv.void & ~ref.tr.pos0).scramble & dst.scramble)      
+      val limits = bv.border( limitsToTrait ) & (~ref.tr.pos0)
+        val res = bv.goTo(limits)
+        if (res.size > 0) res(0) else tron.genMove(ref)
+
+    }
+      
 
     val shad = bv.shadows;
     // System.err.println("TheShadows : \n"+bv.shadows);        
 
-    val myBiggest = shad.head.maxBy { x => x.countBitset }
-    val themBiggest = shad.tail.map { x => x.maxBy { x => x.countBitset } }
+    val myBiggest = maxB(shad.head)
+    val themBiggest = shad.tail.map { x => if(x.nonEmpty) x.maxBy { x => x.countBitset } else BMap.zero }
 
-    val themDangerous = themBiggest.filter { x => (x.countBitset >= (Math.max(myBiggest.countBitset,9))) }
+    val themDangerous = themBiggest.filter { x => (x.countBitset >= (Math.max(myBiggest.countBitset,17))) }
 
     if (themDangerous.size > 0) {
       val maxDanger = themDangerous.maxBy { x => x.countBitset }
       //Console.err.println("TheirBig"+maxDanger);
-      val res = bv.goTo(maxDanger)
-      if (res.size > 0) res(0) else tron.genMove(ref)
+      val res=takeThere(maxDanger)
+      res
     } else {
 
-      if (myBiggest.countBitset > 9) {
-        val limits = bv.border((myBiggest.scramble | ref.tr.pos0) & (~ref.tr.pos0))
-       // Console.err.println("MyBig"+myBiggest+" limit "+limits);
-        val res = bv.goTo(limits)
-        if (res.size > 0) res(0) else tron.genMove(ref)
+      if (myBiggest.countBitset > 12) {
+          val res=takeThere(myBiggest)
+          res
       } else if (!(bv.void & myRight).isNull && (ref.tr.pos0 & myRight).isNull) {
         val res = bv.goTo(myRight)
         if (res.size > 0) res(0) else tron.genMove(ref)
@@ -65,7 +81,7 @@ class oo002(nbPlayer: Int) extends agentAbstract {
         tron.genMove(ref)
       }
     }
-
+    //4
   }
 
   var logMove: log = new log
@@ -77,7 +93,17 @@ class oo002(nbPlayer: Int) extends agentAbstract {
   def genMove(ref: GameState4P) = {
     doOnce(ref)
     logMove.blockControl {
-      doPlan(ref)
+
+          if(currPlan==null){
+           doPlan(ref )
+          }else{
+            val m = currPlan.genMove(ref)
+            if(m!=4) m else{
+              currPlan=null
+              doPlan(ref)
+              
+            }
+          }
 
     }
 

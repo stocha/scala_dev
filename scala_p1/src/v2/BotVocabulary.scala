@@ -1,5 +1,6 @@
 package v2
 
+
 /**
  * @author Jahan
  */
@@ -15,14 +16,53 @@ class BotVocabulary(val st: GameState4P) {
 
   }
   
-  def dirCaptureStraight ={
+  
+  def basicCapturePathTry={
+    val traits=List(0,1,2,3).map { x => (x,st.pos.pos0.shadow(st.tr.void, x)) }
+    
+    def dirTrail (x : Tuple2[Int,BMap])  = {
+      var rotd=(x._1+1)%4
+      var opd=(rotd+2)%4
+      
+      List( x._2, x._2.shiftIn(rotd)|st.pos.pos0.shiftIn(rotd), x._2.shiftIn(opd)|st.pos.pos0.shiftIn(opd) )
+    }      
+          
+    traits.map(dirTrail).flatten
+  }
+  
+  def dead_code_dirCaptureStraight ={
     val traits=List(0,1,2,3).map { x => (x,st.pos.pos0.shadow(st.tr.void, x)) }
     val capt=traits.map{ x => (x._1,
-      BMap.enclosed((x._2 )  | st.tr.pos0, void & (~x._2) ) ) 
-    }
+      BMap.enclosed((x._2 )  | st.tr.pos0, void & (~x._2) )
+      ,x._2 ) 
+    }.filter(x => x._2.notNull)
     
     capt
   }
+  
+  def enemies = {
+    void ^ st.pos.pos0    
+  }
+  
+  def dead_code_someCapturePlans ={
+    val capt=dead_code_dirCaptureStraight
+    
+    def forsee(to: BMap) = {
+      val zerg = new bv_followTrail(to)(identity)
+      val sim = new SimulBot(0, st, Array(zerg, zerg, zerg, zerg))
+      var dir = 0
+  
+      while (GameState4P.m(dir)(0) != 4) {
+        dir = sim.turn()
+      }
+  
+      sim.getState.myRelScore
+    }
+    
+
+    
+  }
+  
 
   def firstZoneHeuristic = {
     var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;

@@ -18,16 +18,69 @@ class oo004 extends agentAbstract {
     
   }
   
+  def forseeMovesSimple(to: BMap,ref: GameState4P) = {
+    val zerg = new bv_followTrail(to)(identity)
+    val sim = new SimulBot(0, ref, Array(zerg, zerg, new bv_doNothing, new bv_doNothing))
+    var dir = 0
 
+    while (GameState4P.m(dir)(0) != 4) {
+      dir = sim.turn()
+    }
+   // System.err.println("\n"+sim.getState);
+    
+   // val sim2 = new SimulBot(0, sim.getState, Array(new bv_taker(BMap.full,0xFF92888), new bv_taker(BMap.full,0xFF89398), new bv_doNothing, new bv_doNothing))
+
+   // for(i <- 0 until 100){
+   //   dir = sim2.turn()
+   // }
+    
+    sim.getState.myRelScore
+  }
 
   def doPlan(ref: GameState4P) = {
     val bv = new BotVocabulary(ref)        
      val targ = bv.firstTronZoneHeuristic
      val tr = bv.firstZoneHeuristic
      
-     val captSt=bv.dirCaptureStraight
+     val captSt : List[BMap]=bv.basicCapturePathTry
      
-     System.err.println(""+captSt)
+    val tmpF0 = for (d <- 0 until 4; s <- List(4,10,20)) yield {
+      (new Tuple2(d, s))
+    }
+    
+    def genBmSquare(p: Seq[Tuple2[Int, Int]], bv: BotVocabulary) = {
+      for (Tuple2(x, y) <- p) yield {
+        bv.border(bv.squareInDir(x, y) & bv.st.tr.void)
+      }
+    }    
+    
+    val bmSqToTry = genBmSquare(tmpF0, bv)
+     
+     val currS=ref.myRelScore     
+     //System.err.println(""+captSt)
+     
+   //  val scoresBasicManeu=captSt.map { x => forseeMovesSimple(x, ref) - currS }
+     
+     val ll=captSt
+     val ol=bmSqToTry.toList
+    
+    val basicEval= (ll:::ol).map { x => (forseeMovesSimple(x, ref) - currS,x) }
+    
+    //System.err.println("scores "+scoresBasicManeu);
+    
+    val maxEval=basicEval.maxBy(x => x._1)
+    
+    if(maxEval._1 > 20){
+   //   System.err.println("Follow evaluation"+maxEval)
+      
+      val zerg = new bv_followTrail(maxEval._2)(identity)
+      val to=zerg.genMove(ref)
+      to
+    }else{
+          tron.genMove(ref)
+    }
+    
+    //System.err.println("Best plan : "+maxEval);
      
     // System.err.println("tron"+targ);
     //System.err.println("first"+tr);
@@ -35,7 +88,7 @@ class oo004 extends agentAbstract {
     // System.err.println("tron + first "+((targ._2 & tr) | ref.pos.pos0));
     
     
-    tron.genMove(ref)
+
         
         
 

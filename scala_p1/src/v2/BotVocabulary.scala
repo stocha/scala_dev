@@ -40,6 +40,11 @@ class BotVocabulary(val st: GameState4P) {
     capt
   }
   
+  def is_capturing(prop : BMap) ={
+    val enc= BMap.enclosed((prop )  | st.tr.pos0, void & (~prop ))
+    enc.notNull
+  }
+  
   def enemies = {
     void ^ st.pos.pos0    
   }

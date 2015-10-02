@@ -26,6 +26,8 @@ class oo004 extends agentAbstract {
     while (GameState4P.m(dir)(0) != 4) {
       dir = sim.turn()
     }
+    
+    val success = ((sim.getState.tr.pos0 & to)^to).isNull
    // System.err.println("\n"+sim.getState);
     
    // val sim2 = new SimulBot(0, sim.getState, Array(new bv_taker(BMap.full,0xFF92888), new bv_taker(BMap.full,0xFF89398), new bv_doNothing, new bv_doNothing))
@@ -34,7 +36,7 @@ class oo004 extends agentAbstract {
    //   dir = sim2.turn()
    // }
     
-    sim.getState.myRelScore
+    if(success) sim.getState.myRelScore else 0
   }
 
   def doPlan(ref: GameState4P) = {
@@ -64,14 +66,16 @@ class oo004 extends agentAbstract {
      val ll=captSt
      val ol=bmSqToTry.toList
     
-    val basicEval= (ll:::ol).map { x => (forseeMovesSimple(x, ref) - currS,x) }
+    val basicEval= (ll:::ol).filter { x => bv.is_capturing(x) }.map { x => (forseeMovesSimple(x, ref) - currS,x) }
     
     //System.err.println("scores "+scoresBasicManeu);
     
-    val maxEval=basicEval.maxBy(x => x._1)
+    val maxEval=if(basicEval.size>0) basicEval.maxBy(x => x._1) else (0,BMap.zero)
     
     if(maxEval._1 > 20){
-   //   System.err.println("Follow evaluation"+maxEval)
+      
+      
+      System.err.println("Follow evaluation"+maxEval)
       
       val zerg = new bv_followTrail(maxEval._2)(identity)
       val to=zerg.genMove(ref)

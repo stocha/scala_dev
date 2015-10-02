@@ -11,7 +11,7 @@ class oo003 extends agentAbstract {
   val tron = new bv_tronRacer
   
   def takeThere(b : BMap,ref: GameState4P)={
-    System.err.println("Taking : "+b)
+   // System.err.println("Taking : "+b)
     
     currPlan=new bv_taker(b)
     currPlan.genMove(ref)
@@ -45,7 +45,7 @@ class oo003 extends agentAbstract {
       res
     } else {
 
-      if (myBiggest.countBitset > 70) {
+      if (myBiggest.countBitset > 50) {
           val res=takeThere(myBiggest,ref)
           res
       } else { 

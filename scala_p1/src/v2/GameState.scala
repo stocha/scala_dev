@@ -307,6 +307,11 @@ class GameState4P(
     List(tr.pos0.countBitset,tr.pos1.countBitset,tr.pos2.countBitset,tr.pos3.countBitset)
     
   }
+  
+  def myRelScore={
+    val h=scores.head
+    scores.tail.minBy { x => h-x }
+  }
 
   private def transitionApplyMap(m: BMap, vect: Int) = {
     val r = vect match {

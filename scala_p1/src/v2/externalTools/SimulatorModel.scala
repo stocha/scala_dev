@@ -10,6 +10,7 @@ import v2.test_bv_square
 import v2.test_bv_squareUndo
 import v2.tb002
 import v2.tb003
+import v2.tb004
 import v2.bv_racer
 import v2.oo001
 import v2.bv_tronFrontierInside
@@ -19,6 +20,9 @@ import v2.bv_tronFrontierInside
 import v2.bv_tronRacer
 import v2.oo002
 import v2.oo003
+import v2.BMap
+import v2.bv_taker
+import v2.tb005
 
 /**
  * @author Jahan
@@ -27,7 +31,7 @@ object SimulatorModel {
   def getModel = {
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
-    val size=2;
+    val size=4;
     var game=GameState4P.start(64564544557L,size)
     
     //val simul = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new stupidAgent,new stupidAgent,new stupidAgent))
@@ -51,9 +55,16 @@ object SimulatorModel {
    // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo002(size),new tb003,new tb003,new tb003))
    // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo002(size),new tb003))
    //  val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo002(size),new oo002(size)))
-    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new oo003,new tb003,new tb003))
+    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new oo003,new tb003,new tb003))
     
    // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo003,new oo003,new tb003,new tb003))
+    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new tb004,new tb003,new tb004))
+    
+    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new tb005,new tb003,new tb003))
+    
+    
+    val bot =new bv_taker(BMap.full,0xF44824F75L*4745)
+    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(0x645657FL,size),Array(bot,bot,bot,bot))
     
     //simul
     oo001T

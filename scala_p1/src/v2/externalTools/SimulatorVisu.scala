@@ -35,7 +35,22 @@ object SimulatorVisu extends SimpleSwingApplication {
     listenTo(mouse.moves)
         listenTo(mouse.clicks)
     reactions += {
-          case e: MouseClicked => { if(e.peer.getButton==3) (model.doBackward()) else model.turn(); repaint(); Console.err.println(""+model.getState.scores)  }
+          case e: MouseClicked => { 
+            if(e.peer.getButton==3)
+              (model.doBackward()) 
+              else 
+              {
+                val t0 =  System.nanoTime()
+                model.turn();                
+                val t1 = System.nanoTime()
+                repaint(); Console.err.println(""+model.getState.scores)  
+
+                
+                val t : Double = t1 - t0
+                System.err.println("Move time milli "+((t/1000)/1000));
+              }
+                
+          }
       case e: MouseDragged => { model.turn(); repaint(); }
     }
 

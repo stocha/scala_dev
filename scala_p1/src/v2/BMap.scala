@@ -215,6 +215,11 @@ class BMap(
     val u19: Long //,       
     //val end : Long
     ) {
+  
+  
+  def notNull ={
+    ! isNull
+  }
 
   def isNull = {
     var acc = 0L

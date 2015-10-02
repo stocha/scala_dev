@@ -195,6 +195,28 @@ class BotVocabulary(val st: GameState4P) {
       nthBm(code(to), nb - 1)(code)
     }
   }
+  
+  
+  def eval_withTaker(to : BMap){
+    def zerg ={
+      new bv_taker(to,0xFF93887492L)
+    }
+    
+    val sim = new SimulBot(0, st, Array(zerg, zerg, zerg, zerg))
+    var dir = 0
+    var nbMove=0
+    while (((sim.getState.tr.void&to ).notNull) && nbMove < 200) {
+       nbMove=nbMove+1
+      
+      dir = sim.turn()
+      //System.err.println("Evaluating \n"+sim.getState);
+    }
+
+    val res=sim.getState.myRelScore
+    
+  //  System.err.println("Evaled with takers "+res);
+    
+  }
 
   def forsee_withZerger(to: BMap, plan: agentAbstract) = {
     val zerg = new bv_followTrail(to)(identity)

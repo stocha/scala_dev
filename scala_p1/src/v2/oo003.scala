@@ -13,7 +13,7 @@ class oo003 extends agentAbstract {
   def takeThere(b : BMap,ref: GameState4P)={
    // System.err.println("Taking : "+b)
     
-    currPlan=new bv_taker(b)
+    currPlan=new bv_taker(b,0x4157457)
     currPlan.genMove(ref)
     
   }

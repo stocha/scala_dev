@@ -224,44 +224,63 @@ class bv_tronFrontierInside extends agentAbstract {
       val targSS = bv.border(targ._1.closeDiag)
       val targf = if (targSS.isNull) targ._2.closeDiag else targSS
       //  Console.err.println("f front\n"+targf)
-     // val targfsp = targf.split
+      // val targfsp = targf.split
       //if (targfsp.nonEmpty) {
-        //val mtarg = targfsp.maxBy { x => x.countBitset }
-        val mtarg=targf
-        val resp = bv.goToWithVoid(mtarg)
-        ra = ((ra << 3) + 13) & 0xFFFFFF;
-        def rind = ((ra % resp.size) & 3)
-        if (resp.size > 0 && targ._3<11) {
-          //   Console.err.println("Tron dist "+targ._3);
-          resp(rind)
-        } else {
-          4
-        }
-    //  } else {
-       // 4
-     // }
+      //val mtarg = targfsp.maxBy { x => x.countBitset }
+      val mtarg = targf
+      val resp = bv.goToWithVoid(mtarg)
+      ra = ((ra << 3) + 13) & 0xFFFFFF;
+      def rind = ((ra % resp.size) & 3)
+      if (resp.size > 0 && targ._3 < 11) {
+        //   Console.err.println("Tron dist "+targ._3);
+        resp(rind)
+      } else {
+        4
+      }
+      //  } else {
+      // 4
+      // }
     }
   }
 }
 
-class bv_taker(objective : BMap) extends agentAbstract {
+class bv_taker(objectiveParam: BMap, seed: Long) extends agentAbstract {
   
-  
-  def genMove(ref: GameState4P) = {
-    val bv = new BotVocabulary(ref)
-    
-    val b=objective& (ref.tr.void|ref.tr.pos0)
-    
-      val limitsToTrait = ( ~(~bv.void & ~ref.tr.pos0).scramble & b.scramble)      
-      val limits = bv.border( limitsToTrait ) & (~ref.tr.pos0) & bv.void
-        val res = bv.goTo(limits)
-       // System.err.println(""+limits);
-        val m=if (res.size > 0) res(0) else 4 
 
-        
-       // System.err.println(""+objective+" limi "+limits+"  m "+m);
+  var v = seed >> 32
+  var u = (seed << 32) >>> 32
+
+  def applyRand() = {
+    v = 36969 * (v & 65535) + (v >> 16);
+    u = 18000 * (u & 65535) + (u >> 16);
+    ((v << 16) + u) & 0xFFFF;
+  }
+  
+  var nbMove=0;
+
+  def genMove(ref: GameState4P) = {
     
-    m
+    val bv = new BotVocabulary(ref)
+    val objective = objectiveParam|ref.tr.pos0
+
+    if (!(ref.pos.pos0 & ref.tr.void).isNull) {
+      (applyRand().toInt % 4)
+    } else {
+
+      val b = objective & (ref.tr.void | ref.tr.pos0)
+
+      val limitsToTrait = (~(~bv.void & ~ref.tr.pos0).scramble & b.scramble)
+      val limits = bv.border(limitsToTrait) & (~ref.tr.pos0) & bv.void
+      val res = bv.goTo(limits)
+      //System.err.println(""+limits);
+      val m = if (res.size > 0) res(applyRand().toInt % res.size) else {
+        // System.err.println("raw "+b);
+        val res = bv.goTo(objective & ref.tr.void)
+        val m = if (res.size > 0) res(applyRand().toInt % res.size) else 4
+        m
+      }
+      m
+    }
   }
 }
 
@@ -300,17 +319,16 @@ class bv_tronRacer extends agentAbstract {
 
   var currPlan: agentAbstract = null
   var ra = 0xAA88319
-  
+
   val tronIn = new bv_tronFrontierInside
 
   def doTronFirst(ref: GameState4P) = {
-    
-    val m=tronIn.genMove(ref)
-    
-    if(m==4 && ((ref.pos.pos0 & ref.tr.void).isNull)){
-        doPlan(ref)      
-    }
-    else{
+
+    val m = tronIn.genMove(ref)
+
+    if (m == 4 && ((ref.pos.pos0 & ref.tr.void).isNull)) {
+      doPlan(ref)
+    } else {
       m
     }
   }
@@ -318,33 +336,32 @@ class bv_tronRacer extends agentAbstract {
   def doPlan(ref: GameState4P) = {
     val bv = new BotVocabulary(ref)
 
-    val specialVoid = (ref.tr.void | ref.tr.pos0 ).split
-    if(specialVoid.isEmpty){
+    val specialVoid = (ref.tr.void | ref.tr.pos0).split
+    if (specialVoid.isEmpty) {
       4
-    }else{
-      
+    } else {
+
       val nearVoidL = (ref.pos.pos0.scramble & ref.tr.void).split
-      
-      if(nearVoidL.isEmpty) {
-        val targArea = bv.border( specialVoid.maxBy { x => x.countBitset } )
+
+      if (nearVoidL.isEmpty) {
+        val targArea = bv.border(specialVoid.maxBy { x => x.countBitset })
         val resp = bv.goTo(targArea)
-    
+
         if (resp.size > 0) resp(0) else {
-            4
-        }     
-      }else{
+          4
+        }
+      } else {
         val nearVoids = nearVoidL.map { x => BMap.followTrail(x, ref.tr.void) }
-        
-        val targArea = bv.border( nearVoids.maxBy { x => x.countBitset } )
+
+        val targArea = bv.border(nearVoids.maxBy { x => x.countBitset })
         val resp = bv.goTo(targArea)
-        
-        if(resp.nonEmpty){
+
+        if (resp.nonEmpty) {
           resp(0)
-        }else 4
+        } else 4
       }
-      
- 
-    }    
+
+    }
 
   }
 

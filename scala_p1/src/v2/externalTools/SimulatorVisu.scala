@@ -36,8 +36,10 @@ object SimulatorVisu extends SimpleSwingApplication {
         listenTo(mouse.clicks)
     reactions += {
           case e: MouseClicked => { 
-            if(e.peer.getButton==3)
+            if(e.peer.getButton==3){
               (model.doBackward()) 
+              repaint();
+          }
               else 
               {
                 val t0 =  System.nanoTime()

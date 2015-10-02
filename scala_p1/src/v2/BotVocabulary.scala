@@ -14,6 +14,15 @@ class BotVocabulary(val st: GameState4P) {
     trail.split
 
   }
+  
+  def dirCaptureStraight ={
+    val traits=List(0,1,2,3).map { x => (x,st.pos.pos0.shadow(st.tr.void, x)) }
+    val capt=traits.map{ x => (x._1,
+      BMap.enclosed((x._2 )  | st.tr.pos0, void & (~x._2) ) ) 
+    }
+    
+    capt
+  }
 
   def firstZoneHeuristic = {
     var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;

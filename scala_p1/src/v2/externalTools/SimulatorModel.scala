@@ -22,7 +22,7 @@ import v2.oo002
 import v2.oo003
 import v2.BMap
 import v2.bv_taker
-import v2.tb005
+import v2.oo004
 
 /**
  * @author Jahan
@@ -31,7 +31,7 @@ object SimulatorModel {
   def getModel = {
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
-    val size=4;
+    val size=2;
     var game=GameState4P.start(64564544557L,size)
     
     //val simul = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new stupidAgent,new stupidAgent,new stupidAgent))
@@ -60,11 +60,12 @@ object SimulatorModel {
    // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo003,new oo003,new tb003,new tb003))
     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new tb004,new tb003,new tb004))
     
-    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new tb005,new tb003,new tb003))
+   // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new tb005,new tb003,new tb003))
     
     
     val bot =new bv_taker(BMap.full,0xF44824F75L*4745)
     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(0x645657FL,size),Array(bot,bot,bot,bot))
+    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(bot,new oo004))
     
     //simul
     oo001T

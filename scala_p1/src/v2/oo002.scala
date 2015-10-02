@@ -62,7 +62,7 @@ class oo002(nbPlayer: Int) extends agentAbstract {
     val myBiggest = maxB(shad.head)
     val themBiggest = shad.tail.map { x => if(x.nonEmpty) x.maxBy { x => x.countBitset } else BMap.zero }
 
-    val themDangerous = themBiggest.filter { x => (x.countBitset >= (Math.max(myBiggest.countBitset,17))) }
+    val themDangerous = themBiggest.filter { x => (x.countBitset >= (Math.max(myBiggest.countBitset,60))) }
 
     if (themDangerous.size > 0) {
       val maxDanger = themDangerous.maxBy { x => x.countBitset }
@@ -71,7 +71,7 @@ class oo002(nbPlayer: Int) extends agentAbstract {
       res
     } else {
 
-      if (myBiggest.countBitset > 12) {
+      if (myBiggest.countBitset > 61) {
           val res=takeThere(myBiggest)
           res
       } else if (!(bv.void & myRight).isNull && (ref.tr.pos0 & myRight).isNull) {

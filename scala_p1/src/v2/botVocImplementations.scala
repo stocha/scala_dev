@@ -244,6 +244,33 @@ class bv_tronFrontierInside extends agentAbstract {
   }
 }
 
+class bv_taker(objective : BMap) extends agentAbstract {
+  
+  
+  def genMove(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+    
+    val b=objective& (ref.tr.void|ref.tr.pos0)
+    
+      val limitsToTrait = ( ~(~bv.void & ~ref.tr.pos0).scramble & b.scramble)      
+      val limits = bv.border( limitsToTrait ) & (~ref.tr.pos0) & bv.void
+        val res = bv.goTo(limits)
+       // System.err.println(""+limits);
+        val m=if (res.size > 0) res(0) else 4 
+
+        
+       // System.err.println(""+objective+" limi "+limits+"  m "+m);
+    
+    m
+  }
+}
+
+class bv_doNothing extends agentAbstract {
+  def genMove(ref: GameState4P) = {
+    4
+  }
+}
+
 class bv_racer extends agentAbstract {
   def genMove(ref: GameState4P) = {
     val bv = new BotVocabulary(ref)

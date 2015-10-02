@@ -176,13 +176,15 @@ object BMap {
       curr = curr | down
       curr = curr | left
       curr = curr | right
+      
 
-   //   Console.err.println("curr\n"+curr );
+     //Console.err.println("curr\n"+curr );
     }
     res
   }
 
   def firstDirTo(pos: BMap, goal: BMap) = {
+    //System.err.println("full"+full);
     firstDirToThrough(pos, goal, full)
   }
 }

@@ -8,7 +8,56 @@ class oo004 extends agentAbstract {
   var currPlan: agentAbstract = null
   var ra = 0xAA88319
 
-  val tron = new bv_tronRacer
+  val tron = new agentAbstract {
+
+    def genMove(ref: GameState4P) = {
+
+      val bv = new BotVocabulary(ref)
+      
+      def anyOpen = {
+        if (bv.void.isNull) {
+          4
+        } else {
+    
+           val targArea = bv.border(bv.void.split.maxBy { x => x.countBitset })
+            val resp = bv.goTo(targArea)
+    
+            if (resp.nonEmpty) {
+              resp(0)
+            } else 4       
+        }        
+        
+      }
+
+      def gosomeOpenBorder = {
+
+        val targ = bv.firstTronZoneHeuristic
+        //Console.err.println("raw front\n"+targ)
+        val targSS = bv.border(targ._1.closeDiag)
+        val targf = if (targSS.isNull) targ._2.closeDiag else targSS
+       //   Console.err.println("f front\n"+targf)
+        // val targfsp = targf.split
+        //if (targfsp.nonEmpty) {
+        //val mtarg = targfsp.maxBy { x => x.countBitset }
+        val mtarg = targf
+        val resp = bv.goToWithVoid(mtarg)
+        ra = ((ra << 3) + 13) & 0xFFFFFF;
+        def rind = ((ra % resp.size) & 3)
+        if (resp.size > 0 ) {
+          resp(rind)
+        } else {
+          anyOpen
+        }
+      }
+
+      if ((ref.pos.pos0 & ref.tr.pos0).isNull) {
+        //  System.err.println("FUCK " +ref.myRelScore+" Scores "+ref.scores)
+        if (ref.myRelScore > 0) 4 else gosomeOpenBorder
+      } else {
+        gosomeOpenBorder
+      }
+    }
+  }
 
   def takeThere(b: BMap, ref: GameState4P) = {
     // System.err.println("Taking : "+b)
@@ -19,14 +68,12 @@ class oo004 extends agentAbstract {
   }
 
   def forseeMovesSimple(to: BMap, ref: GameState4P) = {
-          val bv = new BotVocabulary(ref)
-    val capt=bv.what_capturing(to)    
+    val bv = new BotVocabulary(ref)
+    val capt = bv.what_capturing(to)
     val ag = new bv_followTrail(to)(identity)
     val zerg = new bv_followTrail(capt)(identity)
     val sim = new SimulBot(0, ref, Array(ag, zerg, new bv_doNothing, new bv_doNothing))
     var dir = 0
-    
-
 
     while (GameState4P.m(dir)(0) != 4) {
       dir = sim.turn()
@@ -43,10 +90,9 @@ class oo004 extends agentAbstract {
 
     if (success) {
 
+      //   System.err.println("success \n"+  to+" \n "+capt);
+      capt.countBitset
 
-   //   System.err.println("success \n"+  to+" \n "+capt);
-            capt.countBitset
-      
     } else 0
   }
 
@@ -79,14 +125,14 @@ class oo004 extends agentAbstract {
     val maxEval = if (basicEval.size > 0) basicEval.maxBy(x => x._1) else (0, BMap.zero)
 
     //System.err.println("scores "+scoresBasicManeu);
-    val MinValForPlan=3
+    val MinValForPlan = 3
     if (maxEval._1 > MinValForPlan) {
 
       val ll = captSt
       val basicEval = (ll).filter { x => bv.is_capturing(x) }.map { x => (forseeMovesSimple(x, ref) - currS, x) }
       val maxEval = if (basicEval.size > 0) basicEval.maxBy(x => x._1) else (0, BMap.zero)
       if (maxEval._1 > MinValForPlan) {
-     //   System.err.println("Follow evaluation" + maxEval)
+        //   System.err.println("Follow evaluation" + maxEval)
 
         val zerg = new bv_followTrail(maxEval._2)(identity)
         val to = zerg.genMove(ref)
@@ -95,12 +141,13 @@ class oo004 extends agentAbstract {
         tron.genMove(ref)
       }
 
-    //  System.err.println("Follow evaluation" + maxEval)
+      //  System.err.println("Follow evaluation" + maxEval)
 
       val zerg = new bv_followTrail(maxEval._2)(identity)
       val to = zerg.genMove(ref)
       to
     } else {
+     // Console.err.println("Tron go");
       tron.genMove(ref)
     }
 

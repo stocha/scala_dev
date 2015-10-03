@@ -218,7 +218,7 @@ class BMap(
   
   
   def notNull ={
-    ! isNull
+    ! (isNull)
   }
 
   def isNull = {

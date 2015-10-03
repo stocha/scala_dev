@@ -9,7 +9,55 @@ class tb005  extends agentAbstract {
 
   val stopr: ((GameState4P, BMap) => Boolean) = { (x, y) => !((y & (x.tr.void | x.pos.pos0)) == y) }
   
-  val tron = new bv_tronRacer
+  var ra = 0xAA88319
+  val tron = new agentAbstract {
+    def genMove(ref: GameState4P) = {
+      val bv = new BotVocabulary(ref)
+
+      def anyOpen = {
+        if (bv.void.isNull) {
+          4
+        } else {
+
+          val targArea = bv.border(bv.void.split.maxBy { x => x.countBitset })
+          val resp = bv.goTo(targArea)
+
+          if (resp.nonEmpty) {
+            resp(0)
+          } else 4
+        }
+
+      }
+
+      def gosomeOpenBorder = {
+
+        val targ = bv.firstTronZoneHeuristic
+        //Console.err.println("raw front\n"+targ)
+        val targSS = bv.border(targ._1.closeDiag)
+        val targf = if (targSS.isNull) targ._2.closeDiag else targSS
+        //   Console.err.println("f front\n"+targf)
+        // val targfsp = targf.split
+        //if (targfsp.nonEmpty) {
+        //val mtarg = targfsp.maxBy { x => x.countBitset }
+        val mtarg = targf
+        val resp = bv.goToWithVoid(mtarg)
+        ra = ((ra << 3) + 13) & 0xFFFFFF;
+        def rind = ((ra % resp.size) & 3)
+        if (resp.size > 0) {
+          resp(rind)
+        } else {
+          anyOpen
+        }
+      }
+
+      if (((ref.pos.pos0 & ref.tr.pos0) | ref.tr.void).isNull) {
+        //  System.err.println("FUCK " +ref.myRelScore+" Scores "+ref.scores)
+        if (ref.myRelScore > 0) 4 else gosomeOpenBorder
+      } else {
+        gosomeOpenBorder
+      }
+    }
+  }
 
   def plansTrailTry(p: Array[BMap]) = {
     val sorted = p

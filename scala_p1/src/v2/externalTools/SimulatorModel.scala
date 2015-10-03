@@ -1,27 +1,17 @@
 package v2.externalTools
 
 import scala.util.Random
+import v2.BMap
 import v2.GameState4P
 import v2.SimulBot
 import v2.botVocTest
+import v2.bv_taker
+import v2.bv_tronRacer
 import v2.stupidAgent
 import v2.tb001
+import v2.tb003
 import v2.test_bv_square
 import v2.test_bv_squareUndo
-import v2.tb002
-import v2.tb003
-import v2.tb004
-import v2.bv_racer
-import v2.oo001
-import v2.bv_tronFrontierInside
-import v2.bv_tronRacer
-import v2.bv_tronFrontierInside
-import v2.bv_tronFrontierInside
-import v2.bv_tronRacer
-import v2.oo002
-import v2.oo003
-import v2.BMap
-import v2.bv_taker
 import v2.oo004
 
 /**
@@ -65,7 +55,9 @@ object SimulatorModel {
     
     val bot =new bv_taker(BMap.full,0xF44824F75L*4745)
     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(0x645657FL,size),Array(bot,bot,bot,bot))
-    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(bot,new oo004))
+   // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(bot,new oo004))
+     val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo004,new oo004))
+    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new bv_tronRacer,new oo004))
     
     //simul
     oo001T

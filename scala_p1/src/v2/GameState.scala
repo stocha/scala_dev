@@ -310,7 +310,7 @@ class GameState4P(
   
   def myRelScore={
     val h=scores.head
-    scores.tail.minBy { x => h-x }
+    h-scores.tail.minBy { x =>  h-x }
   }
 
   private def transitionApplyMap(m: BMap, vect: Int) = {

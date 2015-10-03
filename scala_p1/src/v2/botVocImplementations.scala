@@ -208,16 +208,15 @@ class bv_zerg(dest: BMap) extends agentAbstract {
   }
 }
 
+
 class bv_tronFrontierInside extends agentAbstract {
-  var ra = 898;
+  var ra = 898^System.nanoTime().toInt;
 
   def genMove(ref: GameState4P) = {
 
     val bv = new BotVocabulary(ref)
 
-    if ((ref.pos.pos0 & ref.tr.pos0).isNull) {
-      4
-    } else {
+    def gosomewhere = {
 
       val targ = bv.firstTronZoneHeuristic
       //Console.err.println("raw front\n"+targ)
@@ -235,17 +234,23 @@ class bv_tronFrontierInside extends agentAbstract {
         //   Console.err.println("Tron dist "+targ._3);
         resp(rind)
       } else {
-        4
+        (ra)%5
       }
       //  } else {
       // 4
       // }
     }
+
+    if ((ref.pos.pos0 & ref.tr.pos0).isNull) {
+    //  System.err.println("FUCK " +ref.myRelScore+" Scores "+ref.scores)
+      if(ref.myRelScore>0) 4 else gosomewhere
+    } else {
+      gosomewhere
+    }
   }
 }
 
 class bv_taker(objectiveParam: BMap, seed: Long) extends agentAbstract {
-  
 
   var v = seed >> 32
   var u = (seed << 32) >>> 32
@@ -255,13 +260,13 @@ class bv_taker(objectiveParam: BMap, seed: Long) extends agentAbstract {
     u = 18000 * (u & 65535) + (u >> 16);
     ((v << 16) + u) & 0xFFFF;
   }
-  
-  var nbMove=0;
+
+  var nbMove = 0;
 
   def genMove(ref: GameState4P) = {
-    
+
     val bv = new BotVocabulary(ref)
-    val objective = objectiveParam|ref.tr.pos0
+    val objective = objectiveParam | ref.tr.pos0
 
     if (!(ref.pos.pos0 & ref.tr.void).isNull) {
       (applyRand().toInt % 4)
@@ -326,7 +331,7 @@ class bv_tronRacer extends agentAbstract {
 
     val m = tronIn.genMove(ref)
 
-    if (m == 4 && ((ref.pos.pos0 & ref.tr.void).isNull)) {
+    if (m == 4 ) {
       doPlan(ref)
     } else {
       m
@@ -335,11 +340,9 @@ class bv_tronRacer extends agentAbstract {
 
   def doPlan(ref: GameState4P) = {
     val bv = new BotVocabulary(ref)
-
     val specialVoid = (ref.tr.void | ref.tr.pos0).split
-    if (specialVoid.isEmpty) {
-      4
-    } else {
+/*
+    def goSomewhere = {
 
       val nearVoidL = (ref.pos.pos0.scramble & ref.tr.void).split
 
@@ -361,6 +364,18 @@ class bv_tronRacer extends agentAbstract {
         } else 4
       }
 
+    }*/
+
+    if (bv.void.isNull) {
+      4
+    } else {
+
+       val targArea = bv.border(bv.void.split.maxBy { x => x.countBitset })
+        val resp = bv.goTo(targArea)
+
+        if (resp.nonEmpty) {
+          resp(0)
+        } else 4       
     }
 
   }

@@ -16,7 +16,7 @@ class BotVocabulary(val st: GameState4P) {
 
   }
   
-  def minMapFromTo(from : BMap, to : BMap)={
+  def minMapFromTo(from : BMap, to : BMap) : Tuple2[Int,BMap]={
     var dist = 0;
     var curr = to;
     //Console.err.println("curr\n"+curr+" \n"+dist);
@@ -40,18 +40,25 @@ class BotVocabulary(val st: GameState4P) {
     new Tuple2(dist, curr)
   }
   
-  def greedyGoto(to : BMap) = {
+  
+  def greedyGoto(to : BMap) : List[Int] = {
      val from : BMap = st.pos.pos0
-     
      val food = border(void)
      
-     val wayMap=minMapFromTo(from,to)
+     val wayMap=minMapFromTo(from,to)._2 & food
      
      System.err.println(""+wayMap);
      
+     var bs = bitStack()
      
-     goTo(to)
-    
+     for(i <- 0 until 127){
+       bs = bs.add(wayMap)
+     }
+     System.err.println(""+bs);
+     
+     var dirBase = goTo(to)
+     
+    dirBase
   }
   
   

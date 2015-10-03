@@ -142,7 +142,7 @@ object BMap {
       curr = curr.scramble & trail
     }
 
-    curr 
+    curr
   }
 
   def firstDirToThrough(pos: BMap, goal: BMap, conduction: BMap) = {
@@ -154,7 +154,7 @@ object BMap {
 
     val conduct = conduction | pos;
 
- //    Console.err.println("begin search to\n"+goal );
+    //    Console.err.println("begin search to\n"+goal );
     while (!(last ^ curr).isNull && res.size == 0) {
       last = curr
       val up = (curr++) & conduct
@@ -176,9 +176,8 @@ object BMap {
       curr = curr | down
       curr = curr | left
       curr = curr | right
-      
 
-     //Console.err.println("curr\n"+curr );
+      //Console.err.println("curr\n"+curr );
     }
     res
   }
@@ -215,10 +214,9 @@ class BMap(
     val u19: Long //,       
     //val end : Long
     ) {
-  
-  
-  def notNull ={
-    ! (isNull)
+
+  def notNull = {
+    !(isNull)
   }
 
   def isNull = {
@@ -255,22 +253,22 @@ class BMap(
     extractZones
 
   }
-  
+
   def closeDiag = {
-    val frontier=this
+    val frontier = this
     val void = ~this
-    
+
     val ul = ((frontier--) & (frontier<<)) & ~(frontier<<-)
     val ur = ((frontier--) & (frontier>>)) & ~(frontier>>-)
     val dl = ((frontier++) & (frontier<<)) & ~(frontier<<+)
     val dr = ((frontier++) & (frontier>>)) & ~(frontier>>+)
 
     ((ul | ur | dl | dr) & void) | frontier
-  }  
+  }
 
   def border = {
     val ext = this.scramble ^ this;
-    (ext.angularScramble & this) | (this&BMap.border)
+    (ext.angularScramble & this) | (this & BMap.border)
   }
 
   def l_getAt(at: Int): Long = {
@@ -617,20 +615,19 @@ class BMap(
   def >>+ = {
     new BMap(0L, BMap.umask & u00 << 1, BMap.umask & u01 << 1, BMap.umask & u02 << 1, BMap.umask & u03 << 1, BMap.umask & u04 << 1, BMap.umask & u05 << 1, BMap.umask & u06 << 1, BMap.umask & u07 << 1, BMap.umask & u08 << 1, BMap.umask & u09 << 1, BMap.umask & u10 << 1, BMap.umask & u11 << 1, BMap.umask & u12 << 1, BMap.umask & u13 << 1, BMap.umask & u14 << 1, BMap.umask & u15 << 1, BMap.umask & u16 << 1, BMap.umask & u17 << 1, BMap.umask & u18 << 1)
   }
-    
-    
-    def shiftIn(dir : Int)={
-      dir match {
-        case 0 => this--
-        case 1 => this>>
-        case 2 => this++
-        case 3 => this<<
-      }
+
+  def shiftIn(dir: Int) = {
+    dir match {
+      case 0 => this--
+      case 1 => this>>
+      case 2 => this++
+      case 3 => this<<
     }
-    
-    def == ( that : BMap)={
-      (this^that).isNull
-    }
+  }
+
+  def ==(that: BMap) = {
+    (this ^ that).isNull
+  }
 
   def paintCrossAt(x: Int, y: Int) = {
     var res = l_setAt(y)(-1L)
@@ -651,42 +648,37 @@ class BMap(
 
     ~last
   }
-  
-  def shadow(v : BMap, dir : Int)={
-    
-   // System.err.println("shad\n"+this+" \n"+v);
-    def doCalc(op : BMap => BMap)={
-            
+
+  def shadow(v: BMap, dir: Int) = {
+
+    // System.err.println("shad\n"+this+" \n"+v);
+    def doCalc(op: BMap => BMap) = {
+
       var last = this
       var curr = (op(this)) & v;
 
-      
-      
       while ((!(last ^ curr).isNull) && (curr & ~v).isNull) {
 
-          
         last = curr
-        curr = (op(curr) |curr)
-            //    System.err.println("last\n"+last+" \n"+curr+" currNV\n"+(curr & v)+" curXorLast\n "+(last ^ curr));
+        curr = (op(curr) | curr)
+        //    System.err.println("last\n"+last+" \n"+curr+" currNV\n"+(curr & v)+" curXorLast\n "+(last ^ curr));
       }
-  
-      last    
-      
+
+      last
+
     }
-    
+
     dir match {
-      case 0 => doCalc( x => x-- )
-      case 1 => doCalc( x => x>> )
-      case 2 => doCalc( x => x++ )
-      case 3 => doCalc( x => x<< )
-      
-      
+      case 0 => doCalc(x => x--)
+      case 1 => doCalc(x => x>>)
+      case 2 => doCalc(x => x++)
+      case 3 => doCalc(x => x<<)
+
     }
-    
-    
+
   }
 
-  def closestPointHere(from: BMap) : Tuple2[Int,BMap] = {
+  def closestPointHere(from: BMap): Tuple2[Int, BMap] = {
     var dist = 0;
     var curr = from;
     //Console.err.println("curr\n"+curr+" \n"+dist);
@@ -700,30 +692,117 @@ class BMap(
 
     new Tuple2(dist, curr & this)
   }
-  
-    def scaleToSize(v : BMap, sz : Int) : BMap={
-      
-      val b = this
-      def up (it : BMap) : BMap ={
-        if(it.countBitset >= sz) it else{
-          val sc=it.scramble & v
-          if(sc==it) sc else
-            up(sc)
-          
-        }
+
+  def scaleToSize(v: BMap, sz: Int): BMap = {
+
+    val b = this
+    def up(it: BMap): BMap = {
+      if (it.countBitset >= sz) it else {
+        val sc = it.scramble & v
+        if (sc == it) sc else
+          up(sc)
+
       }
-      
-      def down (it : BMap ) : BMap ={
-        if(it.countBitset < sz) it else{
-          val sc=it & ((~it).scramble)
-          if(sc==it) sc else
-          down(sc)
-          
-        }
-      }      
-      
-      if(b.countBitset <= sz) up(b) else up(down(b)) 
     }
+
+    def down(it: BMap): BMap = {
+      if (it.countBitset < sz) it else {
+        val sc = it & ((~it).scramble)
+        if (sc == it) sc else
+          down(sc)
+
+      }
+    }
+
+    if (b.countBitset <= sz) up(b) else up(down(b))
+  }
+
+}
+
+object bitStack {
+
+  def apply() ={
+    new bitStack(
+      BMap.zero, BMap.zero,
+      BMap.zero, BMap.zero,
+      BMap.zero, BMap.zero,
+      BMap.zero, BMap.zero)
+  }
+}
+class bitStack(
+    a: BMap,
+    b: BMap,
+    c: BMap,
+    d: BMap,
+    e: BMap,
+    f: BMap,
+    g: BMap,
+    h: BMap) {
+
+  def apply(i: Int)(j: Int) ={
+    var acc= 0L
+    acc|= h(i)(j)
+    acc = acc << 1
+    acc|= g(i)(j)
+    acc = acc << 1
+    acc|= f(i)(j)
+    acc = acc << 1
+    acc|= e(i)(j)
+    
+    acc = acc << 1
+    acc|= d(i)(j)
+    acc = acc << 1
+    acc|= c(i)(j)
+    acc = acc << 1
+    acc|= b(i)(j)
+    acc = acc << 1
+    acc|= a(i)(j)    
+    
+    acc
+  }
+  
+  def carry(x : BMap, y : BMap, c : BMap)={
+    (x & y) | (x & c) | (y & c)
+  }
+  
+  def summ(x : BMap, y : BMap, c : BMap)={
+    x^y^c
+  }
+  
+  def add(x : BMap)={
+    var acc = x
+    var carr = x
+    
+    def spart(x : BMap)={
+      val r=x ^ carr
+      carr= a & carr
+      r
+    }
+    
+    
+    new bitStack(
+      spart(a),
+      spart(b),
+      spart(c),
+      spart(d),
+      
+      spart(e),
+      spart(f),
+      spart(g),
+      spart(h)
+    )
+  }
+  
+  override def toString = {
+     var res=""
+    for( j <-0 until 20){
+      for( i <- 0 until 35){
+        res = res +"|" +"%03x".format(apply(i)(j))
+      }
+      res=res+"\n"
+    }
+    res
+  }
 
 }
 

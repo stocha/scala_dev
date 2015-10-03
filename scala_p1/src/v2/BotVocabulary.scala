@@ -16,6 +16,44 @@ class BotVocabulary(val st: GameState4P) {
 
   }
   
+  def minMapFromTo(from : BMap, to : BMap)={
+    var dist = 0;
+    var curr = to;
+    //Console.err.println("curr\n"+curr+" \n"+dist);
+
+    val thisNotNull = (!from.isNull) && (!to.isNull)
+    while (((curr & from).isNull) & (thisNotNull)) {
+      curr = curr | curr.scramble
+      // Console.err.println("curr\n"+curr+" \n"+dist);
+    }
+    val wayout=curr
+    
+    curr = from;    
+    while (((curr & to).isNull) & (thisNotNull)) {
+      curr = (curr | curr.scramble) & wayout
+      
+      dist = dist + 1
+      // Console.err.println("curr\n"+curr+" \n"+dist);
+    }
+    val wayin=curr
+
+    new Tuple2(dist, curr)
+  }
+  
+  def greedyGoto(to : BMap) = {
+     val from : BMap = st.pos.pos0
+     
+     val food = border(void)
+     
+     val wayMap=minMapFromTo(from,to)
+     
+     System.err.println(""+wayMap);
+     
+     
+     goTo(to)
+    
+  }
+  
   
   def basicCapturePathTry={
     val traits=List(0,1,2,3).map { x => (x,st.pos.pos0.shadow(st.tr.void, x)) }

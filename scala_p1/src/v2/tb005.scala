@@ -9,6 +9,7 @@ class tb005  extends agentAbstract {
 
   val stopr: ((GameState4P, BMap) => Boolean) = { (x, y) => !((y & (x.tr.void | x.pos.pos0)) == y) }
   
+
   var ra = 0xAA88319
   val tron = new agentAbstract {
     def genMove(ref: GameState4P) = {

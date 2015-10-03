@@ -78,6 +78,15 @@ object BMap {
     ~f
 
   }
+  
+  val alternatedBM = {
+    var r =  BMap.zero
+    for( i<- 0 until 35; j<- 0 until 20){
+      r=r.set(i)(j)(i&1L);
+    }
+    r
+  }  
+  
 
   def enclosed(friend: BMap, void: BMap) = {
     var e = border | ~void;
@@ -403,6 +412,7 @@ class BMap(
 
   def l_toString(at: Int) = {
     val r = l_getAt(at)
+    // throw new RuntimeException("toto");
     llong_toString(r)
   }
 
@@ -721,7 +731,7 @@ class BMap(
 
 object bitStack {
 
-  def apply() ={
+  def apply() = {
     new bitStack(
       BMap.zero, BMap.zero,
       BMap.zero, BMap.zero,
@@ -730,76 +740,195 @@ object bitStack {
   }
 }
 class bitStack(
-    a: BMap,
-    b: BMap,
-    c: BMap,
-    d: BMap,
-    e: BMap,
-    f: BMap,
-    g: BMap,
-    h: BMap) {
+    val a: BMap,
+    val b: BMap,
+    val c: BMap,
+    val d: BMap,
+    val e: BMap,
+    val f: BMap,
+    val g: BMap,
+    val h: BMap) {
 
-  def apply(i: Int)(j: Int) ={
-    var acc= 0L
-    acc|= h(i)(j)
+  def apply(i: Int)(j: Int) = {
+    var acc = 0L
+    acc |= h(i)(j)
     acc = acc << 1
-    acc|= g(i)(j)
+    acc |= g(i)(j)
     acc = acc << 1
-    acc|= f(i)(j)
+    acc |= f(i)(j)
     acc = acc << 1
-    acc|= e(i)(j)
-    
+    acc |= e(i)(j)
+
     acc = acc << 1
-    acc|= d(i)(j)
+    acc |= d(i)(j)
     acc = acc << 1
-    acc|= c(i)(j)
+    acc |= c(i)(j)
     acc = acc << 1
-    acc|= b(i)(j)
+    acc |= b(i)(j)
     acc = acc << 1
-    acc|= a(i)(j)    
-    
+    acc |= a(i)(j)
+
     acc
   }
-  
-  def carry(x : BMap, y : BMap, c : BMap)={
+
+  private def carry(x: BMap, y: BMap, c: BMap) = {
     (x & y) | (x & c) | (y & c)
   }
-  
-  def summ(x : BMap, y : BMap, c : BMap)={
-    x^y^c
+
+  private def summ(x: BMap, y: BMap, c: BMap) = {
+    x ^ y ^ c
   }
   
-  def add(x : BMap)={
-    var acc = x
-    var carr = x
+  
+  def max(x : bitStack) ={
+    var deci=BMap.zero
+    var sup=BMap.zero
     
-    def spart(x : BMap)={
-      val r=x ^ carr
-      carr= a & carr
-      r
+    def supdo(y: BMap ,z:BMap ) ={
+          sup = (sup & deci ) | (~deci & (y & ~(z))) 
+          deci = deci | (y ^ z)          
+          
+          (deci & sup & y) | (deci & ~sup & z) | (~deci & y)
     }
     
+
+   // System.err.println("deci "+deci);
+  //  System.err.println("sup "+sup);
+    val rh = supdo(h,x.h)
+  //  System.err.println("deci "+deci);
+  //  System.err.println("sup "+sup);    
+    val rg = supdo(g,x.g)
+  //  System.err.println("deci "+deci);
+  //  System.err.println("sup "+sup);     
+    val rf = supdo(f,x.f)
+    val re = supdo(e,x.e)
     
+    val rd = supdo(d,x.d)
+    val rc = supdo(c,x.c)
+    val rb = supdo(b,x.b)
+    val ra = supdo(a,x.a)
+    
+    new bitStack(
+    ra,
+    rb,
+    rc,
+    rd,
+    
+    re,
+    rf,
+    rg,
+    rh
+    ){
+      
+    }
+    
+ /*   val ze=new bitStack(
+        rh,
+         rg,
+          BMap.zero,
+           BMap.zero,
+            BMap.zero,
+             BMap.zero,
+              BMap.zero,
+               BMap.zero
+        )
+    ze*/
+  }
+
+  def add(x: BMap) = {
+    var carr = x
+
+    def spart(x: BMap) = {
+      val r = x ^ carr
+      carr = x & carr
+      r
+    }
+
     new bitStack(
       spart(a),
       spart(b),
       spart(c),
       spart(d),
-      
+
       spart(e),
       spart(f),
       spart(g),
-      spart(h)
-    )
+      spart(h))
+  }
+
+  def >> = {
+    new bitStack(
+      a>>,
+      b>>,
+      c>>,
+      d>>,
+
+      e>>,
+      f>>,
+      g>>,
+      h>>)
+  }
+
+  def << = {
+    new bitStack(
+      a<<,
+      b<<,
+      c<<,
+      d<<,
+
+      e<<,
+      f<<,
+      g<<,
+      h<<)
+  }
+
+  def ++ = {
+    new bitStack(
+      a++,
+      b++,
+      c++,
+      d++,
+
+      e++,
+      f++,
+      g++,
+      h++)
   }
   
+  def -- = {
+    new bitStack(
+      a--,
+      b--,
+      c--,
+      d--,
+
+      e--,
+      f--,
+      g--,
+      h--)
+  }  
+  
+  def mask( m : BMap) = {
+    new bitStack(
+      a & m,
+      b & m,
+      c & m,
+      d & m,
+
+      e & m,
+      f & m,
+      g & m,
+      h & m)    
+    
+  }
+
   override def toString = {
-     var res=""
-    for( j <-0 until 20){
-      for( i <- 0 until 35){
-        res = res +"|" +"%03x".format(apply(i)(j))
+    var res = "\n"
+    for (j <- 0 until 20) {
+      for (i <- 0 until 35) {
+        res = res + "|" + "%03x".format(apply(i)(j))
       }
-      res=res+"\n"
+      res = res + "\n"
     }
     res
   }

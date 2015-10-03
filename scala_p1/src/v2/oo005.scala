@@ -37,7 +37,7 @@ class oo005  extends agentAbstract {
   
   def myGoElse(bv : BotVocabulary, dest : BMap)(elsedo : => Int)={
     val r = bv.greedyGoto(dest)
-    System.err.println(""+dest);
+   // System.err.println(""+dest);
     val dir=if(r.nonEmpty) r(ra.nextInt(r.size)) else elsedo
     insertInCycleBreak(dir)
     
@@ -240,7 +240,7 @@ class oo005  extends agentAbstract {
         //  System.err.println("Conflicting capture, ninja going ");
           if (toNinja.nonEmpty) toNinja(0) else tron.genMove(ref)          
         } else {
-          System.err.println("Conflicting capture, aborting ");
+         // System.err.println("Conflicting capture, aborting ");
           val toDef = bv.goTo(enemyCapturePath._2)
           if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
         }

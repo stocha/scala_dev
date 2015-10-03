@@ -40,6 +40,38 @@ class BotVocabulary(val st: GameState4P) {
     new Tuple2(dist, curr)
   }
   
+  def sumFromTo(from : BMap, to : BMap, target : BMap) : bitStack={
+    var dist = 0;
+    var curr = to;
+    
+    var res= bitStack()
+    //Console.err.println("curr\n"+curr+" \n"+dist);
+    
+     Console.err.println("way\n"+(from | to));
+
+    val thisNotNull = (!from.isNull) && (!to.isNull)
+    while (((curr & from).isNull) & (thisNotNull)) {
+      curr = curr | curr.scramble
+       Console.err.println("curr\n"+curr+" \n"+dist);
+    }
+    val wayout=curr
+    
+    curr = from;    
+    var last = BMap.zero
+    while (((curr & to).isNull) & (thisNotNull)) {
+      last = curr
+      curr = (curr | curr.scramble) & wayout
+      res=res.add( (curr ) )      
+     // res=res.add( (curr) & target )
+      
+      dist = dist + 1
+       Console.err.println("curr\n"+curr+" \n"+dist);
+    }
+    val wayin=curr
+
+    res
+  }  
+  
   
   def greedyGoto(to : BMap) : List[Int] = {
      val from : BMap = st.pos.pos0
@@ -47,14 +79,15 @@ class BotVocabulary(val st: GameState4P) {
      
      val wayMap=minMapFromTo(from,to)._2 & food
      
-     System.err.println(""+wayMap);
+   //  System.err.println(""+wayMap);
      
-     var bs = bitStack()
-     
-     for(i <- 0 until 127){
-       bs = bs.add(wayMap)
-     }
+
+     val bs = sumFromTo(from, to, void)
+   //  val bs = new bitStack( BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,
+     //    BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM)
      System.err.println(""+bs);
+     System.err.println("shift"+(bs>>) )
+     System.err.println("max "+((bs>>) max (bs) ))
      
      var dirBase = goTo(to)
      

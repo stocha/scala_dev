@@ -62,6 +62,7 @@ object SimulatorModel {
     // val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new oo004))
     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new bv_tronRacer,new oo004))
      val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo005,new oo002(size)))
+    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new oo005))
     
     //simul
     oo001T

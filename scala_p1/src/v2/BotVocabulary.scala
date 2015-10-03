@@ -47,12 +47,12 @@ class BotVocabulary(val st: GameState4P) {
     var res= bitStack()
     //Console.err.println("curr\n"+curr+" \n"+dist);
     
-     Console.err.println("way\n"+(from | to));
+     //Console.err.println("way\n"+(from | to));
 
     val thisNotNull = (!from.isNull) && (!to.isNull)
     while (((curr & from).isNull) & (thisNotNull)) {
       curr = curr | curr.scramble
-       Console.err.println("curr\n"+curr+" \n"+dist);
+      // Console.err.println("curr\n"+curr+" \n"+dist);
     }
     val wayout=curr
     
@@ -61,11 +61,20 @@ class BotVocabulary(val st: GameState4P) {
     while (((curr & to).isNull) & (thisNotNull)) {
       last = curr
       curr = (curr | curr.scramble) & wayout
-      res=res.add( (curr ) )      
-     // res=res.add( (curr) & target )
+      val u= (res--)  
+      val r= (res>>)
+      val d= (res++)
+      val l= (res<<)
+      
+      res =  res max u
+      res = res max r
+      res = res max d
+      res = res max l
+      
+      res=res.add( (curr^last) & target )
       
       dist = dist + 1
-       Console.err.println("curr\n"+curr+" \n"+dist);
+      // Console.err.println("curr\n"+curr+" \n"+dist);
     }
     val wayin=curr
 
@@ -75,23 +84,66 @@ class BotVocabulary(val st: GameState4P) {
   
   def greedyGoto(to : BMap) : List[Int] = {
      val from : BMap = st.pos.pos0
-     val food = border(void)
+     val food = border(void)        
      
      val wayMap=minMapFromTo(from,to)._2 & food
      
    //  System.err.println(""+wayMap);
      
-
+Console.err.println("fr\n"+(from ));     
+Console.err.println("way\n"+(from | to));
      val bs = sumFromTo(from, to, void)
    //  val bs = new bitStack( BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,
      //    BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM)
      System.err.println(""+bs);
-     System.err.println("shift"+(bs>>) )
-     System.err.println("max "+((bs>>) max (bs) ))
+     //System.err.println("shift"+(bs>>) )
+     //System.err.println("max "+((bs>>) max (bs) ))
      
      var dirBase = goTo(to)
-     
-    dirBase
+     var nbAtDir= Array[Int](0,0,0,0)
+     st.pos.pos0.forAllSet{
+       (x,y)=> {
+         
+         (x,y) match {
+           case (0,0) => {
+             nbAtDir(1)=bs(x+1)(y).toInt
+             nbAtDir(2)=bs(x)(y+1).toInt             
+           }
+           case (0,34) => {
+             nbAtDir(0)=bs(x)(y-1).toInt
+             nbAtDir(1)=bs(x+1)(y).toInt             
+             
+           }
+           case (19,0) => {
+             nbAtDir(0)=bs(x)(y-1).toInt
+             nbAtDir(1)=bs(x+1)(y).toInt
+           }
+           case (19,34) => {
+             nbAtDir(0)=bs(x)(y-1).toInt
+             nbAtDir(3)=bs(x-1)(y).toInt 
+           }
+             
+           case (x, y) => 
+             nbAtDir(0)=bs(x)(y-1).toInt
+             nbAtDir(1)=bs(x+1)(y).toInt
+             nbAtDir(2)=bs(x)(y+1).toInt
+             nbAtDir(3)=bs(x-1)(y).toInt             
+         }
+         
+
+       }
+     }
+
+    if(dirBase.isEmpty){
+      dirBase
+    }else{
+    val dirValue = dirBase.map(x => (x,nbAtDir(x) ) ) ;      
+      val maxValue = dirValue.maxBy(x => x._2)
+    
+
+            List(maxValue._1)      
+    }
+
   }
   
   

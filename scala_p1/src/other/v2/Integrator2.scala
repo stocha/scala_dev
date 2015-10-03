@@ -1,5 +1,217 @@
 package other.v2
 
+import v2.bitStack
+import scala.util.Random
+
+
+object bitStack {
+
+  def apply() = {
+    new bitStack(
+      BMap.zero, BMap.zero,
+      BMap.zero, BMap.zero,
+      BMap.zero, BMap.zero,
+      BMap.zero, BMap.zero)
+  }
+}
+class bitStack(
+    val a: BMap,
+    val b: BMap,
+    val c: BMap,
+    val d: BMap,
+    val e: BMap,
+    val f: BMap,
+    val g: BMap,
+    val h: BMap) {
+
+  def apply(i: Int)(j: Int) = {
+    var acc = 0L
+    acc |= h(i)(j)
+    acc = acc << 1
+    acc |= g(i)(j)
+    acc = acc << 1
+    acc |= f(i)(j)
+    acc = acc << 1
+    acc |= e(i)(j)
+
+    acc = acc << 1
+    acc |= d(i)(j)
+    acc = acc << 1
+    acc |= c(i)(j)
+    acc = acc << 1
+    acc |= b(i)(j)
+    acc = acc << 1
+    acc |= a(i)(j)
+
+    acc
+  }
+
+  private def carry(x: BMap, y: BMap, c: BMap) = {
+    (x & y) | (x & c) | (y & c)
+  }
+
+  private def summ(x: BMap, y: BMap, c: BMap) = {
+    x ^ y ^ c
+  }
+  
+  
+  def max(x : bitStack) ={
+    var deci=BMap.zero
+    var sup=BMap.zero
+    
+    def supdo(y: BMap ,z:BMap ) ={
+          sup = (sup & deci ) | (~deci & (y & ~(z))) 
+          deci = deci | (y ^ z)          
+          
+          (deci & sup & y) | (deci & ~sup & z) | (~deci & y)
+    }
+    
+
+   // System.err.println("deci "+deci);
+  //  System.err.println("sup "+sup);
+    val rh = supdo(h,x.h)
+  //  System.err.println("deci "+deci);
+  //  System.err.println("sup "+sup);    
+    val rg = supdo(g,x.g)
+  //  System.err.println("deci "+deci);
+  //  System.err.println("sup "+sup);     
+    val rf = supdo(f,x.f)
+    val re = supdo(e,x.e)
+    
+    val rd = supdo(d,x.d)
+    val rc = supdo(c,x.c)
+    val rb = supdo(b,x.b)
+    val ra = supdo(a,x.a)
+    
+    new bitStack(
+    ra,
+    rb,
+    rc,
+    rd,
+    
+    re,
+    rf,
+    rg,
+    rh
+    ){
+      
+    }
+    
+ /*   val ze=new bitStack(
+        rh,
+         rg,
+          BMap.zero,
+           BMap.zero,
+            BMap.zero,
+             BMap.zero,
+              BMap.zero,
+               BMap.zero
+        )
+    ze*/
+  }
+
+  def add(x: BMap) = {
+    var carr = x
+
+    def spart(x: BMap) = {
+      val r = x ^ carr
+      carr = x & carr
+      r
+    }
+
+    new bitStack(
+      spart(a),
+      spart(b),
+      spart(c),
+      spart(d),
+
+      spart(e),
+      spart(f),
+      spart(g),
+      spart(h))
+  }
+
+  def >> = {
+    new bitStack(
+      a>>,
+      b>>,
+      c>>,
+      d>>,
+
+      e>>,
+      f>>,
+      g>>,
+      h>>)
+  }
+
+  def << = {
+    new bitStack(
+      a<<,
+      b<<,
+      c<<,
+      d<<,
+
+      e<<,
+      f<<,
+      g<<,
+      h<<)
+  }
+
+  def ++ = {
+    new bitStack(
+      a++,
+      b++,
+      c++,
+      d++,
+
+      e++,
+      f++,
+      g++,
+      h++)
+  }
+  
+  def -- = {
+    new bitStack(
+      a--,
+      b--,
+      c--,
+      d--,
+
+      e--,
+      f--,
+      g--,
+      h--)
+  }  
+  
+  def mask( m : BMap) = {
+    new bitStack(
+      a & m,
+      b & m,
+      c & m,
+      d & m,
+
+      e & m,
+      f & m,
+      g & m,
+      h & m)    
+    
+  }
+
+  override def toString = {
+    var res = "\n"
+    for (j <- 0 until 20) {
+      for (i <- 0 until 35) {
+        res = res + "|" + "%03x".format(apply(i)(j))
+      }
+      res = res + "\n"
+    }
+    res
+  }
+
+}
+
+
+
 object BMap {
 
   val zero = {
@@ -731,64 +943,178 @@ class BotVocabulary(val st: GameState4P) {
     trail.split
 
   }
-  
-  
-  def basicCapturePathTry={
-    val traits=List(0,1,2,3).map { x => (x,st.pos.pos0.shadow(st.tr.void, x)) }
-    
-    def dirTrail (x : Tuple2[Int,BMap])  = {
-      var rotd=(x._1+1)%4
-      var opd=(rotd+2)%4
-      
-      List( x._2, x._2.shiftIn(rotd)|st.pos.pos0.shiftIn(rotd), x._2.shiftIn(opd)|st.pos.pos0.shiftIn(opd) )
-    }      
-          
-    traits.map(dirTrail).flatten.map(x=> (x & st.tr.void))
+
+  def minMapFromTo(from: BMap, to: BMap): Tuple2[Int, BMap] = {
+    var dist = 0;
+    var curr = to;
+    //Console.err.println("curr\n"+curr+" \n"+dist);
+
+    val thisNotNull = (!from.isNull) && (!to.isNull)
+    while (((curr & from).isNull) & (thisNotNull)) {
+      curr = curr | curr.scramble
+      // Console.err.println("curr\n"+curr+" \n"+dist);
+    }
+    val wayout = curr
+
+    curr = from;
+    while (((curr & to).isNull) & (thisNotNull)) {
+      curr = (curr | curr.scramble) & wayout
+
+      dist = dist + 1
+      // Console.err.println("curr\n"+curr+" \n"+dist);
+    }
+    val wayin = curr
+
+    new Tuple2(dist, curr)
   }
-  
-  def dead_code_dirCaptureStraight ={
-    val traits=List(0,1,2,3).map { x => (x,st.pos.pos0.shadow(st.tr.void, x)) }
-    val capt=traits.map{ x => (x._1,
-      BMap.enclosed((x._2 )  | st.tr.pos0, void & (~x._2) )
-      ,x._2 ) 
-    }.filter(x => x._2.notNull)
+
+  def sumFromTo(from: BMap, to: BMap, target: BMap): bitStack = {
+    var dist = 0;
+    var curr = to;
+
+    var res = bitStack()
+    //Console.err.println("curr\n"+curr+" \n"+dist);
+
+    //Console.err.println("way\n"+(from | to));
+
+    val thisNotNull = (!from.isNull) && (!to.isNull)
+    while (((curr & from).isNull) & (thisNotNull)) {
+      curr = curr | curr.scramble
+      // Console.err.println("curr\n"+curr+" \n"+dist);
+    }
+    val wayout = curr
+
+    curr = from;
+    var last = BMap.zero
+    while (((curr & to).isNull) & (thisNotNull)) {
+      last = curr
+      curr = (curr | curr.scramble) & wayout
+      val u = (res--)
+      val r = (res>>)
+      val d = (res++)
+      val l = (res<<)
+
+      res = res max u
+      res = res max r
+      res = res max d
+      res = res max l
+
+      res = res.add((curr ^ last) & target)
+
+      dist = dist + 1
+      // Console.err.println("curr\n"+curr+" \n"+dist);
+    }
+    val wayin = curr
+
+    res
+  }
+
+  def greedyGoto(to: BMap): List[Int] = {
+    val from: BMap = st.pos.pos0
+    val food = border(void)
+
+    val wayMap = minMapFromTo(from, to)._2 & food
+
+    //  System.err.println(""+wayMap);
+/*
+    Console.err.println("fr greedyGoto\n" + (from));
+    Console.err.println("way greedyGoto\n" + (from | to));
     
+    try{
+      
+      throw new RuntimeException()
+    }catch{
+
+      case  e=> e.printStackTrace()
+
+      
+    }*/
+    val bs = sumFromTo(from, to, void)
+    //  val bs = new bitStack( BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,
+    //    BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM)
+  //  System.err.println("" + bs);
+    //System.err.println("shift"+(bs>>) )
+    //System.err.println("max "+((bs>>) max (bs) ))
+
+    var dirBase = goTo(to)
+    var nbAtDir = Array[Int](0, 0, 0, 0)
+
+    var x = 0
+    var y = 0
+
+    st.pos.pos0.forAllSet { (a, b) => x = a; y = b; }
+
+    if (dirBase.isEmpty) {
+      dirBase
+    } else {
+      for (dd <- dirBase) {
+        val cc = GameState4P.convertDireToOfficialCoord(dd)(x)(y)
+        nbAtDir(dd) = bs(cc._1)(cc._2).toInt
+      }
+
+      val dirValue = dirBase.map(x => (x, nbAtDir(x)));
+      val maxValue = dirValue.maxBy(x => x._2)
+
+     // System.err.println("dir base " + dirBase);
+      System.err.println("dir value " + dirValue);
+      List(maxValue._1)
+    }
+
+  }
+
+  def basicCapturePathTry = {
+    val traits = List(0, 1, 2, 3).map { x => (x, st.pos.pos0.shadow(st.tr.void, x)) }
+
+    def dirTrail(x: Tuple2[Int, BMap]) = {
+      var rotd = (x._1 + 1) % 4
+      var opd = (rotd + 2) % 4
+
+      List(x._2, x._2.shiftIn(rotd) | st.pos.pos0.shiftIn(rotd), x._2.shiftIn(opd) | st.pos.pos0.shiftIn(opd))
+    }
+
+    traits.map(dirTrail).flatten.map(x => (x & st.tr.void))
+  }
+
+  def dead_code_dirCaptureStraight = {
+    val traits = List(0, 1, 2, 3).map { x => (x, st.pos.pos0.shadow(st.tr.void, x)) }
+    val capt = traits.map { x =>
+      (x._1,
+        BMap.enclosed((x._2) | st.tr.pos0, void & (~x._2)), x._2)
+    }.filter(x => x._2.notNull)
+
     capt
   }
-  
-  def is_capturing(prop : BMap) ={
-    val enc= BMap.enclosed((prop )  | st.tr.pos0, void & (~prop ))
+
+  def is_capturing(prop: BMap) = {
+    val enc = BMap.enclosed((prop) | st.tr.pos0, void & (~prop))
     enc.notNull
   }
-  
-  def what_capturing(prop : BMap) ={
-    val enc= BMap.enclosed((prop )  | st.tr.pos0, void & (~prop ))
+
+  def what_capturing(prop: BMap) = {
+    val enc = BMap.enclosed((prop) | st.tr.pos0, void & (~prop))
     enc
-  }  
-  
-  def enemies = {
-    void ^ st.pos.pos0    
   }
-  
-  def dead_code_someCapturePlans ={
-    val capt=dead_code_dirCaptureStraight
-    
+
+  def enemies = {
+    void ^ st.pos.pos0
+  }
+
+  def dead_code_someCapturePlans = {
+    val capt = dead_code_dirCaptureStraight
+
     def forsee(to: BMap) = {
       val zerg = new bv_followTrail(to)(identity)
       val sim = new SimulBot(0, st, Array(zerg, zerg, zerg, zerg))
       var dir = 0
-  
+
       while (GameState4P.m(dir)(0) != 4) {
         dir = sim.turn()
       }
-  
+
       sim.getState.myRelScore
     }
-    
 
-    
   }
-  
 
   def firstZoneHeuristic = {
     var e = st.pos.pos1 | st.pos.pos2 | st.pos.pos3;
@@ -817,23 +1143,23 @@ class BotVocabulary(val st: GameState4P) {
   }
 
   def shadows = {
-    def exts(m : BMap) = {
-     val s= for(b <- List(0,1,2,3)) yield{
-        val shad=m.shadow(void, b)
+    def exts(m: BMap) = {
+      val s = for (b <- List(0, 1, 2, 3)) yield {
+        val shad = m.shadow(void, b)
         shad.split
-      }          
+      }
       s.flatten
     }
-    
+
     st.tr.asList.map { x => exts(x) }
-    
+
   }
 
   def extractAllZone = {
     List(extractTronZone,
-        (new BotVocabulary(st.swap(1))).extractTronZone,
-        (new BotVocabulary(st.swap(2))).extractTronZone,
-        (new BotVocabulary(st.swap(3))).extractTronZone).filter { x => !x.isNull }
+      (new BotVocabulary(st.swap(1))).extractTronZone,
+      (new BotVocabulary(st.swap(2))).extractTronZone,
+      (new BotVocabulary(st.swap(3))).extractTronZone).filter { x => !x.isNull }
 
   }
 
@@ -970,27 +1296,26 @@ class BotVocabulary(val st: GameState4P) {
       nthBm(code(to), nb - 1)(code)
     }
   }
-  
-  
-  def eval_withTaker(to : BMap){
-    def zerg ={
-      new bv_taker(to,0xFF93887492L)
+
+  def eval_withTaker(to: BMap) {
+    def zerg = {
+      new bv_taker(to, 0xFF93887492L)
     }
-    
+
     val sim = new SimulBot(0, st, Array(zerg, zerg, zerg, zerg))
     var dir = 0
-    var nbMove=0
-    while (((sim.getState.tr.void&to ).notNull) && nbMove < 200) {
-       nbMove=nbMove+1
-      
+    var nbMove = 0
+    while (((sim.getState.tr.void & to).notNull) && nbMove < 200) {
+      nbMove = nbMove + 1
+
       dir = sim.turn()
       //System.err.println("Evaluating \n"+sim.getState);
     }
 
-    val res=sim.getState.myRelScore
-    
-  //  System.err.println("Evaled with takers "+res);
-    
+    val res = sim.getState.myRelScore
+
+    //  System.err.println("Evaled with takers "+res);
+
   }
 
   def forsee_withZerger(to: BMap, plan: agentAbstract) = {
@@ -1035,7 +1360,6 @@ class BotVocabulary(val st: GameState4P) {
   }
 
 }
-
 class log {
   private var donel: List[Int] = List()
   private var undol: List[Int] = List()
@@ -1427,8 +1751,6 @@ class bv_tronRacer extends agentAbstract {
   }
 }
 
-
-
 object GameState4P {
 
   val H = 20
@@ -1523,6 +1845,18 @@ object GameState4P {
       }    
     
     if(out._3==0) (""+out._1+" "+out._2) else ("BACK "+(-out._3))
+  }
+  
+  def convertDireToOfficialCoord(dir : Int)(x : Int)(y : Int)={
+       val out=dir match {
+        case 0 => new Tuple2(x, y - 1);
+        case 1 => new Tuple2(x + 1, y);
+        case 2 => new Tuple2(x, y + 1);
+        case 3 => new Tuple2(x - 1, y);
+        case 4 => new Tuple2(x , y);
+        case _ => new Tuple2(0 , 0);
+      }        
+       out
   }
   
   def readOfficialGameState(sc : Seq[Tuple3[Int,Int,Int]])(sm : Seq[String]) = {
@@ -1695,7 +2029,6 @@ class GameVect4P(
   }
 
 }
-
 class GameState4P(
     val pos: GameVect4P,
     val tr: GameVect4P) {
@@ -1774,7 +2107,6 @@ class GameState4P(
   }
 
 }
-
 class oo002(nbPlayer: Int) extends agentAbstract {
 
   var currPlan: agentAbstract = null
@@ -1964,8 +2296,8 @@ object Player extends App {
 
   val opponentcount = readInt // Opponent count
 
-  val bot2 = new oo004
-  val other = new tb005
+  val bot2 = new oo006(0xF244444)
+  val other = new oo006(0xF244444)
   
   val bot = if(opponentcount==1) bot2 else other
 
@@ -2633,4 +2965,327 @@ class tb005  extends agentAbstract {
 
 }
 
+class oo006(seed: Long) extends agentAbstract {
 
+  var currPlan: agentAbstract = null
+  var ra = new Random(0x883789 ^ seed)
+  val MinValForPlan = 3
+
+  val ratioEmpty = 80
+
+  val cyclebreaker = Array(0, 1, 2, 3)
+
+  def insertInCycleBreak(i: Int): Int = {
+    cyclebreaker(3) = cyclebreaker(2)
+    cyclebreaker(2) = cyclebreaker(1)
+    cyclebreaker(1) = cyclebreaker(0)
+    cyclebreaker(0) = i
+
+    def eq(i: Int, j: Int) = {
+      cyclebreaker(i) == cyclebreaker(j)
+    }
+
+    def opeq(i: Int, j: Int) = {
+      cyclebreaker(i) == ((cyclebreaker(j) + 2) % 4)
+    }
+
+    if (eq(0, 2) && eq(3, 1) && opeq(1, 2)) {
+      ra.nextInt(4)
+    } else i
+
+  }
+
+  def myGoElse(bv: BotVocabulary, dest: BMap)(elsedo: => Int) = {
+    val r = bv.greedyGoto(dest)
+    // System.err.println(""+dest);
+    val dir = if (r.nonEmpty) r(ra.nextInt(r.size)) else elsedo
+    insertInCycleBreak(dir)
+
+  }
+
+  val tron = new agentAbstract {
+    def genMove(ref: GameState4P) = {
+      val bv = new BotVocabulary(ref)
+
+      def anyOpen = {
+        if (bv.void.isNull) {
+          4
+        } else {
+
+          val targArea = bv.border(bv.void.split.maxBy { x => x.countBitset })
+          val resp = myGoElse(bv, targArea) { 4 }
+          resp
+        }
+
+      }
+
+      def gosomeOpenBorder = {
+
+        val targ = bv.firstTronZoneHeuristic
+
+        //Console.err.println("raw front\n"+targ)
+        val targSS = bv.border(targ._1.closeDiag)
+        val targf = if (targSS.isNull) targ._2.closeDiag else targSS
+        //  Console.err.println("f front\n"+targf)
+        // val targfsp = targf.split
+        //if (targfsp.nonEmpty) {
+        //val mtarg = targfsp.maxBy { x => x.countBitset }
+        val mtarg = targf
+        val resp = myGoElse(bv, mtarg) { anyOpen }
+        resp
+      }
+      if (((ref.pos.pos0 & ref.tr.pos0) | ref.tr.void).isNull) {
+        System.err.println("Interlock " + ref.myRelScore + " Scores " + ref.scores)
+        if (ref.myRelScore > 0) 4 else gosomeOpenBorder
+      } else {
+        gosomeOpenBorder
+      }
+    }
+
+  }
+
+  /*def takeThere(b: BMap, ref: GameState4P) = {
+    // System.err.println("Taking : "+b)        
+
+    currPlan = new bv_taker(b, 0x4157457)
+    currPlan.genMove(ref)
+
+  }*/
+
+  def forseeMovesSimple(to: BMap, ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+    val capt = bv.what_capturing(to)
+    val ag = new bv_followTrail(to)(identity)
+    val zerg = new bv_followTrail(capt)(identity)
+    val sim = new SimulBot(0, ref, Array(ag, zerg, new bv_doNothing, new bv_doNothing))
+    var dir = 0
+
+    //System.err.println("Simuling try "+(ref.tr.pos0 | to));
+
+    while (GameState4P.m(dir)(0) != 4) {
+      dir = sim.turn()
+    }
+
+    val success = ((sim.getState.tr.pos0 & capt) ^ capt).isNull
+    //     System.err.println("\n"+sim.getState);
+
+    // val sim2 = new SimulBot(0, sim.getState, Array(new bv_taker(BMap.full,0xFF92888), new bv_taker(BMap.full,0xFF89398), new bv_doNothing, new bv_doNothing))
+
+    // for(i <- 0 until 100){
+    //   dir = sim2.turn()
+    // }
+
+    if (success) {
+
+      //   System.err.println("success \n"+  to+" \n "+capt);
+      capt.countBitset
+
+    } else 0
+  }
+
+  def forseeConcurrentCaptures(mine: BMap, theirs: BMap, ref: GameState4P) = {
+    val oldsc = ref.myRelScore
+
+    val bv = new BotVocabulary(ref)
+    val captmine = bv.what_capturing(mine)
+    val capttheir = bv.what_capturing(theirs)
+    val ag = new bv_followTrail(mine | capttheir)(identity)
+    val zerg = new bv_followTrail(theirs | captmine)(identity)
+    val sim = new SimulBot(0, ref, Array(ag, zerg, new bv_doNothing, new bv_doNothing))
+    var dir = 0
+
+    //System.err.println("Simuling try "+(ref.tr.pos0 | to));
+
+    while (GameState4P.m(dir)(0) != 4) {
+      dir = sim.turn()
+    }
+
+    //     System.err.println("\n"+sim.getState);
+
+    // val sim2 = new SimulBot(0, sim.getState, Array(new bv_taker(BMap.full,0xFF92888), new bv_taker(BMap.full,0xFF89398), new bv_doNothing, new bv_doNothing))
+
+    // for(i <- 0 until 100){
+    //   dir = sim2.turn()
+    // }
+
+    (sim.getState.myRelScore - oldsc)
+  }
+
+  def eCaptureLines(other: GameState4P) = {
+    val ref = other.swap(1)
+    val bv = new BotVocabulary(ref)
+
+    val captSt: List[BMap] = bv.basicCapturePathTry
+    val basicEval = (captSt).filter { x =>
+      {
+        bv.is_capturing(x) && (forseeMovesSimple(x, ref) == 0)
+      }
+    }
+
+    if (basicEval.isEmpty) (BMap.zero, BMap.zero) else {
+      val res = basicEval.maxBy { x => bv.what_capturing(x).countBitset }
+
+      //   System.err.println("==>"+res)
+
+      (res, bv.what_capturing(res))
+    }
+  }
+
+  def doPlan_NonDouble(ref: GameState4P, captSt: List[BMap]) = {
+    val bv = new BotVocabulary(ref)
+    val currS = ref.myRelScore
+    val ll = captSt
+    val basicEval = (ll).filter { x => bv.is_capturing(x) }.map { x => (forseeMovesSimple(x, ref) - currS, x) }
+    val maxEval = if (basicEval.size > 0) basicEval.maxBy(x => x._1) else (0, BMap.zero)
+    if (maxEval._1 > MinValForPlan) {
+      //   System.err.println("Follow evaluation" + maxEval)
+
+      val zerg = new bv_followTrail(maxEval._2)(identity)
+      val to = zerg.genMove(ref)
+      to
+    } else {
+      tron.genMove(ref)
+    }
+
+    //  System.err.println("Follow evaluation" + maxEval)
+
+    val zerg = new bv_followTrail(maxEval._2)(identity)
+    val to = zerg.genMove(ref)
+    to
+  }
+
+  def doTakeEmpty(ref: GameState4P) = {
+
+    if (ref.tr.void.countBitset < ratioEmpty * (GameState4P.WH) / 100) {
+     // System.err.println("Empty phase");
+      
+      val bv = new BotVocabulary(ref)
+      val concZone=bv.firstZoneHeuristic & ref.tr.pos0
+      val accessVoid=BMap.followTrail(concZone, ref.tr.void)
+      
+      if(accessVoid.isNull){
+        tron.genMove(ref)
+      }else{
+        
+        //System.err.println("accessVoid "+accessVoid)
+        val allTargs=accessVoid.split.map { x => val b=bv.border(x); val e= BMap.enclosed(bv.me | b, bv.void);(b,e.countBitset) } 
+        if(allTargs.nonEmpty){
+          val t=allTargs.maxBy( x => x._2 )._1
+          myGoElse(bv, t){tron.genMove(ref)}
+          
+          
+        }else{
+          val allTargs=ref.tr.void.split.map { x => val b=bv.border(x); val e= BMap.enclosed(bv.me | b, bv.void);(b,e.countBitset) } 
+           val t=allTargs.maxBy( x => x._2 )._1
+          myGoElse(bv, t){tron.genMove(ref)}
+        }
+        
+        
+      }
+      
+      
+      
+      
+      
+    } else {
+     // System.err.println("Border phase");
+      tron.genMove(ref)
+    }
+
+  }
+
+  def doPlan(ref: GameState4P) = {
+    val bv = new BotVocabulary(ref)
+    val currS = ref.myRelScore
+    val targ = bv.firstTronZoneHeuristic
+    val tr = bv.firstZoneHeuristic
+
+    val captSt: List[BMap] = bv.basicCapturePathTry.filter { x => x.notNull }
+
+    val tmpF0 = for (d <- 0 until 4; s <- List(4, 10, 20)) yield {
+      (new Tuple2(d, s))
+    }
+
+    def genBmSquare(p: Seq[Tuple2[Int, Int]], bv: BotVocabulary) = {
+      for (Tuple2(x, y) <- p) yield {
+        bv.border(bv.squareInDir(x, y) & bv.st.tr.void)
+      }
+    }
+
+    val bmSqToTry = genBmSquare(tmpF0, bv)
+
+    //System.err.println(""+captSt)
+
+    //  val scoresBasicManeu=captSt.map { x => forseeMovesSimple(x, ref) - currS }
+
+    val ll = captSt
+    val basicEval = (ll).filter { x => bv.is_capturing(x) }.map { x => (forseeMovesSimple(x, ref) - currS, x) }
+    // val basicEval = List[Tuple2[Int,BMap]]()
+    val maxEval = if (basicEval.size > 0) basicEval.maxBy(x => x._1) else (0, BMap.zero)
+
+    //System.err.println("scores "+scoresBasicManeu);
+
+    val enemyCapturePath = eCaptureLines(ref)
+    if (enemyCapturePath._1.notNull) {
+      //Attention !
+      if (maxEval._1 <= MinValForPlan) {
+        val toDef = bv.goTo(enemyCapturePath._2)
+        if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
+      } else {
+        val futurBothList = captSt.map { x => (forseeConcurrentCaptures(x, enemyCapturePath._1, ref), x) }
+        val workingOnes = futurBothList.filter { x => x._1 > currS }
+        if (workingOnes.nonEmpty) {
+          val bmTarg = workingOnes.maxBy { x => x._1 }._2
+          val toNinja = bv.goTo(bmTarg)
+          //  System.err.println("Conflicting capture, ninja going ");
+          if (toNinja.nonEmpty) toNinja(0) else tron.genMove(ref)
+        } else {
+          // System.err.println("Conflicting capture, aborting ");
+          val toDef = bv.goTo(enemyCapturePath._2)
+          if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
+        }
+      }
+    } else {
+      if (maxEval._1 > MinValForPlan) {
+        doPlan_NonDouble(ref, captSt)
+      } else {
+        doTakeEmpty(ref)
+      }
+    }
+
+    //System.err.println("Best plan : "+maxEval);
+
+    // System.err.println("tron"+targ);
+    //System.err.println("first"+tr);
+    // System.err.println("dist "+targ._3);
+    // System.err.println("tron + first "+((targ._2 & tr) | ref.pos.pos0));
+
+    //4
+  }
+
+  var logMove: log = new log
+  override def backMove() {
+    //System.err.println("backing "+logMove);
+    logMove.undo()
+  }
+
+  def genMove(ref: GameState4P) = {
+    logMove.blockControl {
+      // currPlan=null
+
+      if (currPlan == null) {
+        doPlan(ref)
+      } else {
+        val m = currPlan.genMove(ref)
+        if (m != 4) m else {
+          currPlan = null
+          doPlan(ref)
+
+        }
+      }
+
+    }
+
+  }
+
+}

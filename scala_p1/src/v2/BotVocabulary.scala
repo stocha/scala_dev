@@ -87,9 +87,19 @@ class BotVocabulary(val st: GameState4P) {
     val wayMap = minMapFromTo(from, to)._2 & food
 
     //  System.err.println(""+wayMap);
+/*
+    Console.err.println("fr greedyGoto\n" + (from));
+    Console.err.println("way greedyGoto\n" + (from | to));
+    
+    try{
+      
+      throw new RuntimeException()
+    }catch{
 
-//    Console.err.println("fr\n" + (from));
-  //  Console.err.println("way\n" + (from | to));
+      case  e=> e.printStackTrace()
+
+      
+    }*/
     val bs = sumFromTo(from, to, void)
     //  val bs = new bitStack( BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,
     //    BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM,BMap.alternatedBM)
@@ -117,7 +127,7 @@ class BotVocabulary(val st: GameState4P) {
       val maxValue = dirValue.maxBy(x => x._2)
 
      // System.err.println("dir base " + dirBase);
-     // System.err.println("dir value " + dirValue);
+      System.err.println("dir value " + dirValue);
       List(maxValue._1)
     }
 

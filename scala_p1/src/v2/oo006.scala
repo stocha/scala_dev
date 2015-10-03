@@ -5,44 +5,43 @@ import scala.util.Random
 /**
  * @author Jahan
  */
-class oo005 (seed : Long)  extends agentAbstract {
+class oo006(seed: Long) extends agentAbstract {
 
   var currPlan: agentAbstract = null
-  var ra = new Random(0x883789^seed)
+  var ra = new Random(0x883789 ^ seed)
   val MinValForPlan = 3
-  
-  val cyclebreaker = Array(0,1,2,3)
-  
-  def insertInCycleBreak(i : Int) : Int = {
-    cyclebreaker(3)=cyclebreaker(2)
-    cyclebreaker(2)=cyclebreaker(1)
-    cyclebreaker(1)=cyclebreaker(0)
-    cyclebreaker(0)=i
-    
-    def eq(i : Int, j :Int)={
-      cyclebreaker (i)==cyclebreaker(j)
+
+  val ratioEmpty = 80
+
+  val cyclebreaker = Array(0, 1, 2, 3)
+
+  def insertInCycleBreak(i: Int): Int = {
+    cyclebreaker(3) = cyclebreaker(2)
+    cyclebreaker(2) = cyclebreaker(1)
+    cyclebreaker(1) = cyclebreaker(0)
+    cyclebreaker(0) = i
+
+    def eq(i: Int, j: Int) = {
+      cyclebreaker(i) == cyclebreaker(j)
     }
-    
-    def opeq(i : Int, j :Int)={
-      cyclebreaker (i)== ((cyclebreaker(j)+2)%4)
-    }    
-    
-    if(eq(0,2) && eq (3,1) && opeq(1,2)){
+
+    def opeq(i: Int, j: Int) = {
+      cyclebreaker(i) == ((cyclebreaker(j) + 2) % 4)
+    }
+
+    if (eq(0, 2) && eq(3, 1) && opeq(1, 2)) {
       ra.nextInt(4)
-    }else i
-    
+    } else i
+
   }
-  
-  
-  
-  def myGoElse(bv : BotVocabulary, dest : BMap)(elsedo : => Int)={
+
+  def myGoElse(bv: BotVocabulary, dest: BMap)(elsedo: => Int) = {
     val r = bv.greedyGoto(dest)
-   // System.err.println(""+dest);
-    val dir=if(r.nonEmpty) r(ra.nextInt(r.size)) else elsedo
+    // System.err.println(""+dest);
+    val dir = if (r.nonEmpty) r(ra.nextInt(r.size)) else elsedo
     insertInCycleBreak(dir)
-    
+
   }
-    
 
   val tron = new agentAbstract {
     def genMove(ref: GameState4P) = {
@@ -54,7 +53,7 @@ class oo005 (seed : Long)  extends agentAbstract {
         } else {
 
           val targArea = bv.border(bv.void.split.maxBy { x => x.countBitset })
-          val resp = myGoElse(bv,targArea){ 4 }
+          val resp = myGoElse(bv, targArea) { 4 }
           resp
         }
 
@@ -63,34 +62,35 @@ class oo005 (seed : Long)  extends agentAbstract {
       def gosomeOpenBorder = {
 
         val targ = bv.firstTronZoneHeuristic
+
         //Console.err.println("raw front\n"+targ)
         val targSS = bv.border(targ._1.closeDiag)
         val targf = if (targSS.isNull) targ._2.closeDiag else targSS
-        //   Console.err.println("f front\n"+targf)
+        //  Console.err.println("f front\n"+targf)
         // val targfsp = targf.split
         //if (targfsp.nonEmpty) {
         //val mtarg = targfsp.maxBy { x => x.countBitset }
         val mtarg = targf
-        val resp = myGoElse(bv,mtarg){anyOpen}
+        val resp = myGoElse(bv, mtarg) { anyOpen }
         resp
       }
-
       if (((ref.pos.pos0 & ref.tr.pos0) | ref.tr.void).isNull) {
-        //  System.err.println("FUCK " +ref.myRelScore+" Scores "+ref.scores)
+        System.err.println("Interlock " + ref.myRelScore + " Scores " + ref.scores)
         if (ref.myRelScore > 0) 4 else gosomeOpenBorder
       } else {
         gosomeOpenBorder
       }
     }
+
   }
 
-  def takeThere(b: BMap, ref: GameState4P) = {
-    // System.err.println("Taking : "+b)
+  /*def takeThere(b: BMap, ref: GameState4P) = {
+    // System.err.println("Taking : "+b)        
 
     currPlan = new bv_taker(b, 0x4157457)
     currPlan.genMove(ref)
 
-  }
+  }*/
 
   def forseeMovesSimple(to: BMap, ref: GameState4P) = {
     val bv = new BotVocabulary(ref)
@@ -162,12 +162,12 @@ class oo005 (seed : Long)  extends agentAbstract {
       }
     }
 
-    if (basicEval.isEmpty) (BMap.zero,BMap.zero) else {
+    if (basicEval.isEmpty) (BMap.zero, BMap.zero) else {
       val res = basicEval.maxBy { x => bv.what_capturing(x).countBitset }
 
       //   System.err.println("==>"+res)
 
-      (res,bv.what_capturing(res))
+      (res, bv.what_capturing(res))
     }
   }
 
@@ -192,6 +192,46 @@ class oo005 (seed : Long)  extends agentAbstract {
     val zerg = new bv_followTrail(maxEval._2)(identity)
     val to = zerg.genMove(ref)
     to
+  }
+
+  def doTakeEmpty(ref: GameState4P) = {
+
+    if (ref.tr.void.countBitset < ratioEmpty * (GameState4P.WH) / 100) {
+     // System.err.println("Empty phase");
+      
+      val bv = new BotVocabulary(ref)
+      val concZone=bv.firstZoneHeuristic & ref.tr.pos0
+      val accessVoid=BMap.followTrail(concZone, ref.tr.void)
+      
+      if(accessVoid.isNull){
+        tron.genMove(ref)
+      }else{
+        
+        //System.err.println("accessVoid "+accessVoid)
+        val allTargs=accessVoid.split.map { x => val b=bv.border(x); val e= BMap.enclosed(bv.me | b, bv.void);(b,e.countBitset) } 
+        if(allTargs.nonEmpty){
+          val t=allTargs.maxBy( x => x._2 )._1
+          myGoElse(bv, t){tron.genMove(ref)}
+          
+          
+        }else{
+          val allTargs=ref.tr.void.split.map { x => val b=bv.border(x); val e= BMap.enclosed(bv.me | b, bv.void);(b,e.countBitset) } 
+           val t=allTargs.maxBy( x => x._2 )._1
+          myGoElse(bv, t){tron.genMove(ref)}
+        }
+        
+        
+      }
+      
+      
+      
+      
+      
+    } else {
+     // System.err.println("Border phase");
+      tron.genMove(ref)
+    }
+
   }
 
   def doPlan(ref: GameState4P) = {
@@ -235,12 +275,12 @@ class oo005 (seed : Long)  extends agentAbstract {
         val futurBothList = captSt.map { x => (forseeConcurrentCaptures(x, enemyCapturePath._1, ref), x) }
         val workingOnes = futurBothList.filter { x => x._1 > currS }
         if (workingOnes.nonEmpty) {
-          val bmTarg=workingOnes.maxBy{x => x._1}._2
+          val bmTarg = workingOnes.maxBy { x => x._1 }._2
           val toNinja = bv.goTo(bmTarg)
-        //  System.err.println("Conflicting capture, ninja going ");
-          if (toNinja.nonEmpty) toNinja(0) else tron.genMove(ref)          
+          //  System.err.println("Conflicting capture, ninja going ");
+          if (toNinja.nonEmpty) toNinja(0) else tron.genMove(ref)
         } else {
-         // System.err.println("Conflicting capture, aborting ");
+          // System.err.println("Conflicting capture, aborting ");
           val toDef = bv.goTo(enemyCapturePath._2)
           if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
         }
@@ -249,7 +289,7 @@ class oo005 (seed : Long)  extends agentAbstract {
       if (maxEval._1 > MinValForPlan) {
         doPlan_NonDouble(ref, captSt)
       } else {
-        tron.genMove(ref)
+        doTakeEmpty(ref)
       }
     }
 

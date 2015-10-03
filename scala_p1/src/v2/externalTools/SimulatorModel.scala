@@ -15,6 +15,7 @@ import v2.test_bv_squareUndo
 import v2.oo004
 import v2.oo005
 import v2.oo002
+import v2.oo006
 
 /**
  * @author Jahan
@@ -63,7 +64,9 @@ object SimulatorModel {
     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new bv_tronRacer,new oo004))
    //  val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo005,new oo002(size)))
     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new oo005))
-     val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(bot,new oo005))
+  //   val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(bot,new oo005))
+    //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo005(0x457575),new oo005(0x45FF1175)))
+     val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo006(0x457575),new oo006(0x45FF1175)))
     
     //simul
     oo001T

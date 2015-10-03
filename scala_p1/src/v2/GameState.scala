@@ -100,6 +100,18 @@ object GameState4P {
     if(out._3==0) (""+out._1+" "+out._2) else ("BACK "+(-out._3))
   }
   
+  def convertDireToOfficialCoord(dir : Int)(x : Int)(y : Int)={
+       val out=dir match {
+        case 0 => new Tuple2(x, y - 1);
+        case 1 => new Tuple2(x + 1, y);
+        case 2 => new Tuple2(x, y + 1);
+        case 3 => new Tuple2(x - 1, y);
+        case 4 => new Tuple2(x , y);
+        case _ => new Tuple2(0 , 0);
+      }        
+       out
+  }
+  
   def readOfficialGameState(sc : Seq[Tuple3[Int,Int,Int]])(sm : Seq[String]) = {
     new GameState4P(readOfficialCoords(sc),readOfficialMapTrace(sm))
   }

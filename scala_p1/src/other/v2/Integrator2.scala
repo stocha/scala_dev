@@ -721,7 +721,6 @@ class BMap(
 
 }
 
-
 class BotVocabulary(val st: GameState4P) {
   val void = st.tr.void
   val me = st.pos.pos0
@@ -744,7 +743,7 @@ class BotVocabulary(val st: GameState4P) {
       List( x._2, x._2.shiftIn(rotd)|st.pos.pos0.shiftIn(rotd), x._2.shiftIn(opd)|st.pos.pos0.shiftIn(opd) )
     }      
           
-    traits.map(dirTrail).flatten
+    traits.map(dirTrail).flatten.map(x=> (x & st.tr.void))
   }
   
   def dead_code_dirCaptureStraight ={
@@ -1036,8 +1035,6 @@ class BotVocabulary(val st: GameState4P) {
   }
 
 }
-
-
 
 class log {
   private var donel: List[Int] = List()
@@ -2217,8 +2214,6 @@ class oo003 extends agentAbstract {
 }
 
 
-
-
 class oo004 extends agentAbstract {
 
   var currPlan: agentAbstract = null
@@ -2226,9 +2221,7 @@ class oo004 extends agentAbstract {
   val MinValForPlan = 3
 
   val tron = new agentAbstract {
-
     def genMove(ref: GameState4P) = {
-
       val bv = new BotVocabulary(ref)
 
       def anyOpen = {
@@ -2354,12 +2347,12 @@ class oo004 extends agentAbstract {
       }
     }
 
-    if (basicEval.isEmpty) BMap.zero else {
+    if (basicEval.isEmpty) (BMap.zero,BMap.zero) else {
       val res = basicEval.maxBy { x => bv.what_capturing(x).countBitset }
 
       //   System.err.println("==>"+res)
 
-      res
+      (res,bv.what_capturing(res))
     }
   }
 
@@ -2392,7 +2385,7 @@ class oo004 extends agentAbstract {
     val targ = bv.firstTronZoneHeuristic
     val tr = bv.firstZoneHeuristic
 
-    val captSt: List[BMap] = bv.basicCapturePathTry
+    val captSt: List[BMap] = bv.basicCapturePathTry.filter { x => x.notNull }
 
     val tmpF0 = for (d <- 0 until 4; s <- List(4, 10, 20)) yield {
       (new Tuple2(d, s))
@@ -2418,23 +2411,23 @@ class oo004 extends agentAbstract {
     //System.err.println("scores "+scoresBasicManeu);
 
     val enemyCapturePath = eCaptureLines(ref)
-    if (enemyCapturePath.notNull) {
+    if (enemyCapturePath._1.notNull) {
       //Attention !
       if (maxEval._1 <= MinValForPlan) {
-        val toDef = bv.goTo(enemyCapturePath)
-        if (toDef.nonEmpty) toDef(0) else 4
+        val toDef = bv.goTo(enemyCapturePath._2)
+        if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
       } else {
-        val futurBothList = captSt.map { x => (forseeConcurrentCaptures(x, enemyCapturePath, ref), x) }
+        val futurBothList = captSt.map { x => (forseeConcurrentCaptures(x, enemyCapturePath._1, ref), x) }
         val workingOnes = futurBothList.filter { x => x._1 > currS }
         if (workingOnes.nonEmpty) {
           val bmTarg=workingOnes.maxBy{x => x._1}._2
           val toNinja = bv.goTo(bmTarg)
-          System.err.println("Conflicting capture, ninja going ");
-          if (toNinja.nonEmpty) toNinja(0) else 4          
+        //  System.err.println("Conflicting capture, ninja going ");
+          if (toNinja.nonEmpty) toNinja(0) else tron.genMove(ref)          
         } else {
           System.err.println("Conflicting capture, aborting ");
-          val toDef = bv.goTo(enemyCapturePath)
-          if (toDef.nonEmpty) toDef(0) else 4
+          val toDef = bv.goTo(enemyCapturePath._2)
+          if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
         }
       }
     } else {
@@ -2481,3 +2474,5 @@ class oo004 extends agentAbstract {
   }
 
 }
+
+

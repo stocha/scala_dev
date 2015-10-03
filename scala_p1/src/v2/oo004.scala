@@ -2,6 +2,13 @@ package v2
 
 /**
  * @author Jahan
+ * 
+ * positions=10,5 4,7
+seed=4201268333958789561
+same_cell=false
+symmetric=false
+ * 
+ * 
  */
 class oo004 extends agentAbstract {
 
@@ -10,9 +17,7 @@ class oo004 extends agentAbstract {
   val MinValForPlan = 3
 
   val tron = new agentAbstract {
-
     def genMove(ref: GameState4P) = {
-
       val bv = new BotVocabulary(ref)
 
       def anyOpen = {
@@ -206,19 +211,19 @@ class oo004 extends agentAbstract {
       //Attention !
       if (maxEval._1 <= MinValForPlan) {
         val toDef = bv.goTo(enemyCapturePath._2)
-        if (toDef.nonEmpty) toDef(0) else 4
+        if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
       } else {
         val futurBothList = captSt.map { x => (forseeConcurrentCaptures(x, enemyCapturePath._1, ref), x) }
         val workingOnes = futurBothList.filter { x => x._1 > currS }
         if (workingOnes.nonEmpty) {
           val bmTarg=workingOnes.maxBy{x => x._1}._2
           val toNinja = bv.goTo(bmTarg)
-          System.err.println("Conflicting capture, ninja going ");
-          if (toNinja.nonEmpty) toNinja(0) else 4          
+        //  System.err.println("Conflicting capture, ninja going ");
+          if (toNinja.nonEmpty) toNinja(0) else tron.genMove(ref)          
         } else {
           System.err.println("Conflicting capture, aborting ");
           val toDef = bv.goTo(enemyCapturePath._2)
-          if (toDef.nonEmpty) toDef(0) else 4
+          if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
         }
       }
     } else {
@@ -265,3 +270,5 @@ class oo004 extends agentAbstract {
   }
 
 }
+
+

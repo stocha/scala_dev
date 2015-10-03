@@ -27,7 +27,7 @@ class BotVocabulary(val st: GameState4P) {
       List( x._2, x._2.shiftIn(rotd)|st.pos.pos0.shiftIn(rotd), x._2.shiftIn(opd)|st.pos.pos0.shiftIn(opd) )
     }      
           
-    traits.map(dirTrail).flatten
+    traits.map(dirTrail).flatten.map(x=> (x & st.tr.void))
   }
   
   def dead_code_dirCaptureStraight ={

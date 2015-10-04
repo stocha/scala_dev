@@ -5,7 +5,7 @@ import scala.util.Random
 /**
  * @author Jahan
  */
-class tb006(seed : Long) extends agentAbstract {
+class tb006(seed: Long) extends agentAbstract {
 
   var currPlan: agentAbstract = null
   var ra = new Random(0x883789 ^ seed)
@@ -15,7 +15,7 @@ class tb006(seed : Long) extends agentAbstract {
 
   val cyclebreaker = Array(0, 1, 2, 3)
 
-  def insertInCycleBreak(i: Int,bv : BotVocabulary): Int = {
+  def insertInCycleBreak(i: Int, bv: BotVocabulary): Int = {
     cyclebreaker(3) = cyclebreaker(2)
     cyclebreaker(2) = cyclebreaker(1)
     cyclebreaker(1) = cyclebreaker(0)
@@ -30,7 +30,7 @@ class tb006(seed : Long) extends agentAbstract {
     }
 
     if (eq(0, 2) && eq(3, 1) && opeq(1, 2)) {
-      val d=bv.goTo(~bv.me) 
+      val d = bv.goTo(~bv.me)
       val r = ra.nextInt(d.size)
       d(r)
     } else i
@@ -41,7 +41,7 @@ class tb006(seed : Long) extends agentAbstract {
     val r = bv.greedyGoto(dest)
     // System.err.println(""+dest);
     val dir = if (r.nonEmpty) r(ra.nextInt(r.size)) else elsedo
-    insertInCycleBreak(dir,bv)
+    insertInCycleBreak(dir, bv)
 
   }
 
@@ -94,12 +94,14 @@ class tb006(seed : Long) extends agentAbstract {
 
   }*/
 
-  def forseeMovesSimple(to: BMap, ref: GameState4P) = {
+  def forseeCaptureZergedFully(to: BMap, ref: GameState4P) = {
     val bv = new BotVocabulary(ref)
     val capt = bv.what_capturing(to)
     val ag = new bv_followTrail(to)(identity)
-    val zerg = new bv_followTrail(capt)(identity)
-    val sim = new SimulBot(0, ref, Array(ag, zerg, new bv_doNothing, new bv_doNothing))
+    val zerg1 = new bv_followTrail(capt)(identity)
+    val zerg2 = new bv_followTrail(capt)(identity)
+    val zerg3 = new bv_followTrail(capt)(identity)
+    val sim = new SimulBot(0, ref, Array(ag, zerg1, zerg2, zerg3))
     var dir = 0
 
     //System.err.println("Simuling try "+(ref.tr.pos0 | to));
@@ -125,15 +127,51 @@ class tb006(seed : Long) extends agentAbstract {
     } else 0
   }
 
-  def forseeConcurrentCaptures(mine: BMap, theirs: BMap, ref: GameState4P) = {
+  def forseeCaptureZergedBy(to: BMap, ref: GameState4P, play: Int) = {
+    val bv = new BotVocabulary(ref)
+    val capt = bv.what_capturing(to)
+    val ag = new bv_followTrail(to)(identity)
+    val zerg1 = if (play == 1) new bv_followTrail(capt)(identity) else new bv_doNothing
+    val zerg2 = if (play == 2) new bv_followTrail(capt)(identity) else new bv_doNothing
+    val zerg3 = if (play == 3) new bv_followTrail(capt)(identity) else new bv_doNothing
+    val sim = new SimulBot(0, ref, Array(ag, zerg1, zerg2, zerg3))
+    var dir = 0
+
+    //System.err.println("Simuling try "+(ref.tr.pos0 | to));
+
+    while (GameState4P.m(dir)(0) != 4) {
+      dir = sim.turn()
+    }
+
+    val success = ((sim.getState.tr.pos0 & capt) ^ capt).isNull
+    //     System.err.println("\n"+sim.getState);
+
+    // val sim2 = new SimulBot(0, sim.getState, Array(new bv_taker(BMap.full,0xFF92888), new bv_taker(BMap.full,0xFF89398), new bv_doNothing, new bv_doNothing))
+
+    // for(i <- 0 until 100){
+    //   dir = sim2.turn()
+    // }
+
+    if (success) {
+
+      //   System.err.println("success \n"+  to+" \n "+capt);
+      capt.countBitset
+
+    } else 0
+  }
+
+  def forseeConcurrentCaptures(mine: BMap, theirs: BMap, ref: GameState4P, play: Int) = {
     val oldsc = ref.myRelScore
 
     val bv = new BotVocabulary(ref)
     val captmine = bv.what_capturing(mine)
     val capttheir = bv.what_capturing(theirs)
     val ag = new bv_followTrail(mine | capttheir)(identity)
-    val zerg = new bv_followTrail(theirs | captmine)(identity)
-    val sim = new SimulBot(0, ref, Array(ag, zerg, new bv_doNothing, new bv_doNothing))
+    val capt = theirs | captmine
+    val zerg1 = if (play == 1) new bv_followTrail(capt)(identity) else new bv_doNothing
+    val zerg2 = if (play == 2) new bv_followTrail(capt)(identity) else new bv_doNothing
+    val zerg3 = if (play == 3) new bv_followTrail(capt)(identity) else new bv_doNothing
+    val sim = new SimulBot(0, ref, Array(ag, zerg1, zerg2, zerg3))
     var dir = 0
 
     //System.err.println("Simuling try "+(ref.tr.pos0 | to));
@@ -153,14 +191,14 @@ class tb006(seed : Long) extends agentAbstract {
     (sim.getState.myRelScore - oldsc)
   }
 
-  def eCaptureLines(other: GameState4P) = {
-    val ref = other.swap(1)
+  def eCaptureLines(other: GameState4P, play: Int) = {
+    val ref = other.swap(play)
     val bv = new BotVocabulary(ref)
 
     val captSt: List[BMap] = bv.basicCapturePathTry
     val basicEval = (captSt).filter { x =>
       {
-        bv.is_capturing(x) && (forseeMovesSimple(x, ref) == 0)
+        bv.is_capturing(x) && (forseeCaptureZergedBy(x, ref, play) == 0)
       }
     }
 
@@ -177,7 +215,7 @@ class tb006(seed : Long) extends agentAbstract {
     val bv = new BotVocabulary(ref)
     val currS = ref.myRelScore
     val ll = captSt
-    val basicEval = (ll).filter { x => bv.is_capturing(x) }.map { x => (forseeMovesSimple(x, ref) - currS, x) }
+    val basicEval = (ll).filter { x => bv.is_capturing(x) }.map { x => (forseeCaptureZergedFully(x, ref) - currS, x) }
     val maxEval = if (basicEval.size > 0) basicEval.maxBy(x => x._1) else (0, BMap.zero)
     if (maxEval._1 > MinValForPlan) {
       //   System.err.println("Follow evaluation" + maxEval)
@@ -199,38 +237,32 @@ class tb006(seed : Long) extends agentAbstract {
   def doTakeEmpty(ref: GameState4P) = {
 
     if (ref.tr.void.countBitset < ratioEmpty * (GameState4P.WH) / 100) {
-     // System.err.println("Empty phase");
-      
+      // System.err.println("Empty phase");
+
       val bv = new BotVocabulary(ref)
-      val concZone=bv.firstZoneHeuristic & ref.tr.pos0
-      val accessVoid=BMap.followTrail(concZone, ref.tr.void)
-      
-      if(accessVoid.isNull){
+      val concZone = bv.firstZoneHeuristic & ref.tr.pos0
+      val accessVoid = BMap.followTrail(concZone, ref.tr.void)
+
+      if (accessVoid.isNull) {
         tron.genMove(ref)
-      }else{
-        
+      } else {
+
         //System.err.println("accessVoid "+accessVoid)
-        val allTargs=accessVoid.split.map { x => val b=bv.border(x); val e= BMap.enclosed(bv.me | b, bv.void);(b,e.countBitset) } 
-        if(allTargs.nonEmpty){
-          val t=allTargs.maxBy( x => x._2 )._1
-          myGoElse(bv, t){tron.genMove(ref)}
-          
-          
-        }else{
-          val allTargs=ref.tr.void.split.map { x => val b=bv.border(x); val e= BMap.enclosed(bv.me | b, bv.void);(b,e.countBitset) } 
-           val t=allTargs.maxBy( x => x._2 )._1
-          myGoElse(bv, t){tron.genMove(ref)}
+        val allTargs = accessVoid.split.map { x => val b = bv.border(x); val e = BMap.enclosed(bv.me | b, bv.void); (b, e.countBitset) }
+        if (allTargs.nonEmpty) {
+          val t = allTargs.maxBy(x => x._2)._1
+          myGoElse(bv, t) { tron.genMove(ref) }
+
+        } else {
+          val allTargs = ref.tr.void.split.map { x => val b = bv.border(x); val e = BMap.enclosed(bv.me | b, bv.void); (b, e.countBitset) }
+          val t = allTargs.maxBy(x => x._2)._1
+          myGoElse(bv, t) { tron.genMove(ref) }
         }
-        
-        
+
       }
-      
-      
-      
-      
-      
+
     } else {
-     // System.err.println("Border phase");
+      // System.err.println("Border phase");
       tron.genMove(ref)
     }
 
@@ -261,39 +293,52 @@ class tb006(seed : Long) extends agentAbstract {
     //  val scoresBasicManeu=captSt.map { x => forseeMovesSimple(x, ref) - currS }
 
     val ll = captSt
-    val basicEval = (ll).filter { x => bv.is_capturing(x) }.map { x => (forseeMovesSimple(x, ref) - currS, x) }
+    val basicEval = (ll).filter { x => bv.is_capturing(x) }.map { x => (forseeCaptureZergedFully(x, ref) - currS, x) }
     // val basicEval = List[Tuple2[Int,BMap]]()
     val maxEval = if (basicEval.size > 0) basicEval.maxBy(x => x._1) else (0, BMap.zero)
 
     //System.err.println("scores "+scoresBasicManeu);
 
-    val enemyCapturePath = eCaptureLines(ref)
-    if (enemyCapturePath._1.notNull) {
-      //Attention !
-      if (maxEval._1 <= MinValForPlan) {
-        val toDef = bv.goTo(enemyCapturePath._2)
-        if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
-      } else {
-        val futurBothList = captSt.map { x => (forseeConcurrentCaptures(x, enemyCapturePath._1, ref), x) }
-        val workingOnes = futurBothList.filter { x => x._1 > currS }
-        if (workingOnes.nonEmpty) {
-          val bmTarg = workingOnes.maxBy { x => x._1 }._2
-          val toNinja = bv.goTo(bmTarg)
-          //  System.err.println("Conflicting capture, ninja going ");
-          if (toNinja.nonEmpty) toNinja(0) else tron.genMove(ref)
+    def doThemEnemy(l: List[Int]): Int = {
+
+      if (l.isEmpty) {
+
+        if (maxEval._1 > MinValForPlan) {
+          doPlan_NonDouble(ref, captSt)
         } else {
-          // System.err.println("Conflicting capture, aborting ");
-          val toDef = bv.goTo(enemyCapturePath._2)
-          if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
+          doTakeEmpty(ref)
+
+        }
+      } else {
+        val idE = l.head
+        val enemyCapturePath = eCaptureLines(ref, idE)
+        if (enemyCapturePath._1.notNull) {
+          //Attention !
+          if (maxEval._1 <= MinValForPlan) {
+            val toDef = bv.goTo(enemyCapturePath._2)
+            if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
+          } else {
+            val futurBothList = captSt.map { x => (forseeConcurrentCaptures(x, enemyCapturePath._1, ref, idE), x) }
+            val workingOnes = futurBothList.filter { x => x._1 > currS }
+            if (workingOnes.nonEmpty) {
+              val bmTarg = workingOnes.maxBy { x => x._1 }._2
+              val toNinja = bv.goTo(bmTarg)
+              //  System.err.println("Conflicting capture, ninja going ");
+              if (toNinja.nonEmpty) toNinja(0) else tron.genMove(ref)
+            } else {
+              // System.err.println("Conflicting capture, aborting ");
+              val toDef = bv.goTo(enemyCapturePath._2)
+              if (toDef.nonEmpty) toDef(0) else tron.genMove(ref)
+            }
+          }
+        } else {
+          doThemEnemy(l.tail)
+
         }
       }
-    } else {
-      if (maxEval._1 > MinValForPlan) {
-        doPlan_NonDouble(ref, captSt)
-      } else {
-        doTakeEmpty(ref)
-      }
     }
+    val listE = List(1, 2, 3)    
+    doThemEnemy(listE)
 
     //System.err.println("Best plan : "+maxEval);
 

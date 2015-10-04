@@ -61,7 +61,7 @@ object SimulatorVisu extends SimpleSwingApplication {
     preferredSize = new Dimension(GameState4P.W*cz +1, GameState4P.H*cz +1)
 
 
-    val allCol = Array(Color.black, Color.pink, Color.green, Color.blue, Color.yellow)
+    val allCol = Array(Color.black, Color.pink, Color.red, Color.blue, Color.yellow)
 
     opaque = true
     background = Color.darkGray

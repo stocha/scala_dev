@@ -1,6 +1,7 @@
 package v2
 
 import scala.util.Random
+import other.v2.BotVocabulary
 
 /**
  * @author Jahan
@@ -15,7 +16,7 @@ class oo006(seed: Long) extends agentAbstract {
 
   val cyclebreaker = Array(0, 1, 2, 3)
 
-  def insertInCycleBreak(i: Int): Int = {
+  def insertInCycleBreak(i: Int, bv : BotVocabulary): Int = {
     cyclebreaker(3) = cyclebreaker(2)
     cyclebreaker(2) = cyclebreaker(1)
     cyclebreaker(1) = cyclebreaker(0)
@@ -30,7 +31,9 @@ class oo006(seed: Long) extends agentAbstract {
     }
 
     if (eq(0, 2) && eq(3, 1) && opeq(1, 2)) {
-      ra.nextInt(4)
+      val d = bv.goTo(~bv.me)
+      val r = ra.nextInt(d.size)
+      d(r)
     } else i
 
   }
@@ -39,7 +42,7 @@ class oo006(seed: Long) extends agentAbstract {
     val r = bv.greedyGoto(dest)
     // System.err.println(""+dest);
     val dir = if (r.nonEmpty) r(ra.nextInt(r.size)) else elsedo
-    insertInCycleBreak(dir)
+    insertInCycleBreak(dir,bv)
 
   }
 

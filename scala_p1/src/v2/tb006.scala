@@ -353,7 +353,7 @@ class tb006(seed: Long) extends agentAbstract {
       
     }
     val listErb= expSup(ref.sortedResults);
-    System.err.println("classement infs: "+listErb)
+    //System.err.println("classement infs: "+listErb)
     
     val listE = if(listErb.nonEmpty) listErb else {
       val minE = ref.sortedResults.filter(p => p._2 != 0).minBy(p => p._1)._2
@@ -361,7 +361,7 @@ class tb006(seed: Long) extends agentAbstract {
       List(minE)
     }
     
-    System.err.println("Considered e "+listE);
+   // System.err.println("Considered e "+listE);
     //val listE = List(1, 2, 3)    
     doThemEnemy(listE)
 

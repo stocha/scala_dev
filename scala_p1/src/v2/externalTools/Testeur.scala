@@ -11,11 +11,77 @@ import v2.bv_zerg
 import v2.bv_taker
 import v2.BMap
 import v2.BotVocabulary
+import v2.tb006
+import v2.tb005
+import v2.tb003
 
 /**
  * @author Jahan
  */
 object Testeur extends App {
+  
+  
+  def statsTest001{
+    val r = new Random(0x8377^System.nanoTime());
+    val randLong=Math.abs(r.nextLong())
+    val size=4;
+    
+    val nbGames=1000
+    val nbTurns=250
+    var acc : Array[Array[Int]] = Array(Array(0,0,0,0),Array(0,0,0,0),Array(0,0,0,0),Array(0,0,0,0))
+    
+    def updateAcc(g : GameState4P) : List[ List[Int]]={
+      var l = g.sortedResults
+      
+      def recU(rp : List[Tuple2[Int,Int]], rang : Int){
+        if(rp.nonEmpty){
+                acc(rang)(rp.head._2)=acc(rang)(rp.head._2)+1
+                recU(rp.tail,rang+1)
+        }
+      }
+      
+      recU(l,0)
+
+     
+      List(
+          List(acc(0)(0),acc(0)(1),acc(0)(2),acc(0)(3)),
+          List(acc(1)(0),acc(1)(1),acc(1)(2),acc(1)(3)),
+          List(acc(2)(0),acc(2)(1),acc(2)(2),acc(2)(3)),
+          List(acc(3)(0),acc(3)(1),acc(3)(2),acc(3)(3))
+          
+      )
+    }
+    
+
+    
+    val t0 = System.nanoTime()    
+    for(i<-1 until nbGames){
+      
+      def percentIng(l :  List[ List[Int]]) = {
+        for( lvl <- l) yield{
+          lvl.map { x => (x*1000)/i }
+        }
+      }  
+      
+      val gseed=r.nextLong()^System.nanoTime()
+      val sim = new SimulBot(0x457571FF,GameState4P.start(gseed,size),Array(new tb006(0x457575),new tb005(),new tb005(),new tb003))     
+      
+      for(i<-0 until nbTurns){
+        sim.turn()
+      }
+      
+      val t1 = System.nanoTime()      
+      val t : Double=(t1 - t0)           
+      val currTime=(t/(1000*1000*1000))
+     System.err.println(" Per sec "+(i.toDouble / currTime )+" currTime = "+currTime+"  seed="+gseed);    
+      val upRes=updateAcc(sim.getState)
+     System.err.println(""+i+" "+percentIng(upRes)+"  "+upRes+" "+sim.getState.sortedResults);
+      
+    }
+    
+
+    
+  }
   
   
   def testGS001{
@@ -186,7 +252,8 @@ object Testeur extends App {
     // testGS002
      //benchGS002
      //bench002
-     benchGS003
+     //benchGS003
+     statsTest001
   }
   
 }

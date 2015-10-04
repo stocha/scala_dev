@@ -127,7 +127,7 @@ class BotVocabulary(val st: GameState4P) {
       val maxValue = dirValue.maxBy(x => x._2)
 
      // System.err.println("dir base " + dirBase);
-      System.err.println("dir value " + dirValue);
+      //System.err.println("dir value " + dirValue);
       List(maxValue._1)
     }
 

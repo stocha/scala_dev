@@ -16,6 +16,8 @@ import v2.oo004
 import v2.oo005
 import v2.oo002
 import v2.oo006
+import v2.tb006
+import v2.tb005
 
 /**
  * @author Jahan
@@ -24,7 +26,7 @@ object SimulatorModel {
   def getModel = {
     val r = new Random(0x8377);
     val randLong=Math.abs(r.nextLong())
-    val size=2;
+    val size=4;
     var game=GameState4P.start(64564544557L,size)
     
     //val simul = new SimulBot(r.nextLong(),game,Array(new stupidAgent,new stupidAgent,new stupidAgent,new stupidAgent))
@@ -66,7 +68,8 @@ object SimulatorModel {
     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb003,new oo005))
   //   val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(bot,new oo005))
     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo005(0x457575),new oo005(0x45FF1175)))
-     val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo006(0x457575),new oo006(0x45FF1175)))
+     //val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new oo006(0x457575),new oo006(0x45FF1175)))
+    val oo001T = new SimulBot(r.nextLong(),GameState4P.start(64564544557L,size),Array(new tb006(0x457575),new tb005(),new tb005(),new tb003))
     
     //simul
     oo001T

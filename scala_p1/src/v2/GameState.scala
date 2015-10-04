@@ -60,7 +60,8 @@ object GameState4P {
     }  
   }
 
-  def start(init: Long,nbP : Int) = {
+  def start(initp: Long,nbP : Int) = {
+    val init=Math.abs(initp)
     val p0 = p(init, 0)
     val p1 = p(init, 1)
     val p2 = p(init, 2)
@@ -318,6 +319,11 @@ class GameState4P(
   def scores ={
     List(tr.pos0.countBitset,tr.pos1.countBitset,tr.pos2.countBitset,tr.pos3.countBitset)
     
+  }
+  
+  def sortedResults={
+    val r= List((tr.pos0.countBitset,0),(tr.pos1.countBitset,1),(tr.pos2.countBitset,2),(tr.pos3.countBitset,3))
+    r.sortBy(x=> -x._1)
   }
   
   def myRelScore={

@@ -1,6 +1,6 @@
 package other.v2
 
-import v2.bitStack
+
 import scala.util.Random
 
 

@@ -20,6 +20,11 @@ import v2.tb003
  */
 object Testeur extends App {
   
+  def gameToTest(r : Long )={
+    new SimulBot(0x457571FF,GameState4P.start(r,4),Array(new tb006(0x457575),new tb005(),new tb005(),new tb003)) 
+    
+  }
+  
   
   def statsTest001{
     val r = new Random(0x8377^System.nanoTime());
@@ -64,7 +69,7 @@ object Testeur extends App {
       }  
       
       val gseed=r.nextLong()^System.nanoTime()
-      val sim = new SimulBot(0x457571FF,GameState4P.start(gseed,size),Array(new tb006(0x457575),new tb005(),new tb005(),new tb003))     
+      val sim = gameToTest(gseed)    
       
       for(i<-0 until nbTurns){
         sim.turn()

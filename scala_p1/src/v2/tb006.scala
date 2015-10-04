@@ -4,6 +4,18 @@ import scala.util.Random
 
 /**
  * @author Jahan
+ * 
+ * 
+ *     new SimulBot(0x457571FF,GameState4P.start(r,4),Array(new tb006(0x457575),new tb005(),new tb005(),new tb003)) 
+ * 
+ * ratioEmpty 80
+ * 157 List(List(146, 203, 356, 292), List(292, 261, 210, 235), List(363, 184, 178, 273), List(197, 350, 254, 197))  List(List(23, 32, 56, 46), List(46, 41, 33, 37), List(57, 29, 28, 43), List(31, 55, 40, 31)) List((217,2), (206,3), (158,0), (119,1))
+ * 
+ * 
+ * ratioEmpty 95
+ * 157 List(List(197, 229, 273, 299), List(248, 242, 292, 216), List(388, 210, 165, 235), List(165, 318, 267, 248))  List(List(31, 36, 43, 47), List(39, 38, 46, 34), List(61, 33, 26, 37), List(26, 50, 42, 39)) List((213,3), (205,2), (154,0), (128,1))
+ * 
+ * 
  */
 class tb006(seed: Long) extends agentAbstract {
 
@@ -11,7 +23,7 @@ class tb006(seed: Long) extends agentAbstract {
   var ra = new Random(0x883789 ^ seed)
   val MinValForPlan = 3
 
-  val ratioEmpty = 80
+  val ratioEmpty = 95
 
   val cyclebreaker = Array(0, 1, 2, 3)
 

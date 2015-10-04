@@ -2544,7 +2544,7 @@ class tb006(seed: Long) extends agentAbstract {
   var ra = new Random(0x883789 ^ seed)
   val MinValForPlan = 3
 
-  val ratioEmpty = 80
+  val ratioEmpty = 95
 
   val cyclebreaker = Array(0, 1, 2, 3)
 

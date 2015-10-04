@@ -222,6 +222,8 @@ class tb006(seed: Long) extends agentAbstract {
 
       val zerg = new bv_followTrail(maxEval._2)(identity)
       val to = zerg.genMove(ref)
+      
+     // System.err.println("Capturing  "+maxEval._2)
       to
     } else {
       tron.genMove(ref)
@@ -337,7 +339,30 @@ class tb006(seed: Long) extends agentAbstract {
         }
       }
     }
-    val listE = List(1, 2, 3)    
+    
+    val ordPlay= ref.sortedResults
+    def expSup (l : List[Tuple2[Int,Int]]) : List[Int] = {
+      if(l.isEmpty) List() else{
+        if(l.head._2==0){
+          l.tail.map { x => x._2 }
+        }else{
+          expSup(l.tail)
+        }
+        
+      }
+      
+    }
+    val listErb= expSup(ref.sortedResults);
+    System.err.println("classement infs: "+listErb)
+    
+    val listE = if(listErb.nonEmpty) listErb else {
+      val minE = ref.sortedResults.filter(p => p._2 != 0).minBy(p => p._1)._2
+      
+      List(minE)
+    }
+    
+    System.err.println("Considered e "+listE);
+    //val listE = List(1, 2, 3)    
     doThemEnemy(listE)
 
     //System.err.println("Best plan : "+maxEval);

@@ -39,11 +39,10 @@ object BMap {
   def fromString(lines: List[String]): BMap = {
     var res = BMap.zero
 
-  //  System.err.println("" + lines);
+    //  System.err.println("" + lines);
 
-   
     for (j <- 0 until 20) {
-   //   System.err.println("" + lines(j));
+      //   System.err.println("" + lines(j));
 
       val nosp = lines(j).replaceAll(" ", "")
       for (i <- 0 until 35) {
@@ -772,33 +771,28 @@ object bitStack {
     //Console.err.println("way\n"+(from | to));
 
     val thisNotNull = (!from.isNull) && (!to.isNull)
+    var last = BMap.zero
     while (((curr & from).isNull) & (thisNotNull)) {
+      last = curr;
       curr = curr | curr.scramble
       // Console.err.println("curr\n"+curr+" \n"+dist);
-    }
-    val wayout = curr
 
-    curr = from;
-    var last = BMap.zero
-    while (((curr & to).isNull) & (thisNotNull)) {
-      last = curr
-      curr = (curr | curr.scramble) & wayout
       val u = (res--)
       val r = (res>>)
       val d = (res++)
       val l = (res<<)
+      
+      val fr = (curr ^ last)
 
-      res = res max u
-      res = res max r
-      res = res max d
-      res = res max l
+      res = res max u.mask(fr)
+      res = res max r.mask(fr)
+      res = res max d.mask(fr)
+      res = res max l.mask(fr)
 
-      res = res.add((curr ^ last) & target)
-
+      res = res.add(fr & target)
       dist = dist + 1
-      // Console.err.println("curr\n"+curr+" \n"+dist);
+      //Console.err.println("res" + res + " \n" + dist);
     }
-    val wayin = curr
 
     res
   }
@@ -988,7 +982,11 @@ class bitStack(
     var res = "\n"
     for (j <- 0 until 20) {
       for (i <- 0 until 35) {
-        res = res + "|" + "%03x".format(apply(i)(j))
+        val v = apply(i)(j)
+        
+        if(v!=0)
+        res = res + "|" + "%03x".format(apply(i)(j))else
+          res = res + "|" +"---"
       }
       res = res + "\n"
     }

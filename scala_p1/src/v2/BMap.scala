@@ -36,6 +36,30 @@ object BMap {
 
   }
 
+  def fromString(lines: List[String]): BMap = {
+    var res = BMap.zero
+
+  //  System.err.println("" + lines);
+
+   
+    for (j <- 0 until 20) {
+   //   System.err.println("" + lines(j));
+
+      val nosp = lines(j).replaceAll(" ", "")
+      for (i <- 0 until 35) {
+
+        val c = nosp.charAt(i)
+        val s = c match {
+          case '#' => 1L
+          case _   => 0L
+        }
+        res = res.set(i)(j)(s)
+      }
+    }
+
+    res
+  }
+
   val umask = {
     (-1L) >>> (64 - 35);
   }
@@ -78,15 +102,14 @@ object BMap {
     ~f
 
   }
-  
+
   val alternatedBM = {
-    var r =  BMap.zero
-    for( i<- 0 until 35; j<- 0 until 20){
-      r=r.set(i)(j)(i&1L);
+    var r = BMap.zero
+    for (i <- 0 until 35; j <- 0 until 20) {
+      r = r.set(i)(j)(i & 1L);
     }
     r
-  }  
-  
+  }
 
   def enclosed(friend: BMap, void: BMap) = {
     var e = border | ~void;
@@ -738,6 +761,48 @@ object bitStack {
       BMap.zero, BMap.zero,
       BMap.zero, BMap.zero)
   }
+
+  def sumFromTo(from: BMap, to: BMap, target: BMap): bitStack = {
+    var dist = 0;
+    var curr = to;
+
+    var res = bitStack()
+    //Console.err.println("curr\n"+curr+" \n"+dist);
+
+    //Console.err.println("way\n"+(from | to));
+
+    val thisNotNull = (!from.isNull) && (!to.isNull)
+    while (((curr & from).isNull) & (thisNotNull)) {
+      curr = curr | curr.scramble
+      // Console.err.println("curr\n"+curr+" \n"+dist);
+    }
+    val wayout = curr
+
+    curr = from;
+    var last = BMap.zero
+    while (((curr & to).isNull) & (thisNotNull)) {
+      last = curr
+      curr = (curr | curr.scramble) & wayout
+      val u = (res--)
+      val r = (res>>)
+      val d = (res++)
+      val l = (res<<)
+
+      res = res max u
+      res = res max r
+      res = res max d
+      res = res max l
+
+      res = res.add((curr ^ last) & target)
+
+      dist = dist + 1
+      // Console.err.println("curr\n"+curr+" \n"+dist);
+    }
+    val wayin = curr
+
+    res
+  }
+
 }
 class bitStack(
     val a: BMap,
@@ -778,51 +843,48 @@ class bitStack(
   private def summ(x: BMap, y: BMap, c: BMap) = {
     x ^ y ^ c
   }
-  
-  
-  def max(x : bitStack) ={
-    var deci=BMap.zero
-    var sup=BMap.zero
-    
-    def supdo(y: BMap ,z:BMap ) ={
-          sup = (sup & deci ) | (~deci & (y & ~(z))) 
-          deci = deci | (y ^ z)          
-          
-          (deci & sup & y) | (deci & ~sup & z) | (~deci & y)
-    }
-    
 
-   // System.err.println("deci "+deci);
-  //  System.err.println("sup "+sup);
-    val rh = supdo(h,x.h)
-  //  System.err.println("deci "+deci);
-  //  System.err.println("sup "+sup);    
-    val rg = supdo(g,x.g)
-  //  System.err.println("deci "+deci);
-  //  System.err.println("sup "+sup);     
-    val rf = supdo(f,x.f)
-    val re = supdo(e,x.e)
-    
-    val rd = supdo(d,x.d)
-    val rc = supdo(c,x.c)
-    val rb = supdo(b,x.b)
-    val ra = supdo(a,x.a)
-    
-    new bitStack(
-    ra,
-    rb,
-    rc,
-    rd,
-    
-    re,
-    rf,
-    rg,
-    rh
-    ){
-      
+  def max(x: bitStack) = {
+    var deci = BMap.zero
+    var sup = BMap.zero
+
+    def supdo(y: BMap, z: BMap) = {
+      sup = (sup & deci) | (~deci & (y & ~(z)))
+      deci = deci | (y ^ z)
+
+      (deci & sup & y) | (deci & ~sup & z) | (~deci & y)
     }
-    
- /*   val ze=new bitStack(
+
+    // System.err.println("deci "+deci);
+    //  System.err.println("sup "+sup);
+    val rh = supdo(h, x.h)
+    //  System.err.println("deci "+deci);
+    //  System.err.println("sup "+sup);    
+    val rg = supdo(g, x.g)
+    //  System.err.println("deci "+deci);
+    //  System.err.println("sup "+sup);     
+    val rf = supdo(f, x.f)
+    val re = supdo(e, x.e)
+
+    val rd = supdo(d, x.d)
+    val rc = supdo(c, x.c)
+    val rb = supdo(b, x.b)
+    val ra = supdo(a, x.a)
+
+    new bitStack(
+      ra,
+      rb,
+      rc,
+      rd,
+
+      re,
+      rf,
+      rg,
+      rh) {
+
+    }
+
+    /*   val ze=new bitStack(
         rh,
          rg,
           BMap.zero,
@@ -894,7 +956,7 @@ class bitStack(
       g++,
       h++)
   }
-  
+
   def -- = {
     new bitStack(
       a--,
@@ -906,9 +968,9 @@ class bitStack(
       f--,
       g--,
       h--)
-  }  
-  
-  def mask( m : BMap) = {
+  }
+
+  def mask(m: BMap) = {
     new bitStack(
       a & m,
       b & m,
@@ -918,8 +980,8 @@ class bitStack(
       e & m,
       f & m,
       g & m,
-      h & m)    
-    
+      h & m)
+
   }
 
   override def toString = {

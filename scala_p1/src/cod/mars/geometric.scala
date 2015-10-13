@@ -6,11 +6,17 @@ package cod.mars
 object geometric {
 
   type StructCoord = { def getCoord: point }
+  
+  def sign(dx : Double)=if(dx ==0) 1 else (dx/dx.abs)
 
   object point {
     def apply(dx: Double, dy: Double) = {
       new point(dx, dy)
     }
+    
+    def apply(x : Tuple2[Double,Double]) = {
+      new point(x._1, x._2)
+    }    
 
     def normedY() = {
       point(0, 1)
@@ -68,7 +74,7 @@ object geometric {
       point(x*xp-y*yp,y*xp+yp*x)
     }
     
-    def+(other : StructCoord)={
+    def ++(other : StructCoord) : point={
       val x = p.getCoord.x;
       val y = p.getCoord.y;   
       
@@ -77,20 +83,88 @@ object geometric {
       
       point(x+xp,y+yp)      
     }
+    
+    def center(other : StructCoord) : point ={
+      val x = p.getCoord.x;
+      val y = p.getCoord.y;   
+      
+      val xp = other.getCoord.x;
+      val yp = other.getCoord.y;         
+      
+      point((x+xp)/2 ,( y+yp)/2)
+    }
 
   }
 
 }
 
 import geometric.point
+import geometric.sign
+
+object mars{
+  val GRAV = point(0,-3.711)
+  
+  def mxtStableAngleVect = {
+    val l=for(i <- 0 to 90) yield{
+      val p=(point.angulNormDegree(90-i)*4)
+      val pg= p ++ GRAV
+      (pg,i)
+    }
+    
+    l.filter { x => x._1.y > 0 }.maxBy { x => Math.abs(x._1.x) }
+    //l
+  }
+  
+  def stableHVel=mxtStableAngleVect._1.x
+  
+  def stableHAngle=mxtStableAngleVect._2
+  
+  class terrain(val g : Seq[point]){
+    def findLanding = {
+      val l=g.toList
+      val there=(g zip g.tail).filter { x => (x._1.y-x._2.y ==0) }.head
+      
+      there._1 center there._2
+    }
+  }
+  
+  class vehicule(coord : point, val velocity : point){
+    def getCoord = coord
+    
+    def gotoH(c : point) : (Double,Double)= {
+      val dx =c.x-coord.x
+      
+      val nbStepToSpeed0=if (velocity.x==0) 0 else (dx/velocity.x).abs
+      
+      val distToSpeed0=nbStepToSpeed0*velocity.x.abs - stableHVel * nbStepToSpeed0
+      
+      val dirDest=if(dx ==0) 1 else (dx/dx.abs)
+      val dirVel=sign(velocity.x)
+      
+     
+      
+      
+      if(distToSpeed0>0){
+        ( stableHAngle*dirVel,4)
+      }else{
+        (0,4)
+      }
+    }
+  }
+  
+  
+}
+
 
 object testGeometric extends App {
 
   override def main(args: Array[String]) {
-    Console.err.println(" Hello there " + (point(4, 6.5) * 5.0));
-    Console.err.println(" Hello there " + (point.normedY() * 5.0));
-    Console.err.println(" Rot 90 " + (point.normedY() * 5.0)*point.angulNormDegree(-45));
-Console.err.println(" Rot 90 " + (point.normedY() * 5.0)*point.angulNormDegree(-45)*point.angulNormDegree(-45));    
 
+    Console.err.println(" mxtStable "+mars.stableHVel+" "+mars.stableHAngle );    
+    var v = new mars.vehicule(point(200,200),point(100,0))
+    
+    Console.err.println(" goto 0 0 "+v.gotoH(point(0,0) ));  
+    Console.err.println(" goto 200 0 "+v.gotoH(point(200,0) ));
+    
   }
 }

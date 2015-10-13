@@ -4,8 +4,13 @@ import scala.util.Random
 
 /**
  * @author Jahan
+ * 
+ * 
+ * vs 006 before opti path correction 200 List(List(540, 460, 0, 0), List(460, 540, 0, 0), List(0, 0, 1000, 0), List(0, 0, 0, 1000))  List(List(108, 92, 0, 0), List(92, 108, 0, 0), List(0, 0, 200, 0), List(0, 0, 0, 200)) List((252,1), (232,0), (0,2), (0,3))
+ * 
+ * 
  */
-class oo006(seed: Long) extends agentAbstract {
+class oo007(seed : Long)  extends agentAbstract {
 
   var currPlan: agentAbstract = null
   var ra = new Random(0x883789 ^ seed)

@@ -115,6 +115,8 @@ object mars{
     //l
   }
   
+  def stableVVel=(point(0,4)++GRAV).y.abs
+  
   def stableHVel=mxtStableAngleVect._1.x
   
   def stableHAngle=mxtStableAngleVect._2
@@ -134,22 +136,61 @@ object mars{
     def gotoH(c : point) : (Double,Double)= {
       val dx =c.x-coord.x
       
-      val nbStepToSpeed0=if (velocity.x==0) 0 else (dx/velocity.x).abs
+      val nbStepToSpeed0=velocity.x.abs/stableHVel
       
       val distToSpeed0=nbStepToSpeed0*velocity.x.abs - stableHVel * nbStepToSpeed0
       
       val dirDest=if(dx ==0) 1 else (dx/dx.abs)
       val dirVel=sign(velocity.x)
       
-     
-      
-      
-      if(distToSpeed0>0){
-        ( stableHAngle*dirVel,4)
+      if(dx.abs>40){
+          if(distToSpeed0 < dx.abs+10){
+            ( - stableHAngle*dirDest,4)
+          }else if(distToSpeed0 > dx.abs-10){
+             (  stableHAngle*dirVel,4)
+          }          
+          else{
+              (0,4)
+          }
       }else{
-        (0,4)
+        if(velocity.x.abs>0){
+                    (12*dirVel,4)   
+        }else{
+                    (0,4)   
+        }          
       }
-    }
+        
+
+    }// gotoH
+    
+    def gotoV(c : point) : (Double,Double)= {
+      val dy =c.y-coord.y
+      
+      val nbStepToSpeed0=velocity.y.abs/stableVVel
+      
+      val distToSpeed0=nbStepToSpeed0*velocity.y.abs - stableVVel * nbStepToSpeed0
+      
+      val dirVel=sign(velocity.y)
+      
+      if(dy.abs>40){
+          if(distToSpeed0 < dy.abs-200){
+            ( 0,0)
+          }else if(distToSpeed0 > dy.abs){
+             (  0,4)
+          }          
+          else{
+              (0,3)
+          }
+      }else{
+        if(velocity.y<0){
+                    (0,4)   
+        }else{
+                    (0,3)   
+        }          
+      }
+        
+
+    }// gotoV    
   }
   
   

@@ -3,7 +3,7 @@ package cod.mars
 /**
  * @author Jahan
  */
-object geometric extends App {
+object geometric  {
 
   type StructCoord = { def getCoord : point }
 
@@ -45,7 +45,14 @@ object geometric extends App {
   }
   
   
-   override def main(args: Array[String]) {
+
+}
+
+import geometric.point
+
+object testGeometric extends App {
+  
+     override def main(args: Array[String]) {
      Console.err.println(" Hello there "+(point(4,6.5)*5.0));
      Console.err.println(" Hello there "+(point.normedY()*5.0));
    

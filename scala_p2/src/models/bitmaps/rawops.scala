@@ -4,7 +4,7 @@ package models.bitmaps
  * @author Jahan
  */
 
-object rawfixbm { 
+object rawfixbm {
 
   final val H: Int = 20
   final val W: Int = 35
@@ -157,10 +157,10 @@ object rawfixbm {
 
       (acc == 0)
     }
-    
+
     final def notNull = {
       !(isNull)
-    }    
+    }
 
     final def get(x: Int)(y: Int): Long = {
       val r = l_getAt(y)
@@ -303,6 +303,131 @@ object rawfixbm {
     }
 
   } // rdatbm   
+}
+
+object Bm {
+  import rawfixbm._
+
+  final class Bm( final val b: rdatbm) {
+    final def &(that: Bm) = new Bm(b & that.b)
+    final def ^(that: Bm) = new Bm(b ^ that.b)
+    final def |(that: Bm) = new Bm(b | that.b)
+
+    final def ++ = new Bm(b++)
+    final def -- = new Bm(b--)
+    final def << = new Bm(b<<)
+    final def >> = new Bm(b>>)
+    final def >>+ = new Bm(b>>+)
+    final def >>- = new Bm(b>>-)
+    final def <<+ = new Bm(b<<+)
+    final def <<- = new Bm(b<<-)
+
+    final def set(x: Int)(y: Int)(v: Long) = b.set(x)(y)(v)
+
+    final def isNull = b.isNull
+
+    final def shiftIn(dir: Int) = {
+      dir match {
+        case 0 => this--
+        case 1 => this>>
+        case 2 => this++
+        case 3 => this<<
+      }
+    }
+
+    final def closestPointHere(from: Bm): Tuple2[Int, Bm] = {
+      var dist = 0;
+      var curr = from;
+
+      val thisNotNull = (!this.isNull) && (!from.isNull)
+      while (((curr & this).isNull) & (thisNotNull)) {
+        curr = curr | curr.scramble
+        dist = dist + 1
+      }
+
+      new Tuple2(dist, curr & this)
+    }
+
+    final def ==(that: Bm) = {
+      (this ^ that).isNull
+    }
+
+    final def scramble = {
+      var check = this;
+      val oldcheck = check;
+
+      check = (check | (oldcheck>>))
+      check = (check | (oldcheck<<))
+      check = (check | (oldcheck--))
+      check = (check | (oldcheck++))
+
+      check
+    }
+
+    final def angularScramble = {
+      var check = this;
+      val oldcheck = check;
+
+      check = (check | (oldcheck>>-))
+      check = (check | (oldcheck>>+))
+      check = (check | (oldcheck<<-))
+      check = (check | (oldcheck<<+))
+      check = (check | (oldcheck>>))
+      check = (check | (oldcheck<<))
+      check = (check | (oldcheck--))
+      check = (check | (oldcheck++))
+
+      check
+    }
+
+    final def scrUL = {
+      var check = this;
+      val oldcheck = check;
+
+      check = (check | (oldcheck<<-))
+      check = (check | (oldcheck<<))
+      check = (check | (oldcheck--))
+
+      check
+    }
+
+    final def scrUR = {
+      var check = this;
+      val oldcheck = check;
+
+      check = (check | (oldcheck>>-))
+      check = (check | (oldcheck>>))
+      check = (check | (oldcheck--))
+
+      check
+    }
+
+    final def scrDL = {
+      var check = this;
+      val oldcheck = check;
+
+      check = (check | (oldcheck<<+))
+      check = (check | (oldcheck<<))
+      check = (check | (oldcheck++))
+
+      check
+    }
+
+    final def scrDR = {
+      var check = this;
+      val oldcheck = check;
+
+      check = (check | (oldcheck>>+))
+      check = (check | (oldcheck>>))
+      check = (check | (oldcheck++))
+
+      check
+    }
+
+    final def apply(x: Int)(y: Int) = {
+      b.get(x)(y)
+    }
+  }
 }
 
 object rawops extends App {

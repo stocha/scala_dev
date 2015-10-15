@@ -9,7 +9,7 @@ object rawfixbm {
   final val H: Int = 20
   final val W: Int = 35
 
-  final val zero = {
+  final val rawzero = {
     new rdatbm(
       0,
       0,
@@ -36,8 +36,6 @@ object rawfixbm {
       0)
 
   }
-
-  final val nullbm = zero
 
   final private val umask = {
     (-1L) >>> (64 - W);
@@ -308,6 +306,8 @@ object rawfixbm {
 object Bm {
   import rawfixbm._
 
+  final val zero = new Bm(rawzero)
+
   final class Bm( final val b: rdatbm) {
     final def &(that: Bm) = new Bm(b & that.b)
     final def ^(that: Bm) = new Bm(b ^ that.b)
@@ -321,10 +321,28 @@ object Bm {
     final def >>- = new Bm(b>>-)
     final def <<+ = new Bm(b<<+)
     final def <<- = new Bm(b<<-)
+      
+    final def get(x: Int)(y: Int) = b.get(x)(y)
 
     final def set(x: Int)(y: Int)(v: Long) = b.set(x)(y)(v)
 
     final def isNull = b.isNull
+
+    //----------------------------------------------------
+
+    override def toString() = {
+      var res = "\n";
+
+      for (i <- 0 until H) {
+        for (j <- 0 until W) {
+          val v = get(i)(j)
+          val c = if (v==1) '#' else '-'          
+          res+=" "+c
+        }
+        res+="\n"          
+      }
+      res
+    }
 
     final def shiftIn(dir: Int) = {
       dir match {
@@ -426,6 +444,46 @@ object Bm {
 
     final def apply(x: Int)(y: Int) = {
       b.get(x)(y)
+    }
+  } // Bm class
+
+} // Bm object
+
+object sBitStack {
+
+  final def apply(sz: Int): sBitStack = {
+    def mk(curr: List[Bm.Bm], sz: Int): List[Bm.Bm] = {
+      if (sz == 0) {
+        curr
+      } else {
+        Bm.zero :: curr
+      }
+    }
+
+    new sBitStack(mk(List(), sz))
+  }
+
+  final class sBitStack( final val dat: List[Bm.Bm]) {
+    def >> = {
+      new sBitStack(
+        dat.map { x => x>> })
+    }
+    def << = {
+      new sBitStack(
+        dat.map { x => x<< })
+    }
+    def ++ = {
+      new sBitStack(
+        dat.map { x => x++ })
+    }
+    def -- = {
+      new sBitStack(
+        dat.map { x => x-- })
+    }
+
+    def mask(m: Bm.Bm) = {
+      new sBitStack(
+        dat.map { x => x & m })
     }
   }
 }

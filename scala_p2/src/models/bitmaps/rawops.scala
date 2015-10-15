@@ -6,8 +6,8 @@ package models.bitmaps
 
 object rawfixbm {
 
-  final val H: Int = 20
-  final val W: Int = 35
+  final val rH: Int = 20
+  final val rW: Int = 35
 
   final val rawzero = {
     new rdatbm(
@@ -38,7 +38,7 @@ object rawfixbm {
   }
 
   final private val umask = {
-    (-1L) >>> (64 - W);
+    (-1L) >>> (64 - rW);
   }
 
   final class rdatbm(
@@ -307,6 +307,9 @@ object Bm {
   import rawfixbm._
 
   final val zero = new Bm(rawzero)
+  
+  final val H = rH
+  final val W = rW
 
   final class Bm( final val b: rdatbm) {
     final def &(that: Bm) = new Bm(b & that.b)
@@ -324,7 +327,7 @@ object Bm {
       
     final def get(x: Int)(y: Int) = b.get(x)(y)
 
-    final def set(x: Int)(y: Int)(v: Long) = b.set(x)(y)(v)
+    final def set(x: Int)(y: Int)(v: Long) = new Bm(b.set(x)(y)(v))
 
     final def isNull = b.isNull
 
@@ -333,8 +336,8 @@ object Bm {
     override def toString() = {
       var res = "\n";
 
-      for (i <- 0 until H) {
-        for (j <- 0 until W) {
+      for (j <- 0 until rH) {
+        for (i <- 0 until rW) {
           val v = get(i)(j)
           val c = if (v==1) '#' else '-'          
           res+=" "+c
@@ -343,6 +346,11 @@ object Bm {
       }
       res
     }
+      
+    final def rule30 ={
+      val x : Bm.Bm = this
+      ((x>>) ^ (x | (x<<)) ++ )| x 
+    }      
 
     final def shiftIn(dir: Int) = {
       dir match {
@@ -490,6 +498,16 @@ object sBitStack {
 
 object rawops extends App {
   override def main(args: Array[String]) {
-    println("Hello BitMaps free")
+    println("Hello BitMaps free")    
+    
+    var b=Bm.zero.set(Bm.W/2)(0)(1)
+    
+    
+    for(i<-0 until Bm.H){
+
+      println( ""+b)
+            b=b.rule30
+    }
+    
   }
 }

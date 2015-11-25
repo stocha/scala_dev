@@ -41,6 +41,11 @@ class conj(val it: TreeSet[Short]) extends Ordered[conj] {
     new conj(it + v)
   }
 
+  def *(v: conj) = {
+
+    new conj(it ++ v.it)
+  }
+
   def +(ot: conj) = {
     new xor(new TreeSet[conj]) + this + ot;
   }
@@ -69,11 +74,40 @@ class xor(val it: TreeSet[conj]) extends Ordered[xor] {
     -1
   }
 
-  def +(v: conj) = {
+  def +(v: conj): xor = {
     if (it.contains(v)) new xor(it - v) else {
       new xor(it + v)
     }
 
+  }
+
+  def +(v: xor): xor = {
+    var res: xor = v
+    for (i: conj <- it) {
+      res = res + i
+    }
+    res
+
+  }
+
+  def **(v: xor) = {
+
+    var res = new xor(new TreeSet[conj]);
+    for (c <- it.toList) {
+      for (cv <- v.it) {
+        res = res + (c * cv)
+      }
+    }
+    res
+  }
+
+  def **(cv: conj) = {
+
+    var res = new xor(new TreeSet[conj]);
+    for (c <- it.toList) {
+      res = res + (c * cv)
+    }
+    res
   }
 
   override def toString = {
@@ -95,12 +129,55 @@ class equation {
   val it = TreeSet[xor]();
 }
 
+
+import scala.annotation.tailrec
 object T {
-  def apply(vs: Short*): conj = {
+
+  implicit def conjToXor(v: conj): xor = {
+    var x = new xor(new TreeSet) + v;
+
+    x
+  }
+
+  def diag(i: Int, size: Int): xor = {
+
+    @tailrec def recdi(x : Int, y : Int, curr : List[Tuple2[Int,Int]] ) : List[Tuple2[Int,Int]]={
+      if(y<0 || x>= size/2){
+        curr
+      }else
+      {
+        recdi(x+1,y-1,(x,y)::curr)
+      }
+      
+      
+    }
+    
+    def subdi(x: Int, y: Int): xor = {
+      var r = new xor(new TreeSet);
+      
+      for((x,y)<- recdi(x,y, List() )){
+        r= r+T(x,y+size/2)
+      }
+
+      r
+    }
+
+    if(i >= size -1){
+      T()
+    }else
+    if (i < size / 2) {
+      subdi(0, i)
+    } else {
+      subdi(i - size / 2 +1, size / 2-1)
+    }
+
+  }
+
+  def apply(vs: Int*): conj = {
     var x = new conj(new TreeSet);
 
     for (v <- vs) {
-      x = x * v
+      x = x * v.toShort
     }
     x
   }
